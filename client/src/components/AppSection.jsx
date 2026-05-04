@@ -1,24 +1,26 @@
-import { ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import AppCard from "./AppCard";
-import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function AppSection({ title, apps, onViewAll }) {
   if (!apps || apps.length === 0) return null;
 
   return (
-    <section className="container py-8 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-        <Button variant="ghost" size="sm" onClick={onViewAll} className="text-muted-foreground hover:text-primary">
-          View all <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
+    <section className="container py-6">
+      <div 
+        className="flex items-center justify-between mb-4 group cursor-pointer"
+        onClick={onViewAll}
+      >
+        <h2 className="text-xl font-medium tracking-tight text-foreground/90">{title}</h2>
+        <div className="flex items-center text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+          <ArrowRight className="h-5 w-5" />
+        </div>
       </div>
       
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex w-max space-x-4 py-1">
+      <ScrollArea className="w-full">
+        <div className="flex space-x-1 pb-4">
           {apps.map((app) => (
-            <div key={app._id} className="w-[280px] sm:w-[320px]">
+            <div key={app._id} className="w-[140px] sm:w-[160px] shrink-0">
               <AppCard app={app} />
             </div>
           ))}

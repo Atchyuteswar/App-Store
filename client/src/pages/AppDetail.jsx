@@ -127,28 +127,40 @@ export default function AppDetail() {
               </Button>
             </div>
 
-            {/* Right column - Screenshots */}
-            {app.screenshots && app.screenshots.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Screenshots</h3>
-                <Carousel className="w-full" opts={{ align: "start" }}>
-                  <CarouselContent className="-ml-2">
-                    {app.screenshots.map((ss, i) => (
-                      <CarouselItem key={i} className="pl-2 basis-1/2 md:basis-1/3">
-                        <img
-                          src={getFileUrl(ss)}
-                          alt={`Screenshot ${i + 1}`}
-                          className="rounded-lg border cursor-pointer hover:opacity-90 transition-opacity object-cover aspect-[9/16] w-full"
-                          onClick={() => setLightboxImg(getFileUrl(ss))}
+            {/* Right column - Screenshots & Video */}
+            <div className="space-y-4">
+              <h3 className="font-semibold mb-3">Media</h3>
+              <Carousel className="w-full" opts={{ align: "start" }}>
+                <CarouselContent className="-ml-2">
+                  {/* Video First */}
+                  {app.video_url && (
+                    <CarouselItem className="pl-2 basis-full md:basis-1/2">
+                      <div className="relative rounded-lg overflow-hidden border aspect-video bg-black">
+                        <video 
+                          src={getFileUrl(app.video_url)} 
+                          controls 
+                          className="w-full h-full object-contain"
+                          poster={app.screenshots?.[0] ? getFileUrl(app.screenshots[0]) : ""}
                         />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="-left-3" />
-                  <CarouselNext className="-right-3" />
-                </Carousel>
-              </div>
-            )}
+                      </div>
+                    </CarouselItem>
+                  )}
+                  {/* Screenshots */}
+                  {app.screenshots && app.screenshots.map((ss, i) => (
+                    <CarouselItem key={i} className="pl-2 basis-1/2 md:basis-1/3">
+                      <img
+                        src={getFileUrl(ss)}
+                        alt={`Screenshot ${i + 1}`}
+                        className="rounded-lg border cursor-pointer hover:opacity-90 transition-opacity object-cover aspect-[9/16] w-full"
+                        onClick={() => setLightboxImg(getFileUrl(ss))}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="-left-3" />
+                <CarouselNext className="-right-3" />
+              </Carousel>
+            </div>
           </div>
 
           <Separator className="my-8" />

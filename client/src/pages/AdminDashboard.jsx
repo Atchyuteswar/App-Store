@@ -43,6 +43,7 @@ export default function AdminDashboard() {
   const [iconFile, setIconFile] = useState(null);
   const [screenshotFiles, setScreenshotFiles] = useState([]);
   const [appFile, setAppFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -277,9 +278,10 @@ export default function AdminDashboard() {
               <div className="space-y-2"><Label>Min OS</Label><Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} /></div>
             </div>
             <Separator />
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-4 gap-4">
               <div className="space-y-2"><Label>Icon</Label><Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} /></div>
               <div className="space-y-2"><Label>Screenshots</Label><Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} /></div>
+              <div className="space-y-2"><Label>Video (MP4)</Label><Input type="file" accept="video/mp4,video/x-m4v,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} /></div>
               <div className="space-y-2"><Label>App File (.apk/.ipa)</Label><Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} /></div>
             </div>
             {submitting && <div className="space-y-2"><Progress value={uploadProgress} /><p className="text-xs text-center text-muted-foreground">{uploadProgress}% - Processing...</p></div>}

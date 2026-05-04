@@ -31,6 +31,7 @@ adminRouter.put('/apps/:id', (req, res, next) => {
 }, appController.updateApp);
 
 adminRouter.put('/apps/:id/release', appController.releaseAppUpdate);
+adminRouter.put('/apps/:id/rollback', appController.rollbackAppUpdate);
 
 adminRouter.delete('/apps/:id', appController.deleteApp);
 adminRouter.patch('/apps/:id/toggle-publish', appController.togglePublish);

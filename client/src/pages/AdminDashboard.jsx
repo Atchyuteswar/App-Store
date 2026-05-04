@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket
+  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket, History, RotateCcw
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +40,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
+  const [rollbackDialogOpen, setRollbackDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [releaseForm, setReleaseForm] = useState({ version: "", whatsNew: "" });
@@ -185,6 +186,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRollback = async (historyIndex) => {
+    if (!confirm("Are you sure you want to rollback to this version? The current buggy version will be archived.")) return;
+    
+    try {
+      await api.rollbackAppUpdate(editingApp._id, historyIndex);
+      toast({ title: "Rolled Back Successfully", description: "The app has been reverted to the older version." });
+      setRollbackDialogOpen(false);
+      fetchApps();
+    } catch (err) {
+      console.error(err);
+      toast({ variant: "destructive", title: "Error", description: err.response?.data?.message || "Rollback failed." });
+    }
+  };
+
   const openAdd = () => { 
     setEditingApp(null); 
     setForm(emptyForm); 
@@ -230,6 +245,11 @@ export default function AdminDashboard() {
     setAppFile(null);
     setUploadProgress(0);
     setReleaseDialogOpen(true);
+  };
+
+  const openRollback = (app) => {
+    setEditingApp(app);
+    setRollbackDialogOpen(true);
   };
 
   const moveScreenshot = (index, direction) => {
@@ -303,6 +323,7 @@ export default function AdminDashboard() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" title="Publish Update" onClick={() => openRelease(app)} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"><Rocket className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" title="Manage Versions" onClick={() => openRollback(app)} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"><History className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" title="Toggle Visibility" onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button>
                         <Button variant="ghost" size="icon" title="Toggle Featured" onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /></Button>
                         <Button variant="ghost" size="icon" title="Edit App Details" onClick={() => openEdit(app)}><Pencil className="h-4 w-4" /></Button>
@@ -435,6 +456,67 @@ export default function AdminDashboard() {
               {submitting ? "Publishing..." : "Publish Release"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Versions (Rollback) Dialog */}
+      <Dialog open={rollbackDialogOpen} onOpenChange={setRollbackDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="p-6 border-b shrink-0">
+            <DialogTitle className="flex items-center gap-2"><History className="h-5 w-5 text-orange-500" /> Manage Versions</DialogTitle>
+            <DialogDescription>
+              View past releases for <strong className="text-foreground">{editingApp?.name}</strong>. You can rollback to an older version if the current one has issues.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1 p-6">
+            <div className="space-y-6">
+              {/* Current Version */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Current Live Version</h4>
+                <div className="p-4 border border-green-500/30 bg-green-500/5 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-lg">v{editingApp?.version}</span>
+                    <Badge variant="default" className="bg-green-600">Active</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-1"><strong>Released:</strong> {editingApp?.updatedAt ? new Date(editingApp.updatedAt).toLocaleDateString() : 'Unknown'}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2"><strong>Notes:</strong> {editingApp?.whatsNew || "No release notes"}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* History */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Version History</h4>
+                {(!editingApp?.versionHistory || editingApp.versionHistory.length === 0) ? (
+                  <p className="text-sm text-muted-foreground text-center py-4 italic">No previous versions found.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {editingApp.versionHistory.map((hist, idx) => (
+                      <div key={idx} className="p-4 border rounded-lg bg-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold">v{hist.version}</span>
+                            <span className="text-xs text-muted-foreground">({new Date(hist.date).toLocaleDateString()})</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{hist.whatsNew || "No release notes"}</p>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="shrink-0 text-orange-500 border-orange-200 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/50"
+                          onClick={() => handleRollback(idx)}
+                        >
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Rollback
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

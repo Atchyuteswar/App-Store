@@ -282,6 +282,68 @@ exports.releaseAppUpdate = async (req, res) => {
   }
 };
 
+exports.rollbackAppUpdate = async (req, res) => {
+  try {
+    const { historyIndex } = req.body;
+    
+    if (historyIndex === undefined || historyIndex === null) {
+      return res.status(400).json({ message: 'History index is required' });
+    }
+
+    const { data: app, error: findErr } = await supabase
+      .from('apps')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (findErr || !app) return res.status(404).json({ message: 'App not found' });
+
+    const historyArray = app.version_history || [];
+    const targetHistory = historyArray[historyIndex];
+
+    if (!targetHistory) {
+      return res.status(404).json({ message: 'Version history entry not found' });
+    }
+
+    // 1. Create a history record for the CURRENT buggy version
+    const currentAsHistory = {
+      version: app.version,
+      whatsNew: app.whats_new,
+      apkFile: app.apk_file,
+      size: app.size,
+      date: new Date().toISOString()
+    };
+
+    // 2. Remove the target history entry, and add the current version to history
+    const newHistory = historyArray.filter((_, idx) => idx !== parseInt(historyIndex));
+    newHistory.unshift(currentAsHistory);
+
+    // 3. Promote the target history entry to the active fields
+    const updates = {
+      updated_at: new Date().toISOString(),
+      version: targetHistory.version,
+      whats_new: targetHistory.whatsNew || '',
+      apk_file: targetHistory.apkFile,
+      size: targetHistory.size || '0 MB',
+      version_history: newHistory
+    };
+
+    const { data, error } = await supabase
+      .from('apps')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json(toCamel(data));
+  } catch (error) {
+    console.error('Rollback app error:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+};
+
 exports.deleteApp = async (req, res) => {
   try {
     const { data: app, error: findErr } = await supabase

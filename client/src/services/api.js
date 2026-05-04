@@ -54,6 +54,9 @@ export const releaseAppUpdate = (id, formData, onProgress) =>
     },
   });
 
+export const rollbackAppUpdate = (id, historyIndex) => 
+  api.put(`/admin/apps/${id}/rollback`, { historyIndex });
+
 export const deleteApp = (id) => api.delete(`/admin/apps/${id}`);
 export const togglePublish = (id) => api.patch(`/admin/apps/${id}/toggle-publish`);
 export const toggleFeatured = (id) => api.patch(`/admin/apps/${id}/toggle-featured`);

@@ -1,35 +1,30 @@
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const categories = ["All", "Productivity", "Utility", "Games", "Education", "Health", "Finance", "Other"];
 
 export default function CategoryBar({ selected, onSelect }) {
   return (
-    <section className="py-4">
-      <div className="container">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2">
-            {categories.map((cat) => (
-              <Button
-                key={cat}
-                id={`category-${cat.toLowerCase()}`}
-                variant={selected === cat ? "default" : "secondary"}
-                size="sm"
-                className={cn(
-                  "rounded-full shrink-0 transition-all",
-                  selected === cat && "shadow-sm"
-                )}
-                onClick={() => onSelect(cat)}
-              >
-                {cat}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-    </section>
+    <div className="container mb-8">
+      <ScrollArea className="w-full whitespace-nowrap">
+        <div className="flex w-max space-x-2 py-1">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => onSelect(cat)}
+              className={cn(
+                "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                selected === cat
+                  ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" className="hidden" />
+      </ScrollArea>
+    </div>
   );
 }

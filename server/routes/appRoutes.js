@@ -30,7 +30,13 @@ adminRouter.put('/apps/:id', (req, res, next) => {
   next();
 }, appController.updateApp);
 
-adminRouter.put('/apps/:id/release', appController.releaseAppUpdate);
+adminRouter.put('/apps/:id/release', (req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return uploadFields(req, res, next);
+  }
+  next();
+}, appController.releaseAppUpdate);
+
 adminRouter.put('/apps/:id/rollback', appController.rollbackAppUpdate);
 
 adminRouter.delete('/apps/:id', appController.deleteApp);

@@ -239,79 +239,83 @@ export default function AdminDashboard() {
       </main>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle>{editingApp ? "Edit App" : "Add New App"}</DialogTitle>
+        <DialogContent className="sm:max-w-[800px] w-[95vw] h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="p-6 border-b bg-card shrink-0">
+            <DialogTitle className="text-xl font-bold">{editingApp ? "Edit App" : "Add New App"}</DialogTitle>
             <DialogDescription>{editingApp ? "Update your app's information and files." : "Enter the details for your new application."}</DialogDescription>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 px-6">
-            <form onSubmit={handleSubmit} id="admin-form" className="space-y-6 pb-6">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>App Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-                <div className="space-y-2"><Label>Tagline *</Label><Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} required /></div>
-              </div>
-              <div className="space-y-2"><Label>Description *</Label><Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /></div>
-              <div className="space-y-2"><Label>What's New</Label><Textarea rows={2} value={form.whatsNew} onChange={(e) => setForm({ ...form, whatsNew: e.target.value })} /></div>
-              
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Category *</Label><Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
-                <div className="space-y-2"><Label>Tags</Label><Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} /></div>
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <form onSubmit={handleSubmit} id="admin-form" className="space-y-8">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2"><Label className="text-sm font-semibold">App Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. My Awesome App" required /></div>
+                <div className="space-y-2"><Label className="text-sm font-semibold">Tagline *</Label><Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} placeholder="Short catchy description" required /></div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Platform *</Label>
-                <RadioGroup value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })} className="flex gap-4">
-                  {["android", "ios", "both"].map(p => <div key={p} className="flex items-center gap-2"><RadioGroupItem value={p} id={`p-${p}`} /><Label htmlFor={`p-${p}`} className="capitalize">{p}</Label></div>)}
+              <div className="space-y-2"><Label className="text-sm font-semibold">Description *</Label><Textarea rows={5} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /></div>
+              <div className="space-y-2"><Label className="text-sm font-semibold">What's New</Label><Textarea rows={3} value={form.whatsNew} onChange={(e) => setForm({ ...form, whatsNew: e.target.value })} placeholder="Release notes..." /></div>
+              
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Category *</Label>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>{categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2"><Label className="text-sm font-semibold">Tags</Label><Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="fitness, tools, etc." /></div>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">Platform *</Label>
+                <RadioGroup value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })} className="flex gap-6">
+                  {["android", "ios", "both"].map(p => <div key={p} className="flex items-center gap-2"><RadioGroupItem value={p} id={`p-${p}`} /><Label htmlFor={`p-${p}`} className="capitalize cursor-pointer">{p}</Label></div>)}
                 </RadioGroup>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Version</Label><Input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Min OS</Label><Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} /></div>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2"><Label className="text-sm font-semibold">Version</Label><Input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} /></div>
+                <div className="space-y-2"><Label className="text-sm font-semibold">Min OS</Label><Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} /></div>
               </div>
 
               <Separator />
               
               {/* Screenshot Manager */}
               {existingScreenshots.length > 0 && (
-                <div className="space-y-3">
-                  <Label>Manage Screenshots (Order matters!)</Label>
-                  <ScrollArea className="w-full whitespace-nowrap border rounded-lg p-4">
-                    <div className="flex space-x-4">
-                      {existingScreenshots.map((url, i) => (
-                        <div key={url} className="relative w-32 shrink-0 group">
-                          <img src={api.getFileUrl(url)} alt="" className="h-48 w-full object-cover rounded-md border" />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                            <div className="flex gap-1">
-                              <Button type="button" size="icon" variant="secondary" className="h-8 w-8" onClick={() => moveScreenshot(i, -1)} disabled={i === 0}><ArrowLeft className="h-4 w-4" /></Button>
-                              <Button type="button" size="icon" variant="secondary" className="h-8 w-8" onClick={() => moveScreenshot(i, 1)} disabled={i === existingScreenshots.length - 1}><ArrowRight className="h-4 w-4" /></Button>
-                            </div>
-                            <Button type="button" size="icon" variant="destructive" className="h-8 w-8" onClick={() => removeScreenshot(i)}><X className="h-4 w-4" /></Button>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between"><Label className="text-sm font-semibold">Manage Screenshots</Label><Badge variant="outline">{existingScreenshots.length} images</Badge></div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {existingScreenshots.map((url, i) => (
+                      <div key={url} className="relative aspect-[9/16] group rounded-lg overflow-hidden border bg-muted">
+                        <img src={api.getFileUrl(url)} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                          <div className="flex gap-1">
+                            <Button type="button" size="icon" variant="secondary" className="h-7 w-7" onClick={() => moveScreenshot(i, -1)} disabled={i === 0}><ArrowLeft className="h-3 w-3" /></Button>
+                            <Button type="button" size="icon" variant="secondary" className="h-7 w-7" onClick={() => moveScreenshot(i, 1)} disabled={i === existingScreenshots.length - 1}><ArrowRight className="h-3 w-3" /></Button>
                           </div>
-                          <Badge className="absolute top-2 left-2 bg-black/50">{i + 1}</Badge>
+                          <Button type="button" size="icon" variant="destructive" className="h-7 w-7" onClick={() => removeScreenshot(i)}><X className="h-3 w-3" /></Button>
                         </div>
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
+                        <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/50 text-[10px] text-white">{i + 1}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Add Icon</Label><Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} /></div>
-                <div className="space-y-2"><Label>Add Screenshots</Label><Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} /></div>
-                <div className="space-y-2"><Label>Add Video (MP4)</Label><Input type="file" accept="video/mp4,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} /></div>
-                <div className="space-y-2"><Label>App File (.apk/.ipa)</Label><Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2"><Label className="text-sm font-semibold">Icon</Label><Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} /></div>
+                <div className="space-y-2"><Label className="text-sm font-semibold">Additional Screenshots</Label><Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} /></div>
+                <div className="space-y-2"><Label className="text-sm font-semibold">Video Preview (MP4)</Label><Input type="file" accept="video/mp4,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} /></div>
+                <div className="space-y-2"><Label className="text-sm font-semibold">App File (.apk/.ipa)</Label><Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} /></div>
               </div>
 
-              {submitting && <div className="space-y-2 pt-2"><Progress value={uploadProgress} /><p className="text-xs text-center text-muted-foreground">{uploadProgress}% - Processing...</p></div>}
+              {submitting && <div className="space-y-3 pt-2"><Progress value={uploadProgress} className="h-2" /><p className="text-xs text-center font-medium animate-pulse">{uploadProgress}% - Uploading Assets...</p></div>}
             </form>
-          </ScrollArea>
+          </div>
 
-          <DialogFooter className="p-6 pt-2 border-t">
-            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="admin-form" disabled={submitting}><Upload className="h-4 w-4 mr-1" />{submitting ? "Uploading..." : "Save App"}</Button>
+          <DialogFooter className="p-6 border-t bg-card shrink-0 flex gap-2">
+            <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" form="admin-form" disabled={submitting} className="min-w-[120px]"><Upload className="h-4 w-4 mr-2" />{submitting ? "Saving..." : "Save App"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

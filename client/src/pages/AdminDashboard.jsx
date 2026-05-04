@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket, History, RotateCcw
+  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket, History, RotateCcw, MoreHorizontal
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 
 const categories = ["Productivity", "Utility", "Games", "Education", "Health", "Finance", "Other"];
 
@@ -311,8 +312,8 @@ export default function AdminDashboard() {
         {loading ? (
           <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
         ) : (
-          <div className="border rounded-lg bg-card overflow-x-auto no-scrollbar">
-            <Table className="min-w-[600px]">
+          <div className="border rounded-lg bg-card">
+            <Table>
               <TableHeader><TableRow><TableHead>App</TableHead><TableHead className="hidden sm:table-cell">Category</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {apps.map((app) => (
@@ -321,13 +322,33 @@ export default function AdminDashboard() {
                     <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{app.category}</Badge></TableCell>
                     <TableCell><div className="flex gap-1">{app.published ? <Badge>Live</Badge> : <Badge variant="outline">Draft</Badge>}{app.featured && <Badge variant="secondary">★</Badge>}</div></TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      {/* Desktop Actions */}
+                      <div className="hidden sm:flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" title="Publish Update" onClick={() => openRelease(app)} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"><Rocket className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" title="Manage Versions" onClick={() => openRollback(app)} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"><History className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" title="Toggle Visibility" onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button>
                         <Button variant="ghost" size="icon" title="Toggle Featured" onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /></Button>
                         <Button variant="ghost" size="icon" title="Edit App Details" onClick={() => openEdit(app)}><Pencil className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" title="Delete App" className="text-destructive" onClick={() => api.deleteApp(app._id).then(fetchApps)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                      {/* Mobile Actions Dropdown */}
+                      <div className="sm:hidden flex justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-5 w-5" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => openRelease(app)}><Rocket className="mr-2 h-4 w-4 text-blue-500" /> Publish Update</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openRollback(app)}><History className="mr-2 h-4 w-4 text-orange-500" /> Manage Versions</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <><EyeOff className="mr-2 h-4 w-4" /> Unpublish</> : <><Eye className="mr-2 h-4 w-4" /> Publish</>}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`mr-2 h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /> {app.featured ? "Unfeature" : "Feature"}</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => openEdit(app)}><Pencil className="mr-2 h-4 w-4" /> Edit Details</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete App</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>

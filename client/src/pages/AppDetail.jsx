@@ -183,24 +183,28 @@ export default function AppDetail() {
               )}
 
               {app.versionHistory && app.versionHistory.length > 0 && (
-                <div className="pt-4 border-t">
-                  <h3 className="text-lg font-semibold mb-4">Version History</h3>
-                  <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-muted before:to-transparent">
+                <div className="pt-8 mt-8 border-t border-border/50">
+                  <h3 className="text-lg font-semibold mb-6">Version History</h3>
+                  <div className="space-y-6">
                     {app.versionHistory.map((history, idx) => (
-                      <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                        <div className="flex items-center justify-center w-4 h-4 rounded-full border-2 border-primary bg-background shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow" />
-                        <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] p-4 rounded border bg-card shadow-sm">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-primary">v{history.version}</span>
-                            <span className="text-xs text-muted-foreground">{formatDate(history.date)}</span>
-                          </div>
-                          {history.whatsNew ? (
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{history.whatsNew}</p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground italic">No release notes provided.</p>
-                          )}
-                          {history.size && <p className="text-xs text-muted-foreground mt-2 border-t pt-2 border-border/50">Size: {history.size}</p>}
+                      <div key={idx} className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-[-24px] before:w-px before:bg-border last:before:hidden">
+                        {/* Timeline Bullet */}
+                        <div className="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-primary ring-4 ring-background" />
+                        
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-4">
+                          <span className="font-bold text-foreground">Version {history.version}</span>
+                          <span className="text-xs text-muted-foreground font-medium">{formatDate(history.date)}</span>
                         </div>
+                        
+                        <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                          {history.whatsNew ? history.whatsNew : <span className="italic">No release notes provided.</span>}
+                        </div>
+                        
+                        {history.size && (
+                          <div className="mt-3 inline-flex items-center text-xs font-medium bg-muted/50 px-2 py-1 rounded text-muted-foreground">
+                            <HardDrive className="h-3 w-3 mr-1" /> {history.size}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

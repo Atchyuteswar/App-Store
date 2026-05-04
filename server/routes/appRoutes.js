@@ -30,6 +30,8 @@ adminRouter.put('/apps/:id', (req, res, next) => {
   next();
 }, appController.updateApp);
 
+adminRouter.put('/apps/:id/release', appController.releaseAppUpdate);
+
 adminRouter.delete('/apps/:id', appController.deleteApp);
 adminRouter.patch('/apps/:id/toggle-publish', appController.togglePublish);
 adminRouter.patch('/apps/:id/toggle-featured', appController.toggleFeatured);

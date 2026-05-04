@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X,
+  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -39,8 +39,10 @@ export default function AdminDashboard() {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [releaseForm, setReleaseForm] = useState({ version: "", whatsNew: "" });
   
   // Existing files
   const [existingScreenshots, setExistingScreenshots] = useState([]);
@@ -147,6 +149,42 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleReleaseSubmit = async (e) => {
+    e.preventDefault();
+    if (!appFile) return toast({ variant: "destructive", title: "Missing File", description: "Please upload the new APK/IPA file." });
+
+    setSubmitting(true);
+    setUploadProgress(10);
+
+    try {
+      setUploadProgress(40);
+      const apkUrl = await uploadFile(appFile, 'apps');
+      const size = `${(appFile.size / (1024 * 1024)).toFixed(1)} MB`;
+
+      setUploadProgress(80);
+      
+      const payload = {
+        version: releaseForm.version,
+        whatsNew: releaseForm.whatsNew,
+        apkFile: apkUrl,
+        size: size
+      };
+
+      await api.releaseAppUpdate(editingApp._id, payload);
+      toast({ title: "Update Released! 🚀", description: `Version ${releaseForm.version} is now live.` });
+
+      setUploadProgress(100);
+      setReleaseDialogOpen(false);
+      setAppFile(null);
+      fetchApps();
+    } catch (err) {
+      console.error(err);
+      toast({ variant: "destructive", title: "Error", description: err.response?.data?.message || "Release failed." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const openAdd = () => { 
     setEditingApp(null); 
     setForm(emptyForm); 
@@ -174,6 +212,24 @@ export default function AdminDashboard() {
     setVideoFile(null); 
     setUploadProgress(0); 
     setDialogOpen(true);
+  };
+
+  const openRelease = (app) => {
+    setEditingApp(app);
+    // Suggest next minor version by default
+    let nextVersion = app.version || "1.0.0";
+    try {
+      const parts = nextVersion.split('.');
+      if (parts.length > 0 && !isNaN(parts[parts.length-1])) {
+        parts[parts.length-1] = parseInt(parts[parts.length-1]) + 1;
+        nextVersion = parts.join('.');
+      }
+    } catch (e) {}
+
+    setReleaseForm({ version: nextVersion, whatsNew: "" });
+    setAppFile(null);
+    setUploadProgress(0);
+    setReleaseDialogOpen(true);
   };
 
   const moveScreenshot = (index, direction) => {
@@ -244,7 +300,15 @@ export default function AdminDashboard() {
                     <TableCell><div className="flex items-center gap-3"><img src={api.getFileUrl(app.icon)} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted" /><span className="font-medium">{app.name}</span></div></TableCell>
                     <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{app.category}</Badge></TableCell>
                     <TableCell><div className="flex gap-1">{app.published ? <Badge>Live</Badge> : <Badge variant="outline">Draft</Badge>}{app.featured && <Badge variant="secondary">★</Badge>}</div></TableCell>
-                    <TableCell className="text-right"><div className="flex items-center justify-end gap-1"><Button variant="ghost" size="icon" onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button><Button variant="ghost" size="icon" onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /></Button><Button variant="ghost" size="icon" onClick={() => openEdit(app)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-destructive" onClick={() => api.deleteApp(app._id).then(fetchApps)}><Trash2 className="h-4 w-4" /></Button></div></TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" title="Publish Update" onClick={() => openRelease(app)} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"><Rocket className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" title="Toggle Visibility" onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button>
+                        <Button variant="ghost" size="icon" title="Toggle Featured" onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /></Button>
+                        <Button variant="ghost" size="icon" title="Edit App Details" onClick={() => openEdit(app)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" title="Delete App" className="text-destructive" onClick={() => api.deleteApp(app._id).then(fetchApps)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -331,6 +395,45 @@ export default function AdminDashboard() {
           <DialogFooter className="p-6 border-t bg-card shrink-0 flex gap-2">
             <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button type="submit" form="admin-form" disabled={submitting} className="min-w-[120px]"><Upload className="h-4 w-4 mr-2" />{submitting ? "Saving..." : "Save App"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Release Update Dialog */}
+      <Dialog open={releaseDialogOpen} onOpenChange={setReleaseDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-blue-500" /> Release Update</DialogTitle>
+            <DialogDescription>
+              Publish a new version for <strong className="text-foreground">{editingApp?.name}</strong>. Previous versions will be archived in the version history.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleReleaseSubmit} id="release-form" className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>New Version Number *</Label>
+              <Input value={releaseForm.version} onChange={(e) => setReleaseForm({ ...releaseForm, version: e.target.value })} placeholder="e.g. 1.0.1" required />
+            </div>
+            <div className="space-y-2">
+              <Label>Release Notes (What's New) *</Label>
+              <Textarea rows={4} value={releaseForm.whatsNew} onChange={(e) => setReleaseForm({ ...releaseForm, whatsNew: e.target.value })} placeholder="Describe what's changed in this update..." required />
+            </div>
+            <div className="space-y-2">
+              <Label>New App File (.apk/.ipa) *</Label>
+              <Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} required />
+            </div>
+            {submitting && (
+              <div className="space-y-2 pt-2">
+                <Progress value={uploadProgress} className="h-2" />
+                <p className="text-xs text-center font-medium animate-pulse">{uploadProgress}% - Uploading Update...</p>
+              </div>
+            )}
+          </form>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setReleaseDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" form="release-form" disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Rocket className="h-4 w-4 mr-2" />
+              {submitting ? "Publishing..." : "Publish Release"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

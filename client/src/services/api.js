@@ -46,6 +46,14 @@ export const updateApp = (id, formData, onProgress) =>
     },
   });
 
+export const releaseAppUpdate = (id, formData, onProgress) =>
+  api.put(`/admin/apps/${id}/release`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      if (onProgress && e.total) onProgress(Math.round((e.loaded * 100) / e.total));
+    },
+  });
+
 export const deleteApp = (id) => api.delete(`/admin/apps/${id}`);
 export const togglePublish = (id) => api.patch(`/admin/apps/${id}/toggle-publish`);
 export const toggleFeatured = (id) => api.patch(`/admin/apps/${id}/toggle-featured`);

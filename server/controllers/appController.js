@@ -28,6 +28,7 @@ function toCamel(row) {
     published: row.published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    versionHistory: row.version_history || [],
   };
 }
 
@@ -224,6 +225,59 @@ exports.updateApp = async (req, res) => {
     res.json(toCamel(data));
   } catch (error) {
     console.error('Update app error:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+};
+
+exports.releaseAppUpdate = async (req, res) => {
+  try {
+    const { data: app, error: findErr } = await supabase
+      .from('apps')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (findErr || !app) return res.status(404).json({ message: 'App not found' });
+
+    const { version, whatsNew, apkFile, size } = req.body;
+
+    if (!version || !apkFile) {
+      return res.status(400).json({ message: 'Version and APK file are required for a release' });
+    }
+
+    // 1. Create a history record for the CURRENT version before overwriting it
+    const historyEntry = {
+      version: app.version,
+      whatsNew: app.whats_new,
+      apkFile: app.apk_file,
+      size: app.size,
+      date: app.updated_at || app.created_at
+    };
+
+    const newHistory = [historyEntry, ...(app.version_history || [])];
+
+    // 2. Prepare the updates for the NEW version
+    const updates = {
+      updated_at: new Date().toISOString(),
+      version: version,
+      whats_new: whatsNew || '',
+      apk_file: apkFile,
+      size: size || '0 MB',
+      version_history: newHistory
+    };
+
+    const { data, error } = await supabase
+      .from('apps')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json(toCamel(data));
+  } catch (error) {
+    console.error('Release update error:', error);
     res.status(500).json({ message: error.message || 'Server error' });
   }
 };

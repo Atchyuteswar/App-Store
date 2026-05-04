@@ -225,7 +225,7 @@ export default function TestingHub() {
             </div>
 
             {/* COMMUNITY TAB */}
-            <TabsContent value="chat" className="flex-1 m-0 flex flex-col border rounded-xl bg-card overflow-hidden shadow-sm">
+            <TabsContent value="chat" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
               <div className="bg-muted/30 p-4 border-b flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -234,7 +234,7 @@ export default function TestingHub() {
                 <Badge variant="outline" className="text-xs font-normal">{messages.length} messages</Badge>
               </div>
 
-              <ScrollArea className="flex-1 p-4">
+              <ScrollArea className="flex-1 p-4 bg-muted/5">
                 <div className="space-y-6">
                   {messages.length === 0 ? (
                     <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
@@ -289,7 +289,7 @@ export default function TestingHub() {
             </TabsContent>
 
             {/* ISSUES TAB */}
-            <TabsContent value="issues" className="flex-1 m-0 flex flex-col border rounded-xl bg-card overflow-hidden shadow-sm">
+            <TabsContent value="issues" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
               <div className="p-4 border-b flex items-center justify-between shrink-0 bg-muted/10">
                 <div>
                   <h3 className="font-semibold">Issue Tracking</h3>
@@ -375,7 +375,7 @@ export default function TestingHub() {
             </TabsContent>
 
             {/* SUGGESTIONS TAB */}
-            <TabsContent value="suggestions" className="flex-1 m-0 flex flex-col border rounded-xl bg-card overflow-hidden shadow-sm">
+            <TabsContent value="suggestions" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
               <div className="p-4 border-b flex items-center justify-between shrink-0 bg-muted/10">
                 <div>
                   <h3 className="font-semibold">Innovation Board</h3>
@@ -452,7 +452,7 @@ export default function TestingHub() {
             </TabsContent>
 
             {/* RELEASE NOTES TAB */}
-            <TabsContent value="notes" className="flex-1 m-0 border rounded-xl bg-card shadow-sm overflow-hidden flex flex-col">
+            <TabsContent value="notes" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
               <ScrollArea className="flex-1">
                 <div className="p-8 max-w-2xl mx-auto space-y-8">
                   <div className="space-y-2 border-b pb-6">
@@ -538,7 +538,7 @@ export default function TestingHub() {
               <div className="divide-y">
                 <div className="flex items-center justify-between p-4">
                   <span className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-4 w-4" /> Started</span>
-                  <span className="text-sm font-semibold">{formatDate(app.created_at)}</span>
+                  <span className="text-sm font-semibold">{app.created_at ? formatDate(app.created_at) : "N/A"}</span>
                 </div>
                 <div className="flex items-center justify-between p-4">
                   <span className="text-sm text-muted-foreground flex items-center gap-2"><Bug className="h-4 w-4" /> Total Issues</span>

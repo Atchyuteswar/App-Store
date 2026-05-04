@@ -12,9 +12,24 @@ router.get('/:slug/download', appController.downloadApp);
 // Admin Routes (exported separately)
 const adminRouter = express.Router();
 adminRouter.use(authMiddleware);
+
 adminRouter.get('/apps', appController.getAllAppsAdmin);
-adminRouter.post('/apps', uploadFields, appController.createApp);
-adminRouter.put('/apps/:id', uploadFields, appController.updateApp);
+
+// Handle both direct JSON (new way) and Multer FormData (old way/fallback)
+adminRouter.post('/apps', (req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return uploadFields(req, res, next);
+  }
+  next();
+}, appController.createApp);
+
+adminRouter.put('/apps/:id', (req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return uploadFields(req, res, next);
+  }
+  next();
+}, appController.updateApp);
+
 adminRouter.delete('/apps/:id', appController.deleteApp);
 adminRouter.patch('/apps/:id/toggle-publish', appController.togglePublish);
 adminRouter.patch('/apps/:id/toggle-featured', appController.toggleFeatured);

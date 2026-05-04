@@ -41,7 +41,7 @@ export default function Navbar({ onSearch, searchValue }) {
               placeholder="Search for apps & more"
               value={searchValue || ""}
               onChange={(e) => onSearch?.(e.target.value)}
-              className="w-full h-12 pl-12 pr-4 rounded-full border-none bg-secondary/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary google-search-shadow transition-all"
+              className="w-full h-12 pl-12 pr-4 rounded-full border-none bg-secondary/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary google-search-shadow transition-all text-base md:text-sm"
             />
           </div>
         </div>

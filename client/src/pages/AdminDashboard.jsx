@@ -311,8 +311,8 @@ export default function AdminDashboard() {
         {loading ? (
           <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
         ) : (
-          <div className="border rounded-lg bg-card overflow-hidden">
-            <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto no-scrollbar">
+            <Table className="min-w-[600px]">
               <TableHeader><TableRow><TableHead>App</TableHead><TableHead className="hidden sm:table-cell">Category</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {apps.map((app) => (

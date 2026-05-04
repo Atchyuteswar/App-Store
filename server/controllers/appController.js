@@ -133,22 +133,20 @@ exports.createApp = async (req, res) => {
       version: version || '1.0.0',
       min_os_version: minOSVersion || '',
       tags: tags ? (typeof tags === 'string' ? tags.split(',').map(t => t.trim()).filter(Boolean) : tags) : [],
+      // Accept direct URLs from frontend
+      icon: req.body.icon || '',
+      screenshots: Array.isArray(req.body.screenshots) ? req.body.screenshots : (req.body.screenshots ? JSON.parse(req.body.screenshots) : []),
+      apk_file: req.body.apkFile || '',
+      size: req.body.size || '0 MB',
     };
 
-    // Handle file uploads to Supabase Storage
+    // Fallback for legacy Multer if still used
     if (req.files) {
-      if (req.files.icon?.[0]) {
-        appData.icon = await uploadToStorage(req.files.icon[0], 'icons');
-      }
-      if (req.files.screenshots) {
-        appData.screenshots = await Promise.all(
-          req.files.screenshots.map(f => uploadToStorage(f, 'screenshots'))
-        );
-      }
+      if (req.files.icon?.[0]) appData.icon = await uploadToStorage(req.files.icon[0], 'icons');
+      if (req.files.screenshots) appData.screenshots = await Promise.all(req.files.screenshots.map(f => uploadToStorage(f, 'screenshots')));
       if (req.files.appFile?.[0]) {
         appData.apk_file = await uploadToStorage(req.files.appFile[0], 'apps');
-        const sizeInMB = (req.files.appFile[0].size / (1024 * 1024)).toFixed(1);
-        appData.size = `${sizeInMB} MB`;
+        appData.size = `${(req.files.appFile[0].size / (1024 * 1024)).toFixed(1)} MB`;
       }
     }
 

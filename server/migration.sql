@@ -86,3 +86,36 @@ CREATE TABLE IF NOT EXISTS ab_test_enrollments (
   UNIQUE(user_id, app_id)
 );
 
+-- ============================================
+-- Updates for Tester Hub Features
+-- ============================================
+
+-- Tester Messages (Chat)
+CREATE TABLE IF NOT EXISTS tester_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  app_id UUID REFERENCES apps(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Tester Bugs
+CREATE TABLE IF NOT EXISTS tester_bugs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  app_id UUID REFERENCES apps(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT DEFAULT 'open', -- open, investigating, resolved
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Tester Ideas
+CREATE TABLE IF NOT EXISTS tester_ideas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  app_id UUID REFERENCES apps(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);

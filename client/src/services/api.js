@@ -21,7 +21,6 @@ api.interceptors.request.use((config) => {
 export const getApps = (params) => api.get("/apps", { params });
 export const getAppBySlug = (slug) => api.get(`/apps/${slug}`);
 export const getDownloadUrl = (slug) => `${API_URL}/api/apps/${slug}/download`;
-export const enrollAbTesting = (slug, data) => api.post(`/apps/${slug}/enroll`, data);
 
 // ─── Auth ─────────────────────────────
 export const login = (credentials) => api.post("/auth/login", credentials);
@@ -57,7 +56,22 @@ export const rollbackAppUpdate = (id, historyIndex) =>
 export const deleteApp = (id) => api.delete(`/admin/apps/${id}`);
 export const togglePublish = (id) => api.patch(`/admin/apps/${id}/toggle-publish`);
 export const toggleFeatured = (id) => api.patch(`/admin/apps/${id}/toggle-featured`);
+
+// --- A/B TESTING ENROLLMENT ---
+export const enrollAbTesting = (slug, data) => api.post(`/apps/${slug}/enroll`, data);
 export const toggleAbTesting = (id) => api.patch(`/admin/apps/${id}/toggle-ab-testing`);
+
+// --- TESTER HUB ---
+export const getTesterEnrollments = () => api.get('/tester/enrollments');
+
+export const getTesterMessages = (slug) => api.get(`/tester/apps/${slug}/messages`);
+export const addTesterMessage = (slug, message) => api.post(`/tester/apps/${slug}/messages`, { message });
+
+export const getTesterBugs = (slug) => api.get(`/tester/apps/${slug}/bugs`);
+export const addTesterBug = (slug, data) => api.post(`/tester/apps/${slug}/bugs`, data);
+
+export const getTesterIdeas = (slug) => api.get(`/tester/apps/${slug}/ideas`);
+export const addTesterIdea = (slug, data) => api.post(`/tester/apps/${slug}/ideas`, data);
 
 export const getFileUrl = (url) => {
   if (!url) return "";

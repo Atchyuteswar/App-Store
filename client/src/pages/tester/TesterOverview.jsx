@@ -5,7 +5,7 @@ import { getTesterEnrollments } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Beaker, AlertCircle, Package, ArrowRight } from "lucide-react";
-import ActivityCalendar from "react-activity-calendar";
+import { ActivityCalendar } from "react-activity-calendar";
 
 export default function TesterOverview() {
   const { user } = useAuth();

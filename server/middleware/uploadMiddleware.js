@@ -3,8 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const supabase = require('../lib/supabase');
 
-// Temp directory for multer (files get uploaded to Supabase Storage then deleted)
-const tmpDir = path.join(__dirname, '..', 'tmp');
+// Use the system's temp directory (required for cloud hosting like Render/Vercel)
+const tmpDir = '/tmp';
 if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
 const storage = multer.diskStorage({

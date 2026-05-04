@@ -12,19 +12,28 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 // Middleware
-const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean);
+const allowedOrigins = [
+  process.env.CLIENT_URL?.replace(/\/$/, ""), 
+  'http://localhost:5173', 
+  'http://localhost:3000'
+].filter(Boolean);
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.CLIENT_URL === '*') {
+    
+    const sanitizedOrigin = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(sanitizedOrigin) || process.env.CLIENT_URL === '*') {
       callback(null, true);
     } else {
+      console.log('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

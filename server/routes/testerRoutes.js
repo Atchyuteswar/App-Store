@@ -1,11 +1,11 @@
 const express = require('express');
-const { protect } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 const testerController = require('../controllers/testerController');
 
 const router = express.Router();
 
-// Require standard user role for all tester routes
-router.use(protect('user'));
+// Require auth for all tester routes
+router.use(authMiddleware);
 
 router.get('/enrollments', testerController.getEnrollments);
 

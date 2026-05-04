@@ -4,7 +4,7 @@ const categories = ["All", "Productivity", "Utility", "Games", "Education", "Hea
 
 export default function CategoryBar({ selected, onSelect }) {
   return (
-    <div className="container mb-6 overflow-x-auto">
+    <div className="container mb-6 overflow-x-auto no-scrollbar">
       <div className="flex gap-2 pb-2">
         {categories.map((cat) => (
           <button

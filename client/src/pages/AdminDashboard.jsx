@@ -318,7 +318,7 @@ export default function AdminDashboard() {
               <TableBody>
                 {apps.map((app) => (
                   <TableRow key={app._id}>
-                    <TableCell><div className="flex items-center gap-3"><img src={api.getFileUrl(app.icon)} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted" /><span className="font-medium">{app.name}</span></div></TableCell>
+                    <TableCell><div className="flex items-center gap-3"><img src={api.getFileUrl(app.icon)} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted shrink-0" /><span className="font-medium max-w-[120px] sm:max-w-none truncate">{app.name}</span></div></TableCell>
                     <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{app.category}</Badge></TableCell>
                     <TableCell><div className="flex gap-1">{app.published ? <Badge>Live</Badge> : <Badge variant="outline">Draft</Badge>}{app.featured && <Badge variant="secondary">★</Badge>}</div></TableCell>
                     <TableCell className="text-right">

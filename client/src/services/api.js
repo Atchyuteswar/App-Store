@@ -63,6 +63,7 @@ export const toggleAbTesting = (id) => api.patch(`/admin/apps/${id}/toggle-ab-te
 
 // --- TESTER HUB ---
 export const getTesterEnrollments = () => api.get('/tester/enrollments');
+export const getTesterActivity = () => api.get('/tester/activity');
 
 export const getTesterMessages = (slug) => api.get(`/tester/apps/${slug}/messages`);
 export const addTesterMessage = (slug, message) => api.post(`/tester/apps/${slug}/messages`, { message });

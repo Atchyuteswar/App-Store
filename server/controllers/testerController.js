@@ -211,3 +211,71 @@ exports.addIdea = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// ─── ACTIVITY CALENDAR ──────────────────────────────────
+exports.getActivity = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Calculate date exactly 365 days ago
+    const aYearAgo = new Date();
+    aYearAgo.setDate(aYearAgo.getDate() - 365);
+    const dateLimit = aYearAgo.toISOString();
+
+    // Fetch from all three tables
+    const [msgs, bugs, ideas] = await Promise.all([
+      supabase.from('tester_messages').select('created_at').eq('user_id', userId).gte('created_at', dateLimit),
+      supabase.from('tester_bugs').select('created_at').eq('user_id', userId).gte('created_at', dateLimit),
+      supabase.from('tester_ideas').select('created_at').eq('user_id', userId).gte('created_at', dateLimit)
+    ]);
+
+    const allDates = [
+      ...(msgs.data || []),
+      ...(bugs.data || []),
+      ...(ideas.data || [])
+    ].map(item => item.created_at.split('T')[0]); // Extract just YYYY-MM-DD
+
+    // Count by date
+    const countsByDate = allDates.reduce((acc, date) => {
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Always include today's date even if 0, so the calendar anchors properly
+    const today = new Date().toISOString().split('T')[0];
+    if (countsByDate[today] === undefined) {
+      countsByDate[today] = 0;
+    }
+
+    // Determine max count for leveling
+    let maxCount = 0;
+    for (const count of Object.values(countsByDate)) {
+      if (count > maxCount) maxCount = count;
+    }
+
+    // Function to calculate level (0-4) based on relative activity
+    const getLevel = (count) => {
+      if (count === 0) return 0;
+      if (maxCount <= 4) return count; // If low overall activity, 1:1 mapping up to 4
+      
+      const ratio = count / maxCount;
+      if (ratio <= 0.25) return 1;
+      if (ratio <= 0.5) return 2;
+      if (ratio <= 0.75) return 3;
+      return 4;
+    };
+
+    const activityData = Object.keys(countsByDate).map(date => ({
+      date,
+      count: countsByDate[date],
+      level: getLevel(countsByDate[date])
+    }));
+
+    // Sort by date ascending
+    activityData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    res.json(activityData);
+  } catch (err) {
+    console.error('getActivity error:', err);
+    res.status(500).json({ message: 'Server error generating activity' });
+  }
+};

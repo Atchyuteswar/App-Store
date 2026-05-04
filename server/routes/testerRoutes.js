@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/enrollments', testerController.getEnrollments);
+router.get('/activity', testerController.getActivity);
 
 router.get('/apps/:slug/messages', testerController.getMessages);
 router.post('/apps/:slug/messages', testerController.addMessage);

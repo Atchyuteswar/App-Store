@@ -5,15 +5,28 @@ import { getTesterEnrollments } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Beaker, AlertCircle, Package, ArrowRight } from "lucide-react";
+import ActivityCalendar from "react-activity-calendar";
 
 export default function TesterOverview() {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
+  const [activityData, setActivityData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEnrollments();
+    Promise.all([fetchEnrollments(), fetchActivity()]).finally(() => {
+      setLoading(false);
+    });
   }, []);
+
+  const fetchActivity = async () => {
+    try {
+      const { data } = await getTesterActivity();
+      setActivityData(data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchEnrollments = async () => {
     try {
@@ -21,8 +34,6 @@ export default function TesterOverview() {
       setEnrollments(data || []);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -128,6 +139,30 @@ export default function TesterOverview() {
           </Card>
         </div>
       </div>
+
+      {/* Activity Calendar */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Contribution Activity</CardTitle>
+          <CardDescription>Your participation in testing communities (bugs, ideas, and messages over the last year)</CardDescription>
+        </CardHeader>
+        <CardContent className="overflow-x-auto pb-6">
+          <div className="min-w-[800px] flex justify-center py-4">
+            {activityData.length > 0 ? (
+              <ActivityCalendar 
+                data={activityData} 
+                theme={{
+                  light: ['#f1f5f9', '#d8b4fe', '#c084fc', '#a855f7', '#7e22ce'],
+                  dark: ['#1e293b', '#6b21a8', '#7e22ce', '#9333ea', '#a855f7'],
+                }}
+                colorScheme="dark" // Forces dark mode colors for a sleek look
+              />
+            ) : (
+              <div className="py-8 text-center text-muted-foreground w-full">Loading activity...</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

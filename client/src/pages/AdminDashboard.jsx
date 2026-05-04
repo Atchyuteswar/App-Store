@@ -157,12 +157,23 @@ export default function AdminDashboard() {
   const openEdit = (app) => {
     setEditingApp(app);
     setForm({
-      name: app.name, tagline: app.tagline, description: app.description,
-      whatsNew: app.whats_new || "", category: app.category, tags: (app.tags || []).join(", "),
-      platform: app.platform, version: app.version, minOSVersion: app.min_os_version || "",
+      name: app.name,
+      tagline: app.tagline,
+      description: app.description,
+      whatsNew: app.whatsNew || "",
+      category: app.category,
+      tags: (app.tags || []).join(", "),
+      platform: app.platform,
+      version: app.version,
+      minOSVersion: app.minOSVersion || "",
     });
     setExistingScreenshots(app.screenshots || []);
-    setIconFile(null); setScreenshotFiles([]); setAppFile(null); setVideoFile(null); setUploadProgress(0); setDialogOpen(true);
+    setIconFile(null); 
+    setScreenshotFiles([]); 
+    setAppFile(null); 
+    setVideoFile(null); 
+    setUploadProgress(0); 
+    setDialogOpen(true);
   };
 
   const moveScreenshot = (index, direction) => {

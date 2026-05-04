@@ -234,8 +234,14 @@ export default function AppDetail() {
 
       {/* Lightbox */}
       <Dialog open={!!lightboxImg} onOpenChange={() => setLightboxImg(null)}>
-        <DialogContent className="max-w-3xl p-2">
-          {lightboxImg && <img src={lightboxImg} alt="Screenshot" className="w-full rounded-lg" />}
+        <DialogContent className="max-w-[95vw] md:max-w-3xl p-0 overflow-hidden bg-transparent border-none shadow-none flex items-center justify-center">
+          {lightboxImg && (
+            <img 
+              src={lightboxImg} 
+              alt="Screenshot" 
+              className="max-h-[90vh] w-auto h-auto rounded-lg shadow-2xl object-contain" 
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: app-store-backend
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: SUPABASE_URL
+        sync: false # Set this in Render Dashboard
+      - key: SUPABASE_SERVICE_KEY
+        sync: false # Set this in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: ADMIN_EMAIL
+        sync: false # Set this in Render Dashboard
+      - key: ADMIN_PASSWORD
+        sync: false # Set this in Render Dashboard
+      - key: CLIENT_URL
+        sync: false # Set this to your Vercel URL later
+      - key: MAX_APK_SIZE_MB
+        value: 500
+      - key: MAX_IMAGE_SIZE_MB
+        value: 5

@@ -91,56 +91,56 @@ export default function AppDetail() {
           </Button>
 
           {/* Header section */}
-          <div className="grid md:grid-cols-[1fr_1.5fr] gap-8">
-            {/* Left column */}
-            <div className="space-y-6">
-              <div className="flex items-start gap-5">
-                {app.icon ? (
-                  <img src={getFileUrl(app.icon)} alt={app.name} className="h-24 w-24 rounded-2xl object-cover shadow-md" />
-                ) : (
-                  <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center">
-                    <span className="text-3xl font-bold text-muted-foreground">{app.name[0]}</span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
+            {/* Left side: Icon & Info */}
+            <div className="flex items-start gap-6">
+              {app.icon ? (
+                <img src={getFileUrl(app.icon)} alt={app.name} className="h-24 w-24 md:h-32 md:w-32 rounded-2xl object-cover shadow-lg border border-border/50" />
+              ) : (
+                <div className="h-24 w-24 md:h-32 md:w-32 rounded-2xl bg-muted flex items-center justify-center shadow-lg border border-border/50">
+                  <span className="text-4xl font-bold text-muted-foreground">{app.name[0]}</span>
+                </div>
+              )}
+              <div className="flex flex-col justify-center h-full pt-1 md:pt-3">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{app.name}</h1>
+                <p className="text-muted-foreground text-sm md:text-base mt-1">by Atchyuteswar Gottumukkala</p>
+                <div className="flex flex-wrap items-center gap-4 mt-3">
+                  <div className="flex items-center gap-1 bg-secondary/50 px-2 py-1 rounded-md">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={`h-4 w-4 ${s <= Math.round(app.rating) ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground/30"}`} />
+                    ))}
+                    <span className="text-sm font-bold ml-1">{app.rating?.toFixed(1)}</span>
                   </div>
-                )}
-                <div>
-                  <h1 className="text-2xl font-bold">{app.name}</h1>
-                  <p className="text-muted-foreground text-sm mt-0.5">by Atchyuteswar Gottumukkala</p>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={`h-4 w-4 ${s <= Math.round(app.rating) ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground/30"}`} />
-                      ))}
-                      <span className="text-sm ml-1">{app.rating?.toFixed(1)}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Download className="h-3.5 w-3.5" />{app.downloads}</span>
-                    <span className="flex items-center gap-1">{plat.icon}{plat.label}</span>
-                  </div>
+                  <span className="flex items-center gap-1 text-sm font-medium text-muted-foreground"><Download className="h-4 w-4" />{app.downloads}</span>
+                  <span className="flex items-center gap-1 text-sm font-medium text-muted-foreground">{plat.icon}{plat.label}</span>
                 </div>
               </div>
+            </div>
 
-              <Button asChild size="lg" className="w-full">
+            {/* Right side: Download Button */}
+            <div className="w-full md:w-auto shrink-0 md:pl-8">
+              <Button asChild size="lg" className="w-full md:w-[220px] h-14 text-lg shadow-xl shadow-primary/20 transition-transform active:scale-95">
                 <a href={getDownloadUrl(app.slug)}>
-                  <Download className="h-5 w-5 mr-2" /> Download ({app.size})
+                  <Download className="h-5 w-5 mr-2" /> Download <span className="text-sm opacity-80 font-normal ml-1">({app.size})</span>
                 </a>
               </Button>
             </div>
+          </div>
 
-            {/* Right column - Screenshots & Video */}
-            <div className="space-y-4">
-              <h3 className="font-semibold mb-3">Media</h3>
-              <div className="relative px-2 sm:px-8">
+          {/* Media Section - Full Width */}
+          <div className="space-y-4 mb-10">
+            <h3 className="text-xl font-bold mb-4">Screenshots</h3>
+            <div className="relative px-2 sm:px-8">
                 <Carousel className="w-full" opts={{ align: "start" }}>
-                  <CarouselContent className="-ml-2">
+                  <CarouselContent className="-ml-2 md:-ml-4">
                     {/* Video First */}
                     {app.video_url && (
-                      <CarouselItem className="pl-2 basis-full md:basis-1/2">
-                        <div className="relative rounded-lg overflow-hidden border aspect-video bg-black">
+                      <CarouselItem className="pl-2 md:pl-4 basis-[85%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                        <div className="relative rounded-xl overflow-hidden border aspect-[9/16] bg-black group">
                           <video
                             src={getFileUrl(app.video_url)}
                             controls
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover"
                             poster={app.screenshots?.[0] ? getFileUrl(app.screenshots[0]) : ""}
                           />
                         </div>
@@ -148,11 +148,11 @@ export default function AppDetail() {
                     )}
                     {/* Screenshots */}
                     {app.screenshots && app.screenshots.map((ss, i) => (
-                      <CarouselItem key={i} className="pl-2 basis-1/2 md:basis-1/3">
+                      <CarouselItem key={i} className="pl-2 md:pl-4 basis-[45%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                         <img
                           src={getFileUrl(ss)}
                           alt={`Screenshot ${i + 1}`}
-                          className="rounded-lg border cursor-pointer hover:opacity-90 transition-opacity object-cover aspect-[9/16] w-full"
+                          className="rounded-xl border shadow-sm cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all object-cover aspect-[9/16] w-full"
                           onClick={() => setLightboxImg(getFileUrl(ss))}
                         />
                       </CarouselItem>
@@ -170,22 +170,24 @@ export default function AppDetail() {
             <div className="grid md:grid-cols-[2fr_1fr] gap-8">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Description</h3>
-                  <ScrollArea className="max-h-80">
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{app.description}</p>
-                  </ScrollArea>
+                <h3 className="text-xl font-bold mb-3">Description</h3>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">{app.description}</p>
+              </div>
                 </div>
 
                 {app.whatsNew && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">What&apos;s New in v{app.version}</h3>
+                  <h3 className="text-xl font-bold mb-3">What&apos;s New in v{app.version}</h3>
+                  <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{app.whatsNew}</p>
                   </div>
+                </div>
                 )}
 
                 {app.versionHistory && app.versionHistory.length > 0 && (
                   <div className="pt-8 mt-8 border-t border-border/50">
-                    <h3 className="text-lg font-semibold mb-6">Version History</h3>
+                  <h3 className="text-xl font-bold mb-6">Version History</h3>
                     <div className="space-y-6">
                       {app.versionHistory.map((history, idx) => (
                         <div key={idx} className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-[-24px] before:w-px before:bg-border last:before:hidden">

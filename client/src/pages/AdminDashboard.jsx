@@ -82,30 +82,38 @@ export default function AdminDashboard() {
       let apkUrl = editingApp?.apkFile || "";
       let size = editingApp?.size || "0 MB";
 
+      let videoUrl = editingApp?.video_url || "";
+
       if (iconFile) {
-        setUploadProgress(20);
+        setUploadProgress(15);
         iconUrl = await uploadFile(iconFile, 'icons');
       }
 
       if (screenshotFiles.length > 0) {
-        setUploadProgress(40);
+        setUploadProgress(30);
         const newUrls = await Promise.all(screenshotFiles.map(f => uploadFile(f, 'screenshots')));
         screenshotUrls = [...screenshotUrls, ...newUrls].slice(0, 8);
       }
 
       if (appFile) {
-        setUploadProgress(60);
+        setUploadProgress(50);
         apkUrl = await uploadFile(appFile, 'apps');
         size = `${(appFile.size / (1024 * 1024)).toFixed(1)} MB`;
       }
 
-      setUploadProgress(90);
+      if (videoFile) {
+        setUploadProgress(80);
+        videoUrl = await uploadFile(videoFile, 'videos');
+      }
+
+      setUploadProgress(95);
 
       const payload = {
         ...form,
         icon: iconUrl,
         screenshots: JSON.stringify(screenshotUrls),
         apkFile: apkUrl,
+        videoUrl: videoUrl,
         size: size
       };
 

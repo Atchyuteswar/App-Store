@@ -40,7 +40,7 @@ export default function Home() {
         {/* Play Store Tabs */}
         <div className="container border-b mb-6">
           <div className="flex gap-8 py-2 overflow-x-auto no-scrollbar">
-            {["Games", "Apps", "Movies", "Books", "Children"].map((tab) => (
+            {["Apps"].map((tab) => (
               <button key={tab} className={`text-sm font-medium pb-2 border-b-2 transition-colors ${tab === "Apps" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
                 {tab}
               </button>

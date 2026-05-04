@@ -40,10 +40,12 @@ export default function Home() {
       {!loading && featuredApps.length > 0 && <HeroBanner apps={featuredApps} />}
 
       {/* Categories */}
-      <CategoryBar selected={category} onSelect={setCategory} />
+      <div className="py-4">
+        <CategoryBar selected={category} onSelect={setCategory} />
+      </div>
 
       {/* App Grid */}
-      <main className="flex-1">
+      <main className="flex-1 pb-12">
         <div className="container pb-12">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

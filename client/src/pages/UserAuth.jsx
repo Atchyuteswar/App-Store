@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -105,9 +105,25 @@ export default function UserAuth() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button variant="link" onClick={() => setIsLogin(!isLogin)}>
+        <CardFooter className="flex flex-col gap-2 pb-6">
+          <Button variant="link" onClick={() => setIsLogin(!isLogin)} className="text-muted-foreground">
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          </Button>
+          
+          <div className="relative w-full py-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-muted"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
+          <Button variant="outline" asChild className="w-full border-dashed">
+            <Link to="/admin/login" className="flex items-center justify-center">
+              <LogIn className="h-3 w-3 mr-2" />
+              Admin Portal
+            </Link>
           </Button>
         </CardFooter>
       </Card>

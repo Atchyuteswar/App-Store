@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -81,6 +81,11 @@ export default function AdminLogin() {
             </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex justify-center border-t py-4">
+          <Button variant="link" asChild className="text-muted-foreground">
+            <Link to="/login">Standard User? Return to login</Link>
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );

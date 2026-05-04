@@ -16,7 +16,7 @@ export default function AppCard({ app }) {
       <CardContent className="p-4 space-y-4">
         <div className="flex gap-4">
           <img 
-            src={api.getFileUrl(app.icon)} 
+            src={api.getFileUrl(app.icon || app.iconUrl)} 
             alt={app.name}
             className="h-16 w-16 rounded-xl object-cover"
           />
@@ -43,7 +43,8 @@ export default function AppCard({ app }) {
             className="h-8"
             onClick={(e) => {
               e.stopPropagation();
-              window.open(api.getFileUrl(app.apk_file), '_blank');
+              const url = app.apk_file || app.apkFile;
+              if (url) window.open(api.getFileUrl(url), '_blank');
             }}
           >
             <Download className="h-4 w-4 mr-1" />

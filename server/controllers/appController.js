@@ -135,7 +135,7 @@ exports.createApp = async (req, res) => {
       tags: tags ? (typeof tags === 'string' ? tags.split(',').map(t => t.trim()).filter(Boolean) : tags) : [],
       // Accept direct URLs from frontend
       icon: req.body.icon || '',
-      screenshots: Array.isArray(req.body.screenshots) ? req.body.screenshots : (req.body.screenshots ? JSON.parse(req.body.screenshots) : []),
+      screenshots: Array.isArray(req.body.screenshots) ? req.body.screenshots : (typeof req.body.screenshots === 'string' ? JSON.parse(req.body.screenshots) : []),
       apk_file: req.body.apkFile || '',
       video_url: req.body.videoUrl || null,
       size: req.body.size || '0 MB',

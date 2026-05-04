@@ -134,6 +134,10 @@ export default function AdminDashboard() {
 
       setUploadProgress(100);
       setDialogOpen(false);
+      setIconFile(null);
+      setScreenshotFiles([]);
+      setAppFile(null);
+      setVideoFile(null);
       fetchApps();
     } catch (err) {
       console.error(err);

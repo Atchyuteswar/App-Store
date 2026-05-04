@@ -239,73 +239,80 @@ export default function AdminDashboard() {
       </main>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-2">
             <DialogTitle>{editingApp ? "Edit App" : "Add New App"}</DialogTitle>
             <DialogDescription>{editingApp ? "Update your app's information and files." : "Enter the details for your new application."}</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>App Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-              <div className="space-y-2"><Label>Tagline *</Label><Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} required /></div>
-            </div>
-            <div className="space-y-2"><Label>Description *</Label><Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /></div>
-            <div className="space-y-2"><Label>What's New</Label><Textarea rows={2} value={form.whatsNew} onChange={(e) => setForm({ ...form, whatsNew: e.target.value })} /></div>
-            
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Category *</Label><Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
-              <div className="space-y-2"><Label>Tags</Label><Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} /></div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Platform *</Label>
-              <RadioGroup value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })} className="flex gap-4">
-                {["android", "ios", "both"].map(p => <div key={p} className="flex items-center gap-2"><RadioGroupItem value={p} id={`p-${p}`} /><Label htmlFor={`p-${p}`} className="capitalize">{p}</Label></div>)}
-              </RadioGroup>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Version</Label><Input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Min OS</Label><Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} /></div>
-            </div>
-
-            <Separator />
-            
-            {/* Screenshot Manager */}
-            {existingScreenshots.length > 0 && (
-              <div className="space-y-3">
-                <Label>Manage Screenshots (Order matters!)</Label>
-                <ScrollArea className="w-full whitespace-nowrap border rounded-lg p-4">
-                  <div className="flex space-x-4">
-                    {existingScreenshots.map((url, i) => (
-                      <div key={url} className="relative w-32 shrink-0 group">
-                        <img src={api.getFileUrl(url)} alt="" className="h-48 w-full object-cover rounded-md border" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                          <div className="flex gap-1">
-                            <Button type="button" size="icon" variant="secondary" className="h-8 w-8" onClick={() => moveScreenshot(i, -1)} disabled={i === 0}><ArrowLeft className="h-4 w-4" /></Button>
-                            <Button type="button" size="icon" variant="secondary" className="h-8 w-8" onClick={() => moveScreenshot(i, 1)} disabled={i === existingScreenshots.length - 1}><ArrowRight className="h-4 w-4" /></Button>
-                          </div>
-                          <Button type="button" size="icon" variant="destructive" className="h-8 w-8" onClick={() => removeScreenshot(i)}><X className="h-4 w-4" /></Button>
-                        </div>
-                        <Badge className="absolute top-2 left-2 bg-black/50">{i + 1}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+          
+          <ScrollArea className="flex-1 px-6">
+            <form onSubmit={handleSubmit} id="admin-form" className="space-y-6 pb-6">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>App Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+                <div className="space-y-2"><Label>Tagline *</Label><Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} required /></div>
               </div>
-            )}
+              <div className="space-y-2"><Label>Description *</Label><Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /></div>
+              <div className="space-y-2"><Label>What's New</Label><Textarea rows={2} value={form.whatsNew} onChange={(e) => setForm({ ...form, whatsNew: e.target.value })} /></div>
+              
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>Category *</Label><Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+                <div className="space-y-2"><Label>Tags</Label><Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} /></div>
+              </div>
 
-            <div className="grid sm:grid-cols-4 gap-4">
-              <div className="space-y-2"><Label>Add Icon</Label><Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} /></div>
-              <div className="space-y-2"><Label>Add Screenshots</Label><Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} /></div>
-              <div className="space-y-2"><Label>Add Video (MP4)</Label><Input type="file" accept="video/mp4,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} /></div>
-              <div className="space-y-2"><Label>App File (.apk/.ipa)</Label><Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} /></div>
-            </div>
+              <div className="space-y-2">
+                <Label>Platform *</Label>
+                <RadioGroup value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })} className="flex gap-4">
+                  {["android", "ios", "both"].map(p => <div key={p} className="flex items-center gap-2"><RadioGroupItem value={p} id={`p-${p}`} /><Label htmlFor={`p-${p}`} className="capitalize">{p}</Label></div>)}
+                </RadioGroup>
+              </div>
 
-            {submitting && <div className="space-y-2"><Progress value={uploadProgress} /><p className="text-xs text-center text-muted-foreground">{uploadProgress}% - Processing...</p></div>}
-            <DialogFooter><Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button><Button type="submit" disabled={submitting}><Upload className="h-4 w-4 mr-1" />{submitting ? "Uploading..." : "Save App"}</Button></DialogFooter>
-          </form>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>Version</Label><Input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Min OS</Label><Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} /></div>
+              </div>
+
+              <Separator />
+              
+              {/* Screenshot Manager */}
+              {existingScreenshots.length > 0 && (
+                <div className="space-y-3">
+                  <Label>Manage Screenshots (Order matters!)</Label>
+                  <ScrollArea className="w-full whitespace-nowrap border rounded-lg p-4">
+                    <div className="flex space-x-4">
+                      {existingScreenshots.map((url, i) => (
+                        <div key={url} className="relative w-32 shrink-0 group">
+                          <img src={api.getFileUrl(url)} alt="" className="h-48 w-full object-cover rounded-md border" />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                            <div className="flex gap-1">
+                              <Button type="button" size="icon" variant="secondary" className="h-8 w-8" onClick={() => moveScreenshot(i, -1)} disabled={i === 0}><ArrowLeft className="h-4 w-4" /></Button>
+                              <Button type="button" size="icon" variant="secondary" className="h-8 w-8" onClick={() => moveScreenshot(i, 1)} disabled={i === existingScreenshots.length - 1}><ArrowRight className="h-4 w-4" /></Button>
+                            </div>
+                            <Button type="button" size="icon" variant="destructive" className="h-8 w-8" onClick={() => removeScreenshot(i)}><X className="h-4 w-4" /></Button>
+                          </div>
+                          <Badge className="absolute top-2 left-2 bg-black/50">{i + 1}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>Add Icon</Label><Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} /></div>
+                <div className="space-y-2"><Label>Add Screenshots</Label><Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} /></div>
+                <div className="space-y-2"><Label>Add Video (MP4)</Label><Input type="file" accept="video/mp4,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} /></div>
+                <div className="space-y-2"><Label>App File (.apk/.ipa)</Label><Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} /></div>
+              </div>
+
+              {submitting && <div className="space-y-2 pt-2"><Progress value={uploadProgress} /><p className="text-xs text-center text-muted-foreground">{uploadProgress}% - Processing...</p></div>}
+            </form>
+          </ScrollArea>
+
+          <DialogFooter className="p-6 pt-2 border-t">
+            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" form="admin-form" disabled={submitting}><Upload className="h-4 w-4 mr-1" />{submitting ? "Uploading..." : "Save App"}</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -88,7 +88,7 @@ export default function TestingHub() {
       const appRes = await getAppBySlug(slug);
       setApp(appRes.data);
       
-      // Fetch all tab data concurrently
+      // Fetch initial tab data
       const [msgRes, bugRes, ideaRes] = await Promise.all([
         getTesterMessages(slug),
         getTesterBugs(slug),
@@ -105,6 +105,24 @@ export default function TestingHub() {
       setLoading(false);
     }
   };
+
+  // Poll for new messages every 5 seconds
+  useEffect(() => {
+    if (!slug || loading) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const msgRes = await getTesterMessages(slug);
+        if (msgRes.data && msgRes.data.length !== messages.length) {
+          setMessages(msgRes.data);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [slug, messages.length, loading]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

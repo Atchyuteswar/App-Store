@@ -187,7 +187,18 @@ exports.updateApp = async (req, res) => {
       updates.tags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()).filter(Boolean) : tags;
     }
 
-    // Handle new file uploads
+    // Handle direct URLs from frontend
+    if (req.body.icon) updates.icon = req.body.icon;
+    if (req.body.screenshots) {
+      updates.screenshots = Array.isArray(req.body.screenshots) 
+        ? req.body.screenshots 
+        : (typeof req.body.screenshots === 'string' ? JSON.parse(req.body.screenshots) : []);
+    }
+    if (req.body.apkFile) updates.apk_file = req.body.apkFile;
+    if (req.body.videoUrl) updates.video_url = req.body.videoUrl;
+    if (req.body.size) updates.size = req.body.size;
+
+    // Handle new file uploads (Multer legacy)
     if (req.files) {
       if (req.files.icon?.[0]) {
         await deleteFromStorage(app.icon);

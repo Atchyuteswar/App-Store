@@ -57,3 +57,32 @@ CREATE POLICY "Allow deletes" ON storage.objects
 -- Allow updates
 CREATE POLICY "Allow updates" ON storage.objects
   FOR UPDATE USING (bucket_id = 'uploads');
+
+-- ============================================
+-- Updates for A/B Testing & Users
+-- ============================================
+
+-- Add ab_testing_enabled to apps
+ALTER TABLE apps ADD COLUMN IF NOT EXISTS ab_testing_enabled BOOLEAN DEFAULT false;
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  username TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- A/B Test Enrollments table
+CREATE TABLE IF NOT EXISTS ab_test_enrollments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  app_id UUID REFERENCES apps(id) ON DELETE CASCADE,
+  full_name TEXT NOT NULL,
+  phone_number TEXT NOT NULL,
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, app_id)
+);
+

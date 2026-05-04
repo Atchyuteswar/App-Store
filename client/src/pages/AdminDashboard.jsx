@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket, History, RotateCcw, MoreHorizontal
+  Package, Download, Star, Eye, EyeOff, Pencil, Trash2, Plus, LogOut, Upload, Home, ArrowLeft, ArrowRight, X, Rocket, History, RotateCcw, MoreHorizontal, Beaker
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -328,6 +328,7 @@ export default function AdminDashboard() {
                         <Button variant="ghost" size="icon" title="Manage Versions" onClick={() => openRollback(app)} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"><History className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" title="Toggle Visibility" onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button>
                         <Button variant="ghost" size="icon" title="Toggle Featured" onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /></Button>
+                        <Button variant="ghost" size="icon" title="Toggle A/B Testing" onClick={() => api.toggleAbTesting(app._id).then(fetchApps)}><Beaker className={`h-4 w-4 ${app.abTestingEnabled ? "text-purple-500 fill-purple-500" : ""}`} /></Button>
                         <Button variant="ghost" size="icon" title="Edit App Details" onClick={() => openEdit(app)}><Pencil className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" title="Delete App" className="text-destructive" onClick={() => api.deleteApp(app._id).then(fetchApps)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
@@ -344,6 +345,7 @@ export default function AdminDashboard() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <><EyeOff className="mr-2 h-4 w-4" /> Unpublish</> : <><Eye className="mr-2 h-4 w-4" /> Publish</>}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`mr-2 h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /> {app.featured ? "Unfeature" : "Feature"}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => api.toggleAbTesting(app._id).then(fetchApps)}><Beaker className={`mr-2 h-4 w-4 ${app.abTestingEnabled ? "text-purple-500 fill-purple-500" : ""}`} /> {app.abTestingEnabled ? "Disable A/B Testing" : "Enable A/B Testing"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => openEdit(app)}><Pencil className="mr-2 h-4 w-4" /> Edit Details</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete App</DropdownMenuItem>

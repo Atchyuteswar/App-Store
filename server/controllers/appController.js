@@ -1,6 +1,7 @@
 const supabase = require('../lib/supabase');
 const slugify = require('slugify');
 const { uploadToStorage, deleteFromStorage } = require('../middleware/uploadMiddleware');
+const { sendConfirmationEmail } = require('../lib/mailer');
 
 // Transform snake_case DB row to camelCase for frontend compatibility
 function toCamel(row) {
@@ -26,6 +27,7 @@ function toCamel(row) {
     downloads: row.downloads || 0,
     featured: row.featured,
     published: row.published,
+    abTestingEnabled: row.ab_testing_enabled,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     versionHistory: row.version_history || [],
@@ -403,6 +405,66 @@ exports.toggleFeatured = async (req, res) => {
     if (error) throw error;
     res.json(toCamel(data));
   } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.toggleAbTesting = async (req, res) => {
+  try {
+    const { data: app } = await supabase.from('apps').select('ab_testing_enabled').eq('id', req.params.id).single();
+    if (!app) return res.status(404).json({ message: 'App not found' });
+
+    const { data, error } = await supabase
+      .from('apps')
+      .update({ ab_testing_enabled: !app.ab_testing_enabled, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(toCamel(data));
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.enrollAbTesting = async (req, res) => {
+  try {
+    const { fullName, phoneNumber } = req.body;
+    if (!fullName || !phoneNumber) {
+      return res.status(400).json({ message: 'Full name and phone number are required' });
+    }
+
+    if (!req.user || req.user.role !== 'user') {
+       return res.status(403).json({ message: 'Only registered users can enroll in testing' });
+    }
+
+    const { data: app } = await supabase.from('apps').select('id, name, ab_testing_enabled').eq('slug', req.params.slug).single();
+    if (!app || !app.ab_testing_enabled) {
+      return res.status(400).json({ message: 'A/B Testing is not enabled for this app' });
+    }
+
+    const { data: enrollment, error } = await supabase.from('ab_test_enrollments').insert({
+      user_id: req.user.id,
+      app_id: app.id,
+      full_name: fullName,
+      phone_number: phoneNumber,
+    }).select().single();
+
+    if (error) {
+      if (error.code === '23505') { 
+        return res.status(400).json({ message: 'You are already enrolled in this testing program' });
+      }
+      throw error;
+    }
+
+    if (req.user.email) {
+      sendConfirmationEmail(req.user.email, fullName, app.name).catch(console.error);
+    }
+
+    res.status(201).json({ message: 'Successfully enrolled', enrollment });
+  } catch (error) {
+    console.error('Enrollment error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

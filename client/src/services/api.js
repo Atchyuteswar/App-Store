@@ -21,9 +21,12 @@ api.interceptors.request.use((config) => {
 export const getApps = (params) => api.get("/apps", { params });
 export const getAppBySlug = (slug) => api.get(`/apps/${slug}`);
 export const getDownloadUrl = (slug) => `${API_URL}/api/apps/${slug}/download`;
+export const enrollAbTesting = (slug, data) => api.post(`/apps/${slug}/enroll`, data);
 
 // ─── Auth ─────────────────────────────
 export const login = (credentials) => api.post("/auth/login", credentials);
+export const userLogin = (credentials) => api.post("/auth/user/login", credentials);
+export const userSignup = (credentials) => api.post("/auth/user/signup", credentials);
 export const logout = () => api.post("/auth/logout");
 export const getMe = () => api.get("/auth/me");
 
@@ -54,6 +57,7 @@ export const rollbackAppUpdate = (id, historyIndex) =>
 export const deleteApp = (id) => api.delete(`/admin/apps/${id}`);
 export const togglePublish = (id) => api.patch(`/admin/apps/${id}/toggle-publish`);
 export const toggleFeatured = (id) => api.patch(`/admin/apps/${id}/toggle-featured`);
+export const toggleAbTesting = (id) => api.patch(`/admin/apps/${id}/toggle-ab-testing`);
 
 export const getFileUrl = (url) => {
   if (!url) return "";

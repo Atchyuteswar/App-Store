@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Download, Star, ArrowLeft, Smartphone, Monitor, Globe, Calendar, HardDrive, Tag } from "lucide-react";
-import { getAppBySlug, getFileUrl, getDownloadUrl, getApps } from "@/services/api";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { Download, Star, ArrowLeft, Smartphone, Monitor, Globe, Calendar, HardDrive, Tag, Beaker } from "lucide-react";
+import { getAppBySlug, getFileUrl, getDownloadUrl, getApps, enrollAbTesting } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -9,7 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import AppCard from "@/components/AppCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -23,10 +28,46 @@ const platformInfo = {
 
 export default function AppDetail() {
   const { slug } = useParams();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
   const [app, setApp] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxImg, setLightboxImg] = useState(null);
+  
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false);
+  const [enrollForm, setEnrollForm] = useState({ fullName: "", phoneNumber: "" });
+  const [agreedTerms, setAgreedTerms] = useState({ copy: false, exploit: false, terms: false });
+  const [enrolling, setEnrolling] = useState(false);
+
+  const handleEnrollClick = () => {
+    if (!isAuthenticated) {
+      toast({ title: "Login Required", description: "You must be signed in to enroll." });
+      navigate("/login", { state: { from: location } });
+      return;
+    }
+    setEnrollModalOpen(true);
+  };
+
+  const submitEnrollment = async (e) => {
+    e.preventDefault();
+    if (!agreedTerms.copy || !agreedTerms.exploit || !agreedTerms.terms) {
+      return toast({ variant: "destructive", title: "Error", description: "You must agree to all terms." });
+    }
+    setEnrolling(true);
+    try {
+      await enrollAbTesting(app.slug, enrollForm);
+      toast({ title: "Enrolled!", description: "You have successfully enrolled in the A/B Testing program. A confirmation email has been sent." });
+      setEnrollModalOpen(false);
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: err.response?.data?.message || "Enrollment failed." });
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -247,6 +288,27 @@ export default function AppDetail() {
               </div>
             </div>
 
+            {/* A/B Testing Section */}
+            {app.abTestingEnabled && (
+              <>
+                <Separator className="my-8" />
+                <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8 text-center md:text-left flex flex-col md:flex-row items-center gap-6">
+                  <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <Beaker className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <h3 className="text-2xl font-bold text-foreground">Help Us Improve {app.name}</h3>
+                    <p className="text-muted-foreground">
+                      Join the A/B Testing program to get early access to experimental features, help find bugs, and shape the future of this app.
+                    </p>
+                  </div>
+                  <Button size="lg" onClick={handleEnrollClick} className="shrink-0 font-bold whitespace-nowrap">
+                    Enroll in A/B Testing
+                  </Button>
+                </div>
+              </>
+            )}
+
             {/* Related Apps */}
             {related.length > 0 && (
               <>
@@ -274,6 +336,63 @@ export default function AppDetail() {
               className="max-h-[90vh] w-auto h-auto rounded-lg shadow-2xl object-contain"
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* A/B Testing Enrollment Modal */}
+      <Dialog open={enrollModalOpen} onOpenChange={setEnrollModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Beaker className="h-5 w-5 text-primary" /> A/B Testing Enrollment</DialogTitle>
+            <DialogDescription>
+              Please provide your details and accept the terms to join the testing program for <strong className="text-foreground">{app?.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitEnrollment} className="space-y-6 py-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name (as per Govt ID) *</Label>
+                <Input id="fullName" required value={enrollForm.fullName} onChange={(e) => setEnrollForm({...enrollForm, fullName: e.target.value})} placeholder="John Doe" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number *</Label>
+                <Input id="phoneNumber" required value={enrollForm.phoneNumber} onChange={(e) => setEnrollForm({...enrollForm, phoneNumber: e.target.value})} placeholder="+1 234 567 8900" />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input value={user?.email || ""} disabled className="bg-muted text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">This email will be used for testing communications.</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3 bg-muted/50 p-4 rounded-lg border text-sm">
+              <div className="flex items-start gap-2">
+                <Checkbox id="term-copy" checked={agreedTerms.copy} onCheckedChange={(c) => setAgreedTerms({...agreedTerms, copy: c})} />
+                <div className="grid gap-1.5 leading-none">
+                  <label htmlFor="term-copy" className="font-medium cursor-pointer">I agree not to copy, reverse engineer, or distribute the app.</label>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Checkbox id="term-exploit" checked={agreedTerms.exploit} onCheckedChange={(c) => setAgreedTerms({...agreedTerms, exploit: c})} />
+                <div className="grid gap-1.5 leading-none">
+                  <label htmlFor="term-exploit" className="font-medium cursor-pointer">I agree not to exploit vulnerabilities, but to report them immediately.</label>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Checkbox id="term-terms" checked={agreedTerms.terms} onCheckedChange={(c) => setAgreedTerms({...agreedTerms, terms: c})} />
+                <div className="grid gap-1.5 leading-none">
+                  <label htmlFor="term-terms" className="font-medium cursor-pointer">I accept the full A/B Testing Terms and Conditions.</label>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setEnrollModalOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={enrolling || !agreedTerms.copy || !agreedTerms.exploit || !agreedTerms.terms}>
+                {enrolling ? "Enrolling..." : "Submit Enrollment"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

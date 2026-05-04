@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Moon, Sun, Menu, Shield } from "lucide-react";
+import { Search, Moon, Sun, Menu, Shield, User, LogOut, Beaker } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar({ onSearch, searchValue }) {
@@ -12,7 +14,7 @@ export default function Navbar({ onSearch, searchValue }) {
     if (typeof window !== "undefined") return localStorage.getItem("theme") === "dark";
     return false;
   });
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, admin, user, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,10 +52,56 @@ export default function Navbar({ onSearch, searchValue }) {
         <div className="flex items-center gap-3 shrink-0">
           <div className="hidden md:flex items-center gap-6 mr-2">
             <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Apps</Link>
-            <Link to={isAuthenticated ? "/admin/dashboard" : "/admin/login"} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              {isAuthenticated ? "Dashboard" : "Admin"}
-            </Link>
+            {admin && (
+              <Link to="/admin/dashboard" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                Admin Panel
+              </Link>
+            )}
+            {!isAuthenticated && (
+              <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                Sign In
+              </Link>
+            )}
           </div>
+
+          {isAuthenticated && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full ml-2 border border-border play-shadow">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{admin ? admin.username[0].toUpperCase() : user?.username[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{admin ? admin.username : user?.username}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{admin ? admin.email : user?.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                {user && (
+                  <DropdownMenuItem onClick={() => navigate('/tester/dashboard')}>
+                    <Beaker className="mr-2 h-4 w-4" />
+                    <span>Testing Dashboard</span>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => {
+                  logout();
+                  navigate('/');
+                }}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           <Toggle pressed={dark} onPressedChange={setDark} size="sm" className="rounded-full">
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -67,7 +115,8 @@ export default function Navbar({ onSearch, searchValue }) {
               <SheetTitle>Navigation</SheetTitle>
               <nav className="flex flex-col gap-6 mt-10">
                 <Link to="/" className="text-lg font-medium">Home</Link>
-                <Link to="/admin/dashboard" className="text-lg font-medium">Admin Panel</Link>
+                {admin && <Link to="/admin/dashboard" className="text-lg font-medium">Admin Panel</Link>}
+                {!isAuthenticated && <Link to="/login" className="text-lg font-medium">Sign In</Link>}
               </nav>
             </SheetContent>
           </Sheet>

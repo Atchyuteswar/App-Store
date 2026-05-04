@@ -16,17 +16,33 @@ const authMiddleware = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const { data: admin, error } = await supabase
-      .from('admins')
-      .select('id, username, email, created_at')
-      .eq('id', decoded.id)
-      .single();
+    if (decoded.role === 'admin' || !decoded.role) {
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('id, username, email, created_at')
+        .eq('id', decoded.id)
+        .single();
 
-    if (error || !admin) {
-      return res.status(401).json({ message: 'Admin not found' });
+      if (error || !admin) {
+        return res.status(401).json({ message: 'Admin not found' });
+      }
+
+      req.admin = admin;
+      req.user = { ...admin, role: 'admin' };
+    } else {
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('id, username, email, created_at')
+        .eq('id', decoded.id)
+        .single();
+
+      if (error || !user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      req.user = { ...user, role: 'user' };
     }
 
-    req.admin = admin;
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Invalid or expired token' });

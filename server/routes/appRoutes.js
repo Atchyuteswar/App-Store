@@ -8,6 +8,7 @@ const { uploadFields } = require('../middleware/uploadMiddleware');
 router.get('/', appController.getAllApps);
 router.get('/:slug', appController.getAppBySlug);
 router.get('/:slug/download', appController.downloadApp);
+router.post('/:slug/enroll', authMiddleware, appController.enrollAbTesting);
 
 // Admin Routes (exported separately)
 const adminRouter = express.Router();
@@ -42,6 +43,7 @@ adminRouter.put('/apps/:id/rollback', appController.rollbackAppUpdate);
 adminRouter.delete('/apps/:id', appController.deleteApp);
 adminRouter.patch('/apps/:id/toggle-publish', appController.togglePublish);
 adminRouter.patch('/apps/:id/toggle-featured', appController.toggleFeatured);
+adminRouter.patch('/apps/:id/toggle-ab-testing', appController.toggleAbTesting);
 
 module.exports = router;
 module.exports.adminRouter = adminRouter;

@@ -230,7 +230,12 @@ export default function AdminDashboard() {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{editingApp ? "Edit App" : "Add New App"}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{editingApp ? "Edit App" : "Add New App"}</DialogTitle>
+            <DialogDescription>
+              {editingApp ? "Update your app's information and files." : "Enter the details for your new application."}
+            </DialogDescription>
+          </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>App Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>

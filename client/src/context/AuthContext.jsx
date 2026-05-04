@@ -12,11 +12,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data } = await getMe();
       setAdmin(data.admin);
     } catch (error) {
-      // Only clear admin if it's a definitive 401/403, not a network timeout
       if (error.response?.status === 401 || error.response?.status === 403) {
         localStorage.removeItem('token');
         setAdmin(null);

@@ -15,8 +15,11 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await getMe();
       setAdmin(data.admin);
-    } catch {
-      setAdmin(null);
+    } catch (error) {
+      // Only clear admin if it's a definitive 401/403, not a network timeout
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setAdmin(null);
+      }
     } finally {
       setLoading(false);
     }

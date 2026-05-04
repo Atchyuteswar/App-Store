@@ -260,7 +260,6 @@ export default function AppDetail() {
               </>
             )}
           </div>
-        </div>
       </main>
 
       <Footer />

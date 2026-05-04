@@ -59,7 +59,11 @@ export default function TesterLayout() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={location.pathname === '/tester/dashboard'}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={location.pathname === '/tester/dashboard'}
+                        className={location.pathname === '/tester/dashboard' ? "!bg-primary/10 !text-primary hover:!bg-primary/20" : ""}
+                      >
                         <Link to="/tester/dashboard">
                           <LayoutDashboard />
                           <span>Overview</span>
@@ -68,7 +72,11 @@ export default function TesterLayout() {
                     </SidebarMenuItem>
                     
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={location.pathname.includes('/tester/active') || location.pathname.includes('/tester/apps')}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={location.pathname.includes('/tester/active') || location.pathname.includes('/tester/apps')}
+                        className={location.pathname.includes('/tester/active') || location.pathname.includes('/tester/apps') ? "!bg-primary/10 !text-primary hover:!bg-primary/20" : ""}
+                      >
                         <Link to="/tester/active">
                           <List />
                           <span>Active Tests</span>
@@ -77,7 +85,11 @@ export default function TesterLayout() {
                     </SidebarMenuItem>
                     
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={location.pathname === '/profile'}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={location.pathname === '/profile'}
+                        className={location.pathname === '/profile' ? "!bg-primary/10 !text-primary hover:!bg-primary/20" : ""}
+                      >
                         <Link to="/profile">
                           <UserIcon />
                           <span>Profile</span>
@@ -86,7 +98,11 @@ export default function TesterLayout() {
                     </SidebarMenuItem>
                     
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={location.pathname === '/tester/settings'}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={location.pathname === '/tester/settings'}
+                        className={location.pathname === '/tester/settings' ? "!bg-primary/10 !text-primary hover:!bg-primary/20" : ""}
+                      >
                         <Link to="/tester/settings">
                           <Settings />
                           <span>Settings</span>

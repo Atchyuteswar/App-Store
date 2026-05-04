@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       // Only clear admin if it's a definitive 401/403, not a network timeout
       if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem('token');
         setAdmin(null);
       }
     } finally {
@@ -27,13 +28,20 @@ export function AuthProvider({ children }) {
 
   const loginFn = async (email, password) => {
     const { data } = await apiLogin({ email, password });
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
     setAdmin(data.admin);
     return data;
   };
 
   const logoutFn = async () => {
-    await apiLogout();
-    setAdmin(null);
+    try {
+      await apiLogout();
+    } finally {
+      localStorage.removeItem('token');
+      setAdmin(null);
+    }
   };
 
   return (

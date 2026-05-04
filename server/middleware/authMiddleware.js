@@ -3,7 +3,12 @@ const supabase = require('../lib/supabase');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
+    // Check for token in Cookie or Authorization Header
+    let token = req.cookies?.token;
+    
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });

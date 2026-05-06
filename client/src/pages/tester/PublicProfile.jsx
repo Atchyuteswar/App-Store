@@ -60,77 +60,94 @@ export default function PublicProfile() {
   if (error) return <ProfileError message={error} debug={debugData} />;
 
   return (
-    <div className="min-h-screen bg-background pb-20 animate-in fade-in duration-700">
+    <div className="min-h-screen bg-background pb-32 animate-in fade-in duration-1000">
       {/* Hero Header */}
-      <div className="h-64 bg-gradient-to-br from-primary via-primary/90 to-primary/80 relative overflow-hidden">
+      <div className="h-[40vh] bg-gradient-to-br from-primary via-primary/90 to-primary/80 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         
-        <div className="max-w-4xl mx-auto px-6 h-full flex flex-col items-center justify-center relative z-10 pt-12">
-          <Avatar className="h-32 w-32 border-4 border-background shadow-2xl mb-4">
-            <AvatarImage src={user.profile_image} />
-            <AvatarFallback className="text-4xl font-bold bg-muted">
-              {user.display_name?.charAt(0) || user.username?.charAt(0)}
+        <div className="max-w-5xl mx-auto px-6 h-full flex flex-col items-center justify-center relative z-10 pt-16">
+          <Avatar className="h-32 w-32 md:h-40 md:w-40 border-8 border-background/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] mb-6 ring-1 ring-white/10">
+            <AvatarImage src={user.profile_image} className="object-cover" />
+            <AvatarFallback className="text-5xl font-black bg-muted text-primary">
+              {(user.display_name?.charAt(0) || user.username?.charAt(0) || "?").toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="text-center">
-            <h1 className="text-3xl font-black text-foreground tracking-tight drop-shadow-sm">{user.display_name || user.username}</h1>
-            <div className="flex items-center justify-center gap-4 mt-2">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-bold uppercase tracking-widest">
-                <Calendar className="h-3.5 w-3.5" />
-                Member Since {format(new Date(user.created_at), "MMM yyyy")}
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight drop-shadow-md">
+              {user.display_name || user.username}
+            </h1>
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] bg-background/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/5">
+                <Calendar className="h-3 w-3 text-primary" />
+                Joined {format(new Date(user.created_at), "MMMM yyyy")}
               </div>
-              <Badge className="bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest px-2 py-0">
-                PRO TESTER
+              <Badge className="bg-primary hover:bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 shadow-lg shadow-primary/20">
+                ELITE TESTER
               </Badge>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 -mt-8 relative z-20 space-y-8">
+      <div className="max-w-5xl mx-auto px-6 -mt-20 relative z-20 space-y-10">
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { label: "Bugs Filed", value: user.stats.bugs, icon: Bug, color: "text-red-500", bg: "bg-red-500/10" },
-            { label: "Ideas Shared", value: user.stats.ideas, icon: Lightbulb, color: "text-amber-500", bg: "bg-amber-500/10" },
-            { label: "Tasks Done", value: user.stats.tasks, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
-            { label: "Level", value: Math.floor((user.stats.bugs + user.stats.ideas + user.stats.tasks) / 10) + 1, icon: Star, color: "text-primary", bg: "bg-primary/10" },
+            { label: "Bugs Filed", value: user.stats?.bugs || 0, icon: Bug, color: "text-red-500", bg: "bg-red-500/10" },
+            { label: "Ideas Shared", value: user.stats?.ideas || 0, icon: Lightbulb, color: "text-amber-500", bg: "bg-amber-500/10" },
+            { label: "Tasks Done", value: user.stats?.tasks || 0, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
+            { label: "Tester Level", value: Math.floor(((user.stats?.bugs || 0) + (user.stats?.ideas || 0) + (user.stats?.tasks || 0)) / 10) + 1, icon: Star, color: "text-primary", bg: "bg-primary/10" },
           ].map((stat, i) => (
-            <Card key={i} className="border-none shadow-xl bg-card/50 backdrop-blur-md">
-              <CardContent className="p-4 flex flex-col items-center text-center">
-                <div className={cn("p-2 rounded-xl mb-2", stat.bg)}>
-                  <stat.icon className={cn("h-5 w-5", stat.color)} />
+            <Card key={i} className="border-none shadow-2xl bg-card/80 backdrop-blur-xl hover:scale-105 transition-all duration-300 ring-1 ring-white/5">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className={cn("p-3 rounded-2xl mb-4", stat.bg)}>
+                  <stat.icon className={cn("h-6 w-6", stat.color)} />
                 </div>
-                <div className="text-2xl font-black leading-none">{stat.value}</div>
-                <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">{stat.label}</div>
+                <div className="text-3xl font-black leading-none tracking-tighter">{stat.value}</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground mt-2">{stat.label}</div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-10">
           {/* Main Info */}
-          <div className="md:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-10">
+            {/* Bio Section if exists */}
+            {user.bio && (
+              <Card className="border-none shadow-xl bg-card/50 backdrop-blur-md p-8">
+                <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4">About Tester</h3>
+                <p className="text-lg font-medium leading-relaxed italic text-muted-foreground">
+                  "{user.bio}"
+                </p>
+              </Card>
+            )}
+
             {/* Achievements */}
-            <Card className="border-none shadow-xl bg-card/50 backdrop-blur-md overflow-hidden">
-              <CardHeader className="bg-muted/10 border-b">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Award className="h-5 w-5 text-primary" /> Unlocked Achievements
+            <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-md overflow-hidden ring-1 ring-white/5">
+              <CardHeader className="bg-muted/10 border-b border-white/5">
+                <CardTitle className="text-xl font-black flex items-center gap-3">
+                  <Award className="h-6 w-6 text-primary" /> Unlocked Achievements
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-8">
                 {user.achievements?.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic text-center py-4">No achievements unlocked yet.</p>
+                  <div className="text-center py-12 space-y-4">
+                    <div className="h-16 w-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto">
+                      <ShieldCheck className="h-8 w-8 text-muted-foreground/30" />
+                    </div>
+                    <p className="text-sm text-muted-foreground font-medium italic">No achievements unlocked in this season yet.</p>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                     {user.achievements.map((achievement) => (
-                      <div key={achievement.key} className="flex flex-col items-center text-center p-4 rounded-2xl bg-muted/20 border border-transparent hover:border-primary/20 transition-all group">
-                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                          <Award className="h-6 w-6 text-primary" />
+                      <div key={achievement.key} className="flex flex-col items-center text-center p-5 rounded-3xl bg-primary/5 border border-primary/10 hover:border-primary/30 hover:bg-primary/10 transition-all group">
+                        <div className="h-14 w-14 rounded-full bg-primary/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                          <Award className="h-7 w-7 text-primary" />
                         </div>
-                        <p className="text-xs font-bold leading-tight">{achievement.name}</p>
-                        <p className="text-[9px] text-muted-foreground mt-1 line-clamp-1">{achievement.description}</p>
+                        <p className="text-sm font-black leading-tight mb-1">{achievement.name}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium line-clamp-1 opacity-80">{achievement.description}</p>
                       </div>
                     ))}
                   </div>
@@ -139,21 +156,26 @@ export default function PublicProfile() {
             </Card>
 
             {/* Participation Bio */}
-            <div className="bg-primary/5 rounded-3xl p-8 border border-primary/10 relative overflow-hidden">
-              <ShieldCheck className="absolute -right-8 -bottom-8 h-48 w-48 text-primary/5" />
-              <h3 className="text-xl font-bold mb-3">Community Contributions</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
-                This tester is an active part of our beta community, helping developers squash bugs and refine user experiences across various applications. Their contributions help ensure higher quality releases for everyone.
-              </p>
-              <div className="flex items-center gap-6 mt-8">
-                <div className="flex -space-x-3 overflow-hidden">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="inline-block h-8 w-8 rounded-full ring-4 ring-background bg-muted flex items-center justify-center">
-                      <Package className="h-4 w-4 opacity-30" />
-                    </div>
-                  ))}
+            <div className="bg-gradient-to-br from-primary/10 to-transparent rounded-[2.5rem] p-10 border border-primary/20 relative overflow-hidden group shadow-xl">
+              <ShieldCheck className="absolute -right-12 -bottom-12 h-64 w-64 text-primary/5 group-hover:scale-110 transition-transform duration-700" />
+              <div className="relative z-10">
+                <h3 className="text-2xl font-black mb-4 tracking-tight">Community Impact</h3>
+                <p className="text-base text-muted-foreground leading-relaxed max-w-xl font-medium">
+                  This tester is a cornerstone of our beta community. By providing detailed feedback and reporting critical issues, they help ensure that every release meets the highest standards of quality and performance.
+                </p>
+                <div className="flex items-center gap-6 mt-10">
+                  <div className="flex -space-x-4 overflow-hidden">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="inline-block h-12 w-12 rounded-full ring-4 ring-card bg-muted/50 flex items-center justify-center backdrop-blur-sm shadow-xl">
+                        <Package className="h-5 w-5 text-primary/40" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Verified Contributor</p>
+                    <p className="text-xs font-bold text-muted-foreground">Active across 5+ Production Beta Tracks</p>
+                  </div>
                 </div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active across multiple projects</p>
               </div>
             </div>
           </div>

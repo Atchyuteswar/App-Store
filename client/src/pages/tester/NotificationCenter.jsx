@@ -156,29 +156,6 @@ export default function NotificationCenter() {
         </CardContent>
       </Card>
 
-      {/* Mock Notifications for UI Demo if empty */}
-      {notifications.length === 0 && (
-        <div className="pt-8 opacity-50">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-center mb-4">Demo Notifications</div>
-          <div className="space-y-4">
-            {[
-              { title: "New Version: Volt Messenger v2.4.0", type: "version_release", time: "2 hours ago" },
-              { title: "Bug Resolved: Login Crash", type: "bug_update", time: "Yesterday" },
-              { title: "New Message from Dev Team", type: "message_reply", time: "2 days ago" },
-            ].map((n, i) => (
-              <Card key={i} className="border-none shadow-sm bg-muted/10 opacity-50">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <Package className="h-5 w-5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-bold">{n.title}</p>
-                    <p className="text-[10px]">{n.time}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

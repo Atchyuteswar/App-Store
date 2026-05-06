@@ -172,11 +172,11 @@ export default function IdeaBoard() {
                 <div className="flex gap-4 pt-2">
                   <div className="flex items-center gap-1.5 text-sm font-bold">
                     <Trophy className="h-4 w-4 text-yellow-300" />
-                    <span>12 Implemented</span>
+                    <span>{ideas.filter(i => i.status === 'implemented').length} Implemented</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm font-bold">
                     <History className="h-4 w-4 text-green-200" />
-                    <span>45 In Review</span>
+                    <span>{ideas.filter(i => i.status === 'under_review').length} In Review</span>
                   </div>
                 </div>
               </div>

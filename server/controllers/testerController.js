@@ -408,3 +408,38 @@ exports.unenrollApp = async (req, res) => {
     res.status(500).json({ message: 'Server error unenrolling' });
   }
 };
+// --- DASHBOARD STATS -----------------------------------
+exports.getStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const [enrollCount, bugCount, ideaCount, activityRes] = await Promise.all([
+      supabase.from('ab_test_enrollments').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      // Use the logic from getActivity to find the streak
+      supabase.from('tester_messages').select('created_at').eq('user_id', userId).order('created_at', { ascending: false })
+    ]);
+
+    // Simple streak calculation (mocked for now but based on recent messages)
+    // In a real app, you'd aggregate all tables and find continuous days
+    const totalActions = (enrollCount.count || 0) + (bugCount.count || 0) + (ideaCount.count || 0);
+    
+    // Streak logic: check consecutive days in activity
+    // For simplicity, we'll return a placeholder for streak if they have recent activity
+    const activityStreak = totalActions > 0 ? 5 : 0; // TODO: Implement real streak logic
+
+    res.json({
+      totalEnrollments: enrollCount.count || 0,
+      totalBugs: bugCount.count || 0,
+      totalIdeas: ideaCount.count || 0,
+      totalMessages: 0, // Placeholder
+      activityStreak,
+      testerLevel: Math.floor(totalActions / 10) + 1,
+      totalActions
+    });
+  } catch (err) {
+    console.error('getStats error:', err);
+    res.status(500).json({ message: 'Server error fetching stats' });
+  }
+};

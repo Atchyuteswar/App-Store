@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getTesterActivity } from "@/services/api";
+import { getTesterActivity, getTesterStats } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 export default function ActivityCalendar() {
   const [activityData, setActivityData] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,8 +30,12 @@ export default function ActivityCalendar() {
 
   const fetchActivity = async () => {
     try {
-      const { data } = await getTesterActivity();
-      setActivityData(data || []);
+      const [activityRes, statsRes] = await Promise.all([
+        getTesterActivity(),
+        getTesterStats()
+      ]);
+      setActivityData(activityRes.data || []);
+      setStats(statsRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -94,7 +99,7 @@ export default function ActivityCalendar() {
               <Zap className="h-8 w-8 fill-current" />
             </div>
             <div>
-              <div className="text-4xl font-bold">5 Days</div>
+              <div className="text-4xl font-bold">{stats?.activityStreak || 0} Days</div>
               <div className="text-xs font-bold uppercase tracking-widest text-green-100">Current Streak</div>
             </div>
             <p className="text-xs text-green-100 italic">"Consistency is the key to quality!"</p>
@@ -145,9 +150,9 @@ export default function ActivityCalendar() {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { title: "Total Actions", value: totalActions, icon: Activity, color: "text-blue-500", bg: "bg-blue-500/10" },
-          { title: "Max Activity/Day", value: "8", icon: TrendingUp, color: "text-purple-500", bg: "bg-purple-500/10" },
-          { title: "Bugs Found", value: "12", icon: BarChart3, color: "text-red-500", bg: "bg-red-500/10" },
-          { title: "Ideas Given", value: "5", icon: PieChart, color: "text-amber-500", bg: "bg-amber-500/10" },
+          { title: "Max Activity/Day", value: Math.max(...activityData.map(d => d.count), 0), icon: TrendingUp, color: "text-purple-500", bg: "bg-purple-500/10" },
+          { title: "Bugs Found", value: stats?.totalBugs || 0, icon: BarChart3, color: "text-red-500", bg: "bg-red-500/10" },
+          { title: "Ideas Given", value: stats?.totalIdeas || 0, icon: PieChart, color: "text-amber-500", bg: "bg-amber-500/10" },
         ].map((stat, i) => (
           <Card key={i} className="border-none shadow-md bg-card/50">
             <CardContent className="p-6 flex items-center justify-between">

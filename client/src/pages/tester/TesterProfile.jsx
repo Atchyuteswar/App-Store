@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { updateTesterProfile } from "@/services/api";
+import { updateTesterProfile, getTesterStats, getTesterEnrollments } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,25 @@ export default function TesterProfile() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [enrollments, setEnrollments] = useState([]);
+  
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const [statsRes, enrollRes] = await Promise.all([
+        getTesterStats(),
+        getTesterEnrollments()
+      ]);
+      setStats(statsRes.data);
+      setEnrollments(enrollRes.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   
   // Profile State
   const [profileData, setProfileData] = useState({
@@ -100,10 +119,10 @@ export default function TesterProfile() {
       {/* Tester Stats Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Bugs reported", value: "12", icon: Bug },
-          { label: "Ideas shared", value: "5", icon: Lightbulb },
-          { label: "Messages", value: "28", icon: MessageSquare },
-          { label: "Active days", value: "45", icon: Activity },
+          { label: "Bugs reported", value: stats?.totalBugs || 0, icon: Bug },
+          { label: "Ideas shared", value: stats?.totalIdeas || 0, icon: Lightbulb },
+          { label: "Messages", value: stats?.totalMessages || 0, icon: MessageSquare },
+          { label: "Active days", value: stats?.totalActions || 0, icon: Activity },
         ].map((stat, i) => (
           <Card key={i} className="border-none shadow-md bg-card/50 text-center">
             <CardContent className="p-6">
@@ -201,7 +220,7 @@ export default function TesterProfile() {
             <div className="pt-4 border-t border-dashed">
               <div className="p-4 rounded-xl bg-muted/20 text-center">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Beta Participation</p>
-                <p className="text-xs mt-1">You are currently testing <strong>3 applications</strong>.</p>
+                <p className="text-xs mt-1">You are currently testing <strong>{enrollments.length} applications</strong>.</p>
               </div>
             </div>
           </CardContent>

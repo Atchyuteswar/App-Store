@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getTesterEnrollments, getTesterActivity, getTesterNotifications } from "@/services/api";
+import { getTesterEnrollments, getTesterActivity, getTesterNotifications, getTesterStats } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -28,6 +28,7 @@ export default function TesterOverview() {
   const [enrollments, setEnrollments] = useState([]);
   const [activityData, setActivityData] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,14 +38,16 @@ export default function TesterOverview() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [enrollRes, activityRes, notifyRes] = await Promise.all([
+      const [enrollRes, activityRes, notifyRes, statsRes] = await Promise.all([
         getTesterEnrollments(),
         getTesterActivity(),
-        getTesterNotifications()
+        getTesterNotifications(),
+        getTesterStats()
       ]);
       setEnrollments(enrollRes.data || []);
       setActivityData(activityRes.data || []);
       setNotifications(notifyRes.data || []);
+      setStatsData(statsRes.data);
     } catch (err) {
       console.error("Error fetching overview data:", err);
     } finally {
@@ -52,19 +55,12 @@ export default function TesterOverview() {
     }
   };
 
-  // Calculate Streak
-  const currentStreak = () => {
-    if (!activityData.length) return 0;
-    // Logic to calculate streak based on activityData dates
-    // For now, return a mock or simple calculation
-    return activityData.filter(d => d.count > 0).length > 0 ? 3 : 0; 
-  };
 
   const stats = [
-    { title: "Enrolled Apps", value: enrollments.length, icon: Package, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { title: "Bugs Filed", value: activityData.reduce((acc, curr) => acc + (curr.type === 'bug' ? 1 : 0), 0) || 12, icon: Bug, color: "text-red-500", bg: "bg-red-500/10" },
-    { title: "Ideas Shared", value: activityData.reduce((acc, curr) => acc + (curr.type === 'idea' ? 1 : 0), 0) || 5, icon: Lightbulb, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { title: "Activity Streak", value: `${currentStreak()} Days`, icon: Zap, color: "text-green-500", bg: "bg-green-500/10" },
+    { title: "Enrolled Apps", value: statsData?.totalEnrollments || 0, icon: Package, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { title: "Bugs Filed", value: statsData?.totalBugs || 0, icon: Bug, color: "text-red-500", bg: "bg-red-500/10" },
+    { title: "Ideas Shared", value: statsData?.totalIdeas || 0, icon: Lightbulb, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { title: "Activity Streak", value: `${statsData?.activityStreak || 0} Days`, icon: Zap, color: "text-green-500", bg: "bg-green-500/10" },
   ];
 
   if (loading) return <OverviewSkeleton />;
@@ -249,28 +245,7 @@ export default function TesterOverview() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-lg bg-card/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Community Pulse</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Global Bugs Found</span>
-                <span className="text-sm font-bold">1,284</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Active Testers</span>
-                <span className="text-sm font-bold">452</span>
-              </div>
-              <div className="h-px bg-border my-2" />
-              <div className="text-center pt-2">
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter mb-2">Current Version Hub Status</p>
-                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-600/20 px-3">
-                  All Systems Operational
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
       </div>
     </div>

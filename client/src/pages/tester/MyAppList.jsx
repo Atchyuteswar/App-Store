@@ -156,13 +156,6 @@ export default function MyAppList() {
                   <CardDescription className="line-clamp-1 mt-1">{enroll.app.tagline}</CardDescription>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="secondary" className="text-[10px] font-mono h-5">v{enroll.app.version}</Badge>
-                    {/* Update Alert Logic */}
-                    {Math.random() > 0.7 && (
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-green-600 animate-pulse">
-                        <AlertCircle className="h-3 w-3" />
-                        UPDATE AVAILABLE
-                      </div>
-                    )}
                   </div>
                 </div>
               </CardHeader>

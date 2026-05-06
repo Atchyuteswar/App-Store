@@ -32,7 +32,12 @@ const authMiddleware = async (req, res, next) => {
     } else {
       const { data: user, error } = await supabase
         .from('users')
-        .select('id, username, email, created_at')
+        .select(`
+          id, username, email, display_name, profile_image, bio, 
+          device_model, manufacturer, os_version, 
+          prefs_new_releases, prefs_bug_updates, prefs_idea_updates, prefs_weekly_digest,
+          profile_public, email_notify_digest, created_at
+        `)
         .eq('id', decoded.id)
         .single();
 

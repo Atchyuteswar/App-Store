@@ -434,12 +434,19 @@ exports.markNotificationRead = async (req, res) => {
 // --- PROFILE -------------------------------------------
 exports.updateProfile = async (req, res) => {
   try {
-    const { deviceModel, manufacturer, osVersion, prefsNewReleases, prefsBugUpdates, prefsIdeaUpdates, prefsWeeklyDigest } = req.body;
+    const { 
+      deviceModel, manufacturer, osVersion, 
+      displayName, bio, profileImage,
+      prefsNewReleases, prefsBugUpdates, prefsIdeaUpdates, prefsWeeklyDigest 
+    } = req.body;
     
     const updates = {};
     if (deviceModel !== undefined) updates.device_model = deviceModel;
     if (manufacturer !== undefined) updates.manufacturer = manufacturer;
     if (osVersion !== undefined) updates.os_version = osVersion;
+    if (displayName !== undefined) updates.display_name = displayName;
+    if (bio !== undefined) updates.bio = bio;
+    if (profileImage !== undefined) updates.profile_image = profileImage;
     if (prefsNewReleases !== undefined) updates.prefs_new_releases = prefsNewReleases;
     if (prefsBugUpdates !== undefined) updates.prefs_bug_updates = prefsBugUpdates;
     if (prefsIdeaUpdates !== undefined) updates.prefs_idea_updates = prefsIdeaUpdates;
@@ -449,13 +456,18 @@ exports.updateProfile = async (req, res) => {
       .from('users')
       .update(updates)
       .eq('id', req.user.id)
-      .select('id, username, email, device_model, manufacturer, os_version, prefs_new_releases, prefs_bug_updates, prefs_idea_updates, prefs_weekly_digest')
+      .select(`
+        id, username, email, display_name, profile_image, bio,
+        device_model, manufacturer, os_version,
+        prefs_new_releases, prefs_bug_updates, prefs_idea_updates, prefs_weekly_digest,
+        profile_public, email_notify_digest, created_at
+      `)
       .single();
 
     if (error) throw error;
     res.json(data);
   } catch (err) {
-    console.error(err);
+    console.error('updateProfile error:', err);
     res.status(500).json({ message: 'Server error updating profile' });
   }
 };

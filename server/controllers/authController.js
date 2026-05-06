@@ -111,7 +111,10 @@ exports.userSignup = async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: user.id, username: user.username, email: user.email, role: 'user' },
+      user: { 
+        ...user,
+        role: 'user' 
+      },
     });
   } catch (error) {
     console.error('User Signup error:', error);
@@ -154,7 +157,10 @@ exports.userLogin = async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, username: user.username, email: user.email, role: 'user' },
+      user: { 
+        ...user,
+        role: 'user' 
+      },
     });
   } catch (error) {
     console.error('User Login error:', error);

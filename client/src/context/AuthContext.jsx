@@ -82,6 +82,7 @@ export function AuthProvider({ children }) {
         userLogin: userLoginFn,
         userSignup: userSignupFn,
         logout: logoutFn,
+        refreshUser: checkAuth,
       }}
     >
       {children}

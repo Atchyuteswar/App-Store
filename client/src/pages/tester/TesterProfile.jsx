@@ -38,7 +38,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export default function TesterProfile() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
@@ -79,15 +79,15 @@ export default function TesterProfile() {
   
   // Profile State
   const [profileData, setProfileData] = useState({
-    deviceModel: user?.deviceModel || "",
+    deviceModel: user?.device_model || user?.deviceModel || "",
     manufacturer: user?.manufacturer || "",
-    osVersion: user?.osVersion || "",
-    prefsNewReleases: user?.prefsNewReleases ?? true,
-    prefsBugUpdates: user?.prefsBugUpdates ?? true,
-    prefsIdeaUpdates: user?.prefsIdeaUpdates ?? true,
-    emailNotifyDigest: user?.emailNotifyDigest ?? false,
+    osVersion: user?.os_version || user?.osVersion || "",
+    prefsNewReleases: user?.prefs_new_releases ?? user?.prefsNewReleases ?? true,
+    prefsBugUpdates: user?.prefs_bug_updates ?? user?.prefsBugUpdates ?? true,
+    prefsIdeaUpdates: user?.prefs_idea_updates ?? user?.prefsIdeaUpdates ?? true,
+    emailNotifyDigest: user?.email_notify_digest ?? user?.emailNotifyDigest ?? false,
     username: user?.username || "",
-    profilePublic: user?.profilePublic ?? false,
+    profilePublic: user?.profile_public ?? user?.profilePublic ?? false,
   });
 
   // Password State
@@ -102,6 +102,7 @@ export default function TesterProfile() {
     setLoading(true);
     try {
       await updateTesterProfile(profileData);
+      await refreshUser();
       toast({ title: "Profile Updated", description: "Your information has been saved." });
     } catch (err) {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
@@ -114,6 +115,7 @@ export default function TesterProfile() {
     try {
       setProfileData(newData);
       await updateTesterProfileSettings(newData);
+      await refreshUser();
       toast({ title: "Settings Saved" });
     } catch (err) {
       toast({ title: "Error", description: "Failed to update settings.", variant: "destructive" });
@@ -135,7 +137,9 @@ export default function TesterProfile() {
   };
 
   const copyProfileLink = () => {
-    const url = `${window.location.origin}/t/${profileData.username}`;
+    const username = profileData.username || user?.username;
+    if (!username) return;
+    const url = `${window.location.origin}/t/${encodeURIComponent(username)}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Link Copied!", description: "Share your profile with others." });
   };
@@ -276,13 +280,18 @@ export default function TesterProfile() {
                   </div>
                   <Switch 
                     checked={profileData[pref.key]}
-                    onCheckedChange={(checked) => {
+                    onCheckedChange={async (checked) => {
                       const newPrefs = { ...profileData, [pref.key]: checked };
-                      if (pref.key === 'emailNotifyDigest') {
-                        handleUpdateSettings(newPrefs);
-                      } else {
-                        setProfileData(newPrefs);
-                        updateTesterProfile(newPrefs);
+                      setProfileData(newPrefs);
+                      try {
+                        if (pref.key === 'emailNotifyDigest') {
+                          await updateTesterProfileSettings(newPrefs);
+                        } else {
+                          await updateTesterProfile(newPrefs);
+                        }
+                        await refreshUser();
+                      } catch (err) {
+                        toast({ title: "Error", description: "Failed to update preference", variant: "destructive" });
                       }
                     }}
                   />

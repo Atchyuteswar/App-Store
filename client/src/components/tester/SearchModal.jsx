@@ -19,7 +19,16 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { globalSearch } from "@/services/api";
-import { debounce } from "lodash";
+// Custom debounce hook/function
+function debounce(fn, delay) {
+  let timeoutId;
+  return function(...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+}
 
 export default function SearchModal({ open, onOpenChange }) {
   const [query, setQuery] = useState("");

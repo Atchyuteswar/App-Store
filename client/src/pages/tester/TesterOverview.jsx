@@ -52,15 +52,15 @@ export default function TesterOverview() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-8 shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-6 sm:p-8 shadow-sm">
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back, {user?.username}!</h1>
-          <p className="text-muted-foreground max-w-2xl text-lg">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Welcome back, {user?.username}!</h1>
+          <p className="text-muted-foreground max-w-2xl text-base sm:text-lg leading-relaxed">
             Thank you for being part of our testing community. Your feedback helps developers build better apps.
           </p>
         </div>
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
-        <Beaker className="absolute right-8 -bottom-8 h-48 w-48 text-primary/10 -rotate-12 pointer-events-none" />
+        <Beaker className="absolute -right-4 -bottom-4 sm:right-8 sm:-bottom-8 h-32 w-32 sm:h-48 sm:w-48 text-primary/10 -rotate-12 pointer-events-none" />
       </div>
 
       {/* Stats / Quick Actions */}

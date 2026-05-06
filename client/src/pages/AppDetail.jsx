@@ -134,19 +134,19 @@ export default function AppDetail() {
           {/* Header section */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
             {/* Left side: Icon & Info */}
-            <div className="flex items-start gap-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
               {app.icon ? (
-                <img src={getFileUrl(app.icon)} alt={app.name} className="h-24 w-24 md:h-32 md:w-32 rounded-2xl object-cover shadow-lg border border-border/50" />
+                <img src={getFileUrl(app.icon)} alt={app.name} className="h-28 w-28 md:h-32 md:w-32 rounded-3xl object-cover shadow-2xl border border-border/50" />
               ) : (
-                <div className="h-24 w-24 md:h-32 md:w-32 rounded-2xl bg-muted flex items-center justify-center shadow-lg border border-border/50">
+                <div className="h-28 w-28 md:h-32 md:w-32 rounded-3xl bg-muted flex items-center justify-center shadow-2xl border border-border/50">
                   <span className="text-4xl font-bold text-muted-foreground">{app.name[0]}</span>
                 </div>
               )}
-              <div className="flex flex-col justify-center h-full pt-1 md:pt-3">
+              <div className="flex flex-col justify-center h-full pt-2">
                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{app.name}</h1>
-                <p className="text-muted-foreground text-sm md:text-base mt-1">by Atchyuteswar Gottumukkala</p>
-                <div className="flex flex-wrap items-center gap-4 mt-3">
-                  <div className="flex items-center gap-1 bg-secondary/50 px-2 py-1 rounded-md">
+                <p className="text-primary font-medium text-sm md:text-base mt-1">Atchyuteswar Gottumukkala</p>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-4">
+                  <div className="flex items-center gap-1 bg-secondary/50 px-2.5 py-1.5 rounded-lg">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star key={s} className={`h-4 w-4 ${s <= Math.round(app.rating) ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground/30"}`} />
                     ))}
@@ -173,11 +173,11 @@ export default function AppDetail() {
             <h3 className="text-xl font-bold mb-4">Screenshots</h3>
             <div className="relative px-2 sm:px-8">
                 <Carousel className="w-full" opts={{ align: "start" }}>
-                  <CarouselContent className="-ml-2 md:-ml-4">
+                  <CarouselContent className="-ml-4">
                     {/* Video First */}
                     {app.video_url && (
-                      <CarouselItem className="pl-2 md:pl-4 basis-[85%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                        <div className="relative rounded-xl overflow-hidden border aspect-[9/16] bg-black group">
+                      <CarouselItem className="pl-4 basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                        <div className="relative rounded-2xl overflow-hidden border aspect-[9/16] bg-black group shadow-xl">
                           <video
                             src={getFileUrl(app.video_url)}
                             controls
@@ -189,18 +189,18 @@ export default function AppDetail() {
                     )}
                     {/* Screenshots */}
                     {app.screenshots && app.screenshots.map((ss, i) => (
-                      <CarouselItem key={i} className="pl-2 md:pl-4 basis-[45%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                      <CarouselItem key={i} className="pl-4 basis-[70%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                         <img
                           src={getFileUrl(ss)}
                           alt={`Screenshot ${i + 1}`}
-                          className="rounded-xl border shadow-sm cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all object-cover aspect-[9/16] w-full"
+                          className="rounded-2xl border shadow-xl cursor-pointer hover:scale-[1.02] transition-transform object-cover aspect-[9/16] w-full"
                           onClick={() => setLightboxImg(getFileUrl(ss))}
                         />
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="-left-3" />
-                  <CarouselNext className="-right-3" />
+                  <CarouselPrevious className="hidden sm:flex -left-4 shadow-xl" />
+                  <CarouselNext className="hidden sm:flex -right-4 shadow-xl" />
                 </Carousel>
               </div>
             </div>
@@ -208,7 +208,7 @@ export default function AppDetail() {
             <Separator className="my-8" />
 
             {/* Description */}
-            <div className="grid md:grid-cols-[2fr_1fr] gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-12">
               <div className="space-y-6">
                 <div>
                 <h3 className="text-xl font-bold mb-3">Description</h3>

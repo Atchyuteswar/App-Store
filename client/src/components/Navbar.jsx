@@ -14,6 +14,7 @@ export default function Navbar({ onSearch, searchValue }) {
     if (typeof window !== "undefined") return localStorage.getItem("theme") === "dark";
     return false;
   });
+  const [open, setOpen] = useState(false);
   const { isAuthenticated, admin, user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -34,16 +35,16 @@ export default function Navbar({ onSearch, searchValue }) {
         </Link>
 
         {/* Play Store Styled Search */}
-        <div className="flex-1 max-w-2xl px-4">
+        <div className="flex-1 max-w-2xl px-2 sm:px-4">
           <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-              <Search className="h-5 w-5" />
+            <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <Input
-              placeholder="Search for apps & more"
+              placeholder="Search apps..."
               value={searchValue || ""}
               onChange={(e) => onSearch?.(e.target.value)}
-              className="w-full h-12 pl-12 pr-4 rounded-full border-none bg-secondary/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary google-search-shadow transition-all text-base md:text-sm"
+              className="w-full h-10 sm:h-12 pl-10 sm:pl-12 pr-4 rounded-full border-none bg-secondary/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary transition-all text-sm"
             />
           </div>
         </div>
@@ -107,16 +108,38 @@ export default function Navbar({ onSearch, searchValue }) {
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Toggle>
 
-          <Sheet>
+          <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="rounded-full"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="right">
-              <SheetTitle>Navigation</SheetTitle>
-              <nav className="flex flex-col gap-6 mt-10">
-                <Link to="/" className="text-lg font-medium">Home</Link>
-                {admin && <Link to="/admin/dashboard" className="text-lg font-medium">Admin Panel</Link>}
-                {!isAuthenticated && <Link to="/login" className="text-lg font-medium">Sign In</Link>}
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetTitle className="text-left">Navigation</SheetTitle>
+              <nav className="flex flex-col gap-4 mt-8">
+                <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setOpen(false)}>
+                  <Link to="/">Home</Link>
+                </Button>
+                {isAuthenticated && (
+                  <>
+                    <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setOpen(false)}>
+                      <Link to="/profile">Profile</Link>
+                    </Button>
+                    {user && (
+                      <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setOpen(false)}>
+                        <Link to="/tester/dashboard">Testing Hub</Link>
+                      </Button>
+                    )}
+                  </>
+                )}
+                {admin && (
+                  <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setOpen(false)}>
+                    <Link to="/admin/dashboard">Admin Panel</Link>
+                  </Button>
+                )}
+                {!isAuthenticated && (
+                  <Button variant="ghost" className="justify-start text-lg" asChild onClick={() => setOpen(false)}>
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                )}
               </nav>
             </SheetContent>
           </Sheet>

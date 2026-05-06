@@ -23,7 +23,8 @@ import {
   Star,
   Activity,
   User as UserIcon,
-  Package
+  Package,
+  MessageSquare
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";

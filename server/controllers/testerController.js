@@ -861,19 +861,20 @@ exports.updateProfileSettings = async (req, res) => {
     const { username, profilePublic, emailNotifyDigest } = req.body;
     const userId = req.user.id;
 
+    const updates = {};
+    if (username !== undefined) updates.username = username?.toLowerCase();
+    if (profilePublic !== undefined) updates.profile_public = profilePublic;
+    if (emailNotifyDigest !== undefined) updates.email_notify_digest = emailNotifyDigest;
+
     const { error } = await supabase
       .from('users')
-      .update({ 
-        username: username?.toLowerCase(), 
-        profile_public: profilePublic,
-        email_notify_digest: emailNotifyDigest
-      })
+      .update(updates)
       .eq('id', userId);
 
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error('updateProfileSettings error:', err);
     res.status(500).json({ message: 'Server error updating settings' });
   }
 };
@@ -881,32 +882,42 @@ exports.updateProfileSettings = async (req, res) => {
 exports.getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params;
+    console.log('Fetching public profile for:', username);
+
     const { data: user, error } = await supabase
       .from('users')
       .select('id, username, display_name, profile_image, created_at, profile_public')
-      .eq('username', username.toLowerCase())
+      .ilike('username', username.toLowerCase())
       .single();
 
-    if (error || !user.profile_public) return res.status(404).json({ message: 'Profile not found' });
+    if (error || !user) {
+      console.log('User not found or error:', error);
+      return res.status(404).json({ message: 'Profile not found' });
+    }
 
-    const [unlocked, bugs, ideas, tasks] = await Promise.all([
-      supabase.from('tester_achievements').select('*').eq('user_id', user.id),
-      supabase.from('tester_bugs').select('id', { count: 'exact' }).eq('user_id', user.id),
-      supabase.from('tester_ideas').select('id', { count: 'exact' }).eq('user_id', user.id),
-      supabase.from('tester_task_completions').select('id', { count: 'exact' }).eq('user_id', user.id)
+    if (user.profile_public === false) {
+      console.log('Profile is private for:', username);
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    const [achRes, bugRes, ideaRes, taskRes] = await Promise.all([
+      supabase.from('tester_achievements').select('achievement_key').eq('user_id', user.id),
+      supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('tester_task_completions').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
     ]);
 
     res.json({
       ...user,
-      achievements: unlocked.map(a => ({ key: a.achievement_key, ...ACHIEVEMENTS[a.achievement_key] })),
+      achievements: (achRes.data || []).map(a => ({ key: a.achievement_key, ...ACHIEVEMENTS[a.achievement_key] })),
       stats: {
-        bugs: bugs.count,
-        ideas: ideas.count,
-        tasks: tasks.count
+        bugs: bugRes.count || 0,
+        ideas: ideaRes.count || 0,
+        tasks: taskRes.count || 0
       }
     });
   } catch (err) {
-    console.error(err);
+    console.error('getPublicProfile error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

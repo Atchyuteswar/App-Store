@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getTesterEnrollments, getTesterActivity, getTesterNotifications, getTesterStats } from "@/services/api";
+import { 
+  getTesterEnrollments, 
+  getTesterActivity, 
+  getTesterNotifications, 
+  getTesterStats,
+  getTesterAchievements
+} from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -31,6 +37,7 @@ export default function TesterOverview() {
   const [activityFeed, setActivityFeed] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [statsData, setStatsData] = useState(null);
+  const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,16 +47,18 @@ export default function TesterOverview() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [enrollRes, activityRes, notifyRes, statsRes] = await Promise.all([
+      const [enrollRes, activityRes, notifyRes, statsRes, achieveRes] = await Promise.all([
         getTesterEnrollments(),
         getTesterActivity(),
         getTesterNotifications(),
-        getTesterStats()
+        getTesterStats(),
+        getTesterAchievements()
       ]);
       setEnrollments(enrollRes.data || []);
       setActivityFeed(activityRes.data?.recent || []);
       setNotifications(notifyRes.data || []);
       setStatsData(statsRes.data);
+      setAchievements(achieveRes.data || []);
     } catch (err) {
       console.error("Error fetching overview data:", err);
     } finally {
@@ -83,6 +92,7 @@ export default function TesterOverview() {
             <Link to="/tester/apps" className="flex items-center gap-2">
               <Plus className="h-4 w-4" /> Enroll New
             </Link>
+          </Button>
         </div>
       </div>
 
@@ -142,12 +152,6 @@ export default function TesterOverview() {
                         <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-mono">
                           v{enroll.app.version}
                         </Badge>
-                        {/* Mock "New Version" alert */}
-                        {Math.random() > 0.5 && (
-                          <Badge className="text-[10px] h-5 px-1.5 bg-green-500 hover:bg-green-600">
-                            NEW UPDATE
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -258,13 +262,22 @@ export default function TesterOverview() {
             </CardHeader>
             <CardContent className="p-4">
               <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="aspect-square rounded-xl bg-muted/20 flex items-center justify-center border border-dashed border-primary/20 group">
-                    <Award className="h-6 w-6 text-primary/30 group-hover:text-primary transition-colors" />
+                {achievements.filter(a => !!a.unlockedAt).slice(0, 3).map((achieve, i) => (
+                  <div key={achieve.key} className="aspect-square rounded-xl bg-primary/5 flex items-center justify-center border border-primary/20 group" title={achieve.name}>
+                    <Award className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
                   </div>
                 ))}
+                {achievements.filter(a => !!a.unlockedAt).length === 0 && (
+                  [1, 2, 3].map(i => (
+                    <div key={i} className="aspect-square rounded-xl bg-muted/10 flex items-center justify-center border border-dashed border-muted/20">
+                      <Award className="h-6 w-6 text-muted-foreground/20" />
+                    </div>
+                  ))
+                )}
               </div>
-              <p className="text-[10px] text-center text-muted-foreground mt-4 italic">Complete tasks to unlock badges</p>
+              <p className="text-[10px] text-center text-muted-foreground mt-4 italic">
+                {achievements.filter(a => !!a.unlockedAt).length > 0 ? "Latest badges unlocked" : "Complete tasks to unlock badges"}
+              </p>
             </CardContent>
           </Card>
 

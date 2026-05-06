@@ -288,17 +288,19 @@ exports.getActivity = async (req, res) => {
     const dateLimit = aYearAgo.toISOString();
 
     // Fetch detailed records
-    const [msgs, bugs, ideas] = await Promise.all([
+    const [msgs, bugs, ideas, tasks] = await Promise.all([
       supabase.from('tester_messages').select('id, created_at, message, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10),
       supabase.from('tester_bugs').select('id, created_at, title, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10),
-      supabase.from('tester_ideas').select('id, created_at, title, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10)
+      supabase.from('tester_ideas').select('id, created_at, title, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10),
+      supabase.from('tester_task_completions').select('id, completed_at, task:tester_tasks(title, app:apps(name))').eq('user_id', userId).gte('completed_at', dateLimit).order('completed_at', { ascending: false }).limit(10)
     ]);
 
     // 1. Heatmap Logic (Aggregate all dates)
     const allActivityDates = [
       ...(msgs.data || []).map(m => m.created_at.split('T')[0]),
       ...(bugs.data || []).map(b => b.created_at.split('T')[0]),
-      ...(ideas.data || []).map(i => i.created_at.split('T')[0])
+      ...(ideas.data || []).map(i => i.created_at.split('T')[0]),
+      ...(tasks.data || []).map(t => t.completed_at.split('T')[0])
     ];
 
     const countsByDate = allActivityDates.reduce((acc, date) => {
@@ -348,6 +350,13 @@ exports.getActivity = async (req, res) => {
         description: `Suggested idea: ${i.title} for ${i.app?.name || 'an app'}`,
         timestamp: i.created_at,
         icon: 'Lightbulb'
+      })),
+      ...(tasks.data || []).map(t => ({
+        id: t.id,
+        type: 'task',
+        description: `Completed task: ${t.task?.title || 'a task'} for ${t.task?.app?.name || 'an app'}`,
+        timestamp: t.completed_at,
+        icon: 'CheckCircle2'
       }))
     ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 15);
 

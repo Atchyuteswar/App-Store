@@ -1,12 +1,25 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { 
   Bell,
   Award,
   Globe,
   CheckCircle2,
   Share2,
   Copy,
-  ExternalLink
+  ExternalLink,
+  User,
+  Smartphone,
+  Mail,
+  Lock,
+  ShieldAlert,
+  LogOut,
+  Check,
+  Loader2,
+  Bug,
+  Lightbulb,
+  MessageSquare,
+  Activity
 } from "lucide-react";
 import { 
   updateTesterProfile, 
@@ -16,6 +29,11 @@ import {
   updateTesterProfileSettings,
   checkUsernameAvailability
 } from "@/services/api";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +85,7 @@ export default function TesterProfile() {
     prefsNewReleases: user?.prefsNewReleases ?? true,
     prefsBugUpdates: user?.prefsBugUpdates ?? true,
     prefsIdeaUpdates: user?.prefsIdeaUpdates ?? true,
-    prefsWeeklyDigest: user?.prefsWeeklyDigest ?? false,
+    emailNotifyDigest: user?.emailNotifyDigest ?? false,
     username: user?.username || "",
     profilePublic: user?.profilePublic ?? false,
   });
@@ -153,7 +171,6 @@ export default function TesterProfile() {
             <Badge className="bg-green-600">BETA TESTER</Badge>
             <Badge variant="outline" className="border-primary/20 text-primary">ID: {user?.id?.slice(0, 8)}</Badge>
           </div>
-        </div>
         </div>
         <div className="flex flex-col gap-2 md:absolute top-8 right-8">
           {profileData.profilePublic && profileData.username && (
@@ -250,7 +267,7 @@ export default function TesterProfile() {
                 { id: "new", label: "New Version Releases", desc: "Alert me when a joined app is updated", key: "prefsNewReleases" },
                 { id: "bug", label: "Bug Status Updates", desc: "Alert me when my bug report changes state", key: "prefsBugUpdates" },
                 { id: "idea", label: "Idea Progression", desc: "Alert me when my idea is planned or implemented", key: "prefsIdeaUpdates" },
-                { id: "weekly", label: "Weekly Digest", desc: "Receive a summary of testing activity", key: "prefsWeeklyDigest" },
+                { id: "weekly", label: "Weekly Digest", desc: "Receive a summary of testing activity", key: "emailNotifyDigest" },
               ].map((pref) => (
                 <div key={pref.id} className="flex items-center justify-between gap-4">
                   <div className="space-y-0.5">
@@ -261,8 +278,12 @@ export default function TesterProfile() {
                     checked={profileData[pref.key]}
                     onCheckedChange={(checked) => {
                       const newPrefs = { ...profileData, [pref.key]: checked };
-                      setProfileData(newPrefs);
-                      updateTesterProfile(newPrefs); // Auto-save for UX
+                      if (pref.key === 'emailNotifyDigest') {
+                        handleUpdateSettings(newPrefs);
+                      } else {
+                        setProfileData(newPrefs);
+                        updateTesterProfile(newPrefs);
+                      }
                     }}
                   />
                 </div>

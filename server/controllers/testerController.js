@@ -424,27 +424,56 @@ exports.getStats = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [enrollCount, bugCount, ideaCount, activityRes] = await Promise.all([
+    const [enrollCount, bugCount, ideaCount] = await Promise.all([
       supabase.from('ab_test_enrollments').select('id', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-      // Use the logic from getActivity to find the streak
-      supabase.from('tester_messages').select('created_at').eq('user_id', userId).order('created_at', { ascending: false })
+      supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', userId)
     ]);
 
-    // Simple streak calculation (mocked for now but based on recent messages)
-    // In a real app, you'd aggregate all tables and find continuous days
     const totalActions = (enrollCount.count || 0) + (bugCount.count || 0) + (ideaCount.count || 0);
+
+    // --- Real Streak Calculation ---
+    const [msgsDates, bugsDates, ideasDates] = await Promise.all([
+      supabase.from('tester_messages').select('created_at').eq('user_id', userId),
+      supabase.from('tester_bugs').select('created_at').eq('user_id', userId),
+      supabase.from('tester_ideas').select('created_at').eq('user_id', userId)
+    ]);
+
+    const allDates = [
+      ...(msgsDates.data || []),
+      ...(bugsDates.data || []),
+      ...(ideasDates.data || [])
+    ].map(item => item.created_at.split('T')[0]);
+
+    const uniqueSortedDates = [...new Set(allDates)].sort((a, b) => new Date(b) - new Date(a));
     
-    // Streak logic: check consecutive days in activity
-    // For simplicity, we'll return a placeholder for streak if they have recent activity
-    const activityStreak = totalActions > 0 ? 5 : 0; // TODO: Implement real streak logic
+    let activityStreak = 0;
+    if (uniqueSortedDates.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      
+      let current = uniqueSortedDates[0];
+      if (current === today || current === yesterday) {
+        activityStreak = 1;
+        for (let i = 0; i < uniqueSortedDates.length - 1; i++) {
+          const d1 = new Date(uniqueSortedDates[i]);
+          const d2 = new Date(uniqueSortedDates[i+1]);
+          const diffDays = Math.ceil((d1 - d2) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            activityStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
 
     res.json({
       totalEnrollments: enrollCount.count || 0,
       totalBugs: bugCount.count || 0,
       totalIdeas: ideaCount.count || 0,
-      totalMessages: 0, // Placeholder
+      totalMessages: msgsDates.data?.length || 0,
       activityStreak,
       testerLevel: Math.floor(totalActions / 10) + 1,
       totalActions

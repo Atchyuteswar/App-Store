@@ -34,7 +34,7 @@ export default function ActivityCalendar() {
         getTesterActivity(),
         getTesterStats()
       ]);
-      setActivityData(activityRes.data || []);
+      setActivityData(activityRes.data?.heatmap || []);
       setStats(statsRes.data);
     } catch (err) {
       console.error(err);

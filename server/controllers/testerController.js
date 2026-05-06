@@ -230,51 +230,40 @@ exports.addIdea = async (req, res) => {
   }
 };
 
-// ─── ACTIVITY CALENDAR ──────────────────────────────────
+// ─── ACTIVITY & FEED ────────────────────────────────────
 exports.getActivity = async (req, res) => {
   try {
     const userId = req.user.id;
-    // Calculate date exactly 365 days ago
     const aYearAgo = new Date();
     aYearAgo.setDate(aYearAgo.getDate() - 365);
     const dateLimit = aYearAgo.toISOString();
 
-    // Fetch from all three tables
+    // Fetch detailed records
     const [msgs, bugs, ideas] = await Promise.all([
-      supabase.from('tester_messages').select('created_at').eq('user_id', userId).gte('created_at', dateLimit),
-      supabase.from('tester_bugs').select('created_at').eq('user_id', userId).gte('created_at', dateLimit),
-      supabase.from('tester_ideas').select('created_at').eq('user_id', userId).gte('created_at', dateLimit)
+      supabase.from('tester_messages').select('id, created_at, message, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10),
+      supabase.from('tester_bugs').select('id, created_at, title, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10),
+      supabase.from('tester_ideas').select('id, created_at, title, app:apps(name)').eq('user_id', userId).gte('created_at', dateLimit).order('created_at', { ascending: false }).limit(10)
     ]);
 
-    const allDates = [
-      ...(msgs.data || []),
-      ...(bugs.data || []),
-      ...(ideas.data || [])
-    ].map(item => item.created_at.split('T')[0]); // Extract just YYYY-MM-DD
+    // 1. Heatmap Logic (Aggregate all dates)
+    const allActivityDates = [
+      ...(msgs.data || []).map(m => m.created_at.split('T')[0]),
+      ...(bugs.data || []).map(b => b.created_at.split('T')[0]),
+      ...(ideas.data || []).map(i => i.created_at.split('T')[0])
+    ];
 
-    // Count by date
-    const countsByDate = allDates.reduce((acc, date) => {
+    const countsByDate = allActivityDates.reduce((acc, date) => {
       acc[date] = (acc[date] || 0) + 1;
       return acc;
     }, {});
 
-    // Always include today's date even if 0, so the calendar anchors properly
     const today = new Date().toISOString().split('T')[0];
-    if (countsByDate[today] === undefined) {
-      countsByDate[today] = 0;
-    }
+    if (countsByDate[today] === undefined) countsByDate[today] = 0;
 
-    // Determine max count for leveling
-    let maxCount = 0;
-    for (const count of Object.values(countsByDate)) {
-      if (count > maxCount) maxCount = count;
-    }
-
-    // Function to calculate level (0-4) based on relative activity
+    let maxCount = Math.max(...Object.values(countsByDate), 0);
     const getLevel = (count) => {
       if (count === 0) return 0;
-      if (maxCount <= 4) return count; // If low overall activity, 1:1 mapping up to 4
-      
+      if (maxCount <= 4) return count;
       const ratio = count / maxCount;
       if (ratio <= 0.25) return 1;
       if (ratio <= 0.5) return 2;
@@ -282,16 +271,38 @@ exports.getActivity = async (req, res) => {
       return 4;
     };
 
-    const activityData = Object.keys(countsByDate).map(date => ({
+    const heatmap = Object.keys(countsByDate).map(date => ({
       date,
       count: countsByDate[date],
       level: getLevel(countsByDate[date])
-    }));
+    })).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Sort by date ascending
-    activityData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    // 2. Recent Feed Logic
+    const recent = [
+      ...(msgs.data || []).map(m => ({
+        id: m.id,
+        type: 'message',
+        description: `Sent a message in ${m.app?.name || 'an app'}`,
+        timestamp: m.created_at,
+        icon: 'MessageSquare'
+      })),
+      ...(bugs.data || []).map(b => ({
+        id: b.id,
+        type: 'bug',
+        description: `Reported bug: ${b.title} in ${b.app?.name || 'an app'}`,
+        timestamp: b.created_at,
+        icon: 'Bug'
+      })),
+      ...(ideas.data || []).map(i => ({
+        id: i.id,
+        type: 'idea',
+        description: `Suggested idea: ${i.title} for ${i.app?.name || 'an app'}`,
+        timestamp: i.created_at,
+        icon: 'Lightbulb'
+      }))
+    ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 15);
 
-    res.json(activityData);
+    res.json({ heatmap, recent });
   } catch (err) {
     console.error('getActivity error:', err);
     res.status(500).json({ message: 'Server error generating activity' });

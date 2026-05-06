@@ -26,7 +26,7 @@ import { formatDistanceToNow } from "date-fns";
 export default function TesterOverview() {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
-  const [activityData, setActivityData] = useState([]);
+  const [activityFeed, setActivityFeed] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function TesterOverview() {
         getTesterStats()
       ]);
       setEnrollments(enrollRes.data || []);
-      setActivityData(activityRes.data || []);
+      setActivityFeed(activityRes.data?.recent || []);
       setNotifications(notifyRes.data || []);
       setStatsData(statsRes.data);
     } catch (err) {
@@ -176,39 +176,36 @@ export default function TesterOverview() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
-              {/* Mock Activity for UI Demo */}
-              {[
-                { type: 'bug', title: 'Critical Crash on Login', app: 'Volt Messenger', time: new Date(Date.now() - 1000 * 60 * 45) },
-                { type: 'message', title: 'Replied to admin inquiry', app: 'Volt Messenger', time: new Date(Date.now() - 1000 * 60 * 60 * 3) },
-                { type: 'download', title: 'Downloaded v2.1.0', app: 'CareerLink', time: new Date(Date.now() - 1000 * 60 * 60 * 24) },
-                { type: 'idea', title: 'Dark mode refinement', app: 'Portfolix', time: new Date(Date.now() - 1000 * 60 * 60 * 48) },
-              ].map((act, i) => (
-                <div key={i} className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors">
-                  <div className={cn(
-                    "p-2.5 rounded-full",
-                    act.type === 'bug' ? "bg-red-500/10 text-red-500" :
-                    act.type === 'message' ? "bg-blue-500/10 text-blue-500" :
-                    act.type === 'idea' ? "bg-amber-500/10 text-amber-500" :
-                    "bg-green-500/10 text-green-500"
-                  )}>
-                    {act.type === 'bug' && <Bug className="h-4 w-4" />}
-                    {act.type === 'message' && <MessageSquare className="h-4 w-4" />}
-                    {act.type === 'idea' && <Lightbulb className="h-4 w-4" />}
-                    {act.type === 'download' && <Package className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold truncate">{act.title}</p>
-                      <span className="text-[10px] font-medium text-muted-foreground shrink-0 uppercase tracking-wider">
-                        {formatDistanceToNow(act.time, { addSuffix: true })}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                      {act.app} <ChevronRight className="h-3 w-3" />
-                    </p>
-                  </div>
+              {activityFeed.length === 0 ? (
+                <div className="py-12 flex flex-col items-center justify-center text-center opacity-30">
+                  <Clock className="h-10 w-10 mb-2" />
+                  <p className="text-xs font-bold uppercase tracking-widest">No activity yet</p>
                 </div>
-              ))}
+              ) : (
+                activityFeed.map((act) => (
+                  <div key={act.id} className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors group">
+                    <div className={cn(
+                      "p-2.5 rounded-full transition-transform group-hover:scale-110",
+                      act.type === 'bug' ? "bg-red-500/10 text-red-500" :
+                      act.type === 'message' ? "bg-blue-500/10 text-blue-500" :
+                      act.type === 'idea' ? "bg-amber-500/10 text-amber-500" :
+                      "bg-green-500/10 text-green-500"
+                    )}>
+                      {act.type === 'bug' && <Bug className="h-4 w-4" />}
+                      {act.type === 'message' && <MessageSquare className="h-4 w-4" />}
+                      {act.type === 'idea' && <Lightbulb className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-semibold truncate leading-tight">{act.description}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground shrink-0 uppercase tracking-tighter">
+                          {formatDistanceToNow(new Date(act.timestamp), { addSuffix: true })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
             <div className="p-4 border-t bg-muted/5 text-center">
               <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" asChild>

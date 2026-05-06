@@ -63,19 +63,19 @@ export default function PublicProfile() {
   return (
     <div className="min-h-screen bg-background pb-32 animate-in fade-in duration-1000">
       {/* Hero Header */}
-      <div className="h-[45vh] bg-gradient-to-br from-primary via-primary/90 to-primary/80 relative overflow-hidden">
+      <div className="h-[35vh] md:h-[45vh] bg-gradient-to-br from-primary via-primary/90 to-primary/80 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         
-        <div className="max-w-5xl mx-auto px-6 h-full flex flex-col items-center justify-end relative z-10 pb-28">
-          <Avatar className="h-32 w-32 md:h-40 md:w-40 border-8 border-background/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] mb-6 ring-1 ring-white/10 shrink-0">
+        <div className="max-w-5xl mx-auto px-6 h-full flex flex-col items-center justify-end relative z-10 pb-16 md:pb-28">
+          <Avatar className="h-24 w-24 md:h-40 md:w-40 border-8 border-background/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] mb-6 ring-1 ring-white/10 shrink-0">
             <AvatarImage src={user.profile_image} className="object-cover" />
-            <AvatarFallback className="text-5xl font-black bg-muted text-primary">
+            <AvatarFallback className="text-3xl md:text-5xl font-black bg-muted text-primary">
               {(user.display_name?.charAt(0) || user.username?.charAt(0) || "?").toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="text-center space-y-2">
-            <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tight drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tight drop-shadow-lg capitalize">
               {user.display_name || user.username}
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4">

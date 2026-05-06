@@ -21,8 +21,13 @@ export function AuthProvider({ children }) {
 
     try {
       const { data } = await getMe();
-      if (data.admin) setAdmin(data.admin);
-      if (data.user) setUser(data.user);
+      if (data.role === 'admin') {
+        setAdmin(data);
+        setUser(null);
+      } else {
+        setUser(data);
+        setAdmin(null);
+      }
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
         localStorage.removeItem('token');
@@ -39,7 +44,7 @@ export function AuthProvider({ children }) {
     if (data.token) {
       localStorage.setItem('token', data.token);
     }
-    setAdmin(data.admin);
+    setAdmin(data.user);
     return data;
   };
 

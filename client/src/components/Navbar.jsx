@@ -35,16 +35,16 @@ export default function Navbar({ onSearch, searchValue }) {
         </Link>
 
         {/* Play Store Styled Search */}
-        <div className="flex-1 max-w-2xl px-2 sm:px-4">
+        <div className="flex-1 max-w-2xl px-1 sm:px-4">
           <div className="relative group">
             <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Search className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
             </div>
             <Input
-              placeholder="Search apps..."
+              placeholder="Search..."
               value={searchValue || ""}
               onChange={(e) => onSearch?.(e.target.value)}
-              className="w-full h-10 sm:h-12 pl-10 sm:pl-12 pr-4 rounded-full border-none bg-secondary/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary transition-all text-sm"
+              className="w-full h-9 sm:h-12 pl-8 sm:pl-12 pr-4 rounded-full border-none bg-secondary/50 focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary transition-all text-xs sm:text-sm"
             />
           </div>
         </div>

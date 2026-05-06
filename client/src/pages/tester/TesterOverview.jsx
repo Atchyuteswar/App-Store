@@ -71,8 +71,8 @@ export default function TesterOverview() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, {user?.username}. Here's what's happening in your testing community.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-1">Welcome back, <span className="capitalize text-foreground">{user?.username}</span>. Here's what's happening in your testing community.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">

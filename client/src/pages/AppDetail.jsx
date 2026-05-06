@@ -188,12 +188,12 @@ export default function AppDetail() {
                       </CarouselItem>
                     )}
                     {/* Screenshots */}
-                    {app.screenshots && app.screenshots.map((ss, i) => (
+                    {app.screenshots && app.screenshots.filter(ss => ss && typeof ss === 'string').map((ss, i) => (
                       <CarouselItem key={i} className="pl-4 basis-[70%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                         <img
                           src={getFileUrl(ss)}
                           alt={`Screenshot ${i + 1}`}
-                          className="rounded-2xl border shadow-xl cursor-pointer hover:scale-[1.02] transition-transform object-cover aspect-[9/16] w-full"
+                          className="rounded-2xl border shadow-xl cursor-pointer hover:scale-[1.02] transition-all object-cover aspect-[9/16] w-full"
                           onClick={() => setLightboxImg(getFileUrl(ss))}
                         />
                       </CarouselItem>

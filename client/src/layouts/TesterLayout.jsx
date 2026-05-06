@@ -182,17 +182,6 @@ export default function TesterLayout() {
               </div>
               <div className="mx-2 h-4 w-[1px] bg-border hidden md:flex" aria-hidden="true" />
               
-              {/* Search Trigger */}
-              <button 
-                onClick={() => setIsSearchOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted transition-colors ml-2 mr-auto md:mr-0 group"
-              >
-                <Search className="h-3.5 w-3.5 group-hover:text-primary transition-colors" />
-                <span className="text-xs hidden sm:inline">Search...</span>
-                <kbd className="hidden md:inline-flex h-4 items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100">
-                  <span className="text-xs">⌘</span>K
-                </kbd>
-              </button>
               <Breadcrumb className="hidden sm:flex">
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -273,9 +262,9 @@ export default function TesterLayout() {
       {/* Floating Action Button for Crash Reporting */}
       <Button
         onClick={() => setIsCrashModalOpen(true)}
-        className="fixed bottom-20 md:bottom-8 right-6 h-12 w-12 rounded-full shadow-2xl bg-red-600 hover:bg-red-700 text-white p-0 z-40 group"
+        className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-2xl bg-red-600 hover:bg-red-700 text-white p-0 z-40 group"
       >
-        <Bug className="h-6 w-6 group-hover:scale-110 transition-transform" />
+        <Bug className="h-7 w-7 group-hover:scale-110 transition-transform" />
         <span className="absolute right-full mr-3 px-2 py-1 rounded bg-red-600 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
           Report Crash
         </span>

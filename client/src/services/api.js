@@ -73,6 +73,13 @@ export const addTesterBug = (slug, data) => api.post(`/tester/apps/${slug}/bugs`
 
 export const getTesterIdeas = (slug) => api.get(`/tester/apps/${slug}/ideas`);
 export const addTesterIdea = (slug, data) => api.post(`/tester/apps/${slug}/ideas`, data);
+export const upvoteTesterIdea = (ideaId) => api.post(`/tester/ideas/${ideaId}/upvote`);
+
+export const getTesterNotifications = () => api.get('/tester/notifications');
+export const markTesterNotificationRead = (id) => api.patch(`/tester/notifications/${id}/read`);
+
+export const updateTesterProfile = (data) => api.put('/tester/profile', data);
+export const unenrollTesterApp = (appId) => api.delete(`/tester/enrollments/${appId}`);
 
 export const getFileUrl = (url) => {
   if (!url) return "";

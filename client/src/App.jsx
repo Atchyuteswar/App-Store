@@ -9,8 +9,13 @@ import UserAuth from "@/pages/UserAuth";
 import Profile from "@/pages/Profile";
 import TesterLayout from "@/layouts/TesterLayout";
 import TesterOverview from "@/pages/tester/TesterOverview";
-import ActiveTests from "@/pages/tester/ActiveTests";
-import TestingHub from "@/pages/tester/TestingHub";
+import MyAppList from "@/pages/tester/MyAppList";
+import BugTracker from "@/pages/tester/BugTracker";
+import IdeaBoard from "@/pages/tester/IdeaBoard";
+import MessageCenter from "@/pages/tester/MessageCenter";
+import ActivityCalendar from "@/pages/tester/ActivityCalendar";
+import NotificationCenter from "@/pages/tester/NotificationCenter";
+import TesterProfile from "@/pages/tester/TesterProfile";
 
 export default function App() {
   return (
@@ -24,10 +29,15 @@ export default function App() {
           
           {/* Tester Nested Routes */}
           <Route path="/tester" element={<TesterLayout />}>
+            <Route index element={<Navigate to="/tester/dashboard" replace />} />
             <Route path="dashboard" element={<TesterOverview />} />
-            <Route path="active" element={<ActiveTests />} />
-            <Route path="apps/:slug" element={<TestingHub />} />
-            <Route path="settings" element={<div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-xl">Tester settings coming soon</div>} />
+            <Route path="apps" element={<MyAppList />} />
+            <Route path="bugs" element={<BugTracker />} />
+            <Route path="ideas" element={<IdeaBoard />} />
+            <Route path="messages" element={<MessageCenter />} />
+            <Route path="activity" element={<ActivityCalendar />} />
+            <Route path="notifications" element={<NotificationCenter />} />
+            <Route path="profile" element={<TesterProfile />} />
           </Route>
           
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -38,3 +48,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+import { Navigate } from "react-router-dom";

@@ -119,3 +119,52 @@ CREATE TABLE IF NOT EXISTS tester_ideas (
   description TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- ============================================
+-- 2026-05-06: Tester Dashboard Extensions
+-- ============================================
+
+-- Add version_history to apps
+ALTER TABLE apps ADD COLUMN IF NOT EXISTS version_history JSONB DEFAULT '[]';
+
+-- Enhance Users with profile/device info
+ALTER TABLE users 
+  ADD COLUMN IF NOT EXISTS device_model TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS manufacturer TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS os_version TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS prefs_new_releases BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS prefs_bug_updates BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS prefs_idea_updates BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS prefs_weekly_digest BOOLEAN DEFAULT false;
+
+-- Enhance Tester Bugs
+ALTER TABLE tester_bugs 
+  ADD COLUMN IF NOT EXISTS steps TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS severity TEXT DEFAULT 'medium',
+  ADD COLUMN IF NOT EXISTS attachments TEXT[] DEFAULT '{}';
+
+-- Enhance Tester Ideas
+ALTER TABLE tester_ideas 
+  ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'feature',
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'submitted';
+
+-- Tester Idea Upvotes
+CREATE TABLE IF NOT EXISTS tester_idea_upvotes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  idea_id UUID REFERENCES tester_ideas(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(idea_id, user_id)
+);
+
+-- Notifications
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- version_release, bug_update, message_reply, idea_update, broadcast
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  data JSONB DEFAULT '{}',
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);

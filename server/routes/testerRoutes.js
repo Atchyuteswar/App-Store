@@ -18,5 +18,12 @@ router.post('/apps/:slug/bugs', testerController.addBug);
 
 router.get('/apps/:slug/ideas', testerController.getIdeas);
 router.post('/apps/:slug/ideas', testerController.addIdea);
+router.post('/ideas/:ideaId/upvote', testerController.upvoteIdea);
+
+router.get('/notifications', testerController.getNotifications);
+router.patch('/notifications/:id/read', testerController.markNotificationRead);
+
+router.put('/profile', testerController.updateProfile);
+router.delete('/enrollments/:appId', testerController.unenrollApp);
 
 module.exports = router;

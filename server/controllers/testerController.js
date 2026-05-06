@@ -100,9 +100,13 @@ exports.getBugs = async (req, res) => {
         id,
         title,
         description,
+        severity,
+        steps,
+        attachments,
         status,
         created_at,
-        user:users ( username )
+        user:users ( username ),
+        app:apps ( name, slug )
       `)
       .eq('app_id', app.id)
       .order('created_at', { ascending: false });
@@ -118,7 +122,7 @@ exports.getBugs = async (req, res) => {
 exports.addBug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { title, description } = req.body;
+    const { title, description, severity, steps, attachments } = req.body;
     if (!title || !description) return res.status(400).json({ message: 'Title and description required' });
 
     const { data: app } = await supabase.from('apps').select('id').eq('slug', slug).single();
@@ -131,12 +135,18 @@ exports.addBug = async (req, res) => {
         user_id: req.user.id,
         title,
         description,
+        severity: severity || 'medium',
+        steps: steps || '',
+        attachments: attachments || [],
         status: 'open'
       })
       .select(`
         id,
         title,
         description,
+        severity,
+        steps,
+        attachments,
         status,
         created_at,
         user:users ( username )
@@ -164,8 +174,12 @@ exports.getIdeas = async (req, res) => {
         id,
         title,
         description,
+        category,
+        status,
         created_at,
-        user:users ( username )
+        user:users ( username ),
+        app:apps ( name, slug ),
+        upvotes:tester_idea_upvotes( count )
       `)
       .eq('app_id', app.id)
       .order('created_at', { ascending: false });
@@ -181,7 +195,7 @@ exports.getIdeas = async (req, res) => {
 exports.addIdea = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { title, description } = req.body;
+    const { title, description, category } = req.body;
     if (!title || !description) return res.status(400).json({ message: 'Title and description required' });
 
     const { data: app } = await supabase.from('apps').select('id').eq('slug', slug).single();
@@ -193,12 +207,16 @@ exports.addIdea = async (req, res) => {
         app_id: app.id,
         user_id: req.user.id,
         title,
-        description
+        description,
+        category: category || 'feature',
+        status: 'submitted'
       })
       .select(`
         id,
         title,
         description,
+        category,
+        status,
         created_at,
         user:users ( username )
       `)
@@ -277,5 +295,116 @@ exports.getActivity = async (req, res) => {
   } catch (err) {
     console.error('getActivity error:', err);
     res.status(500).json({ message: 'Server error generating activity' });
+  }
+};
+
+// --- UPVOTES -------------------------------------------
+exports.upvoteIdea = async (req, res) => {
+  try {
+    const { ideaId } = req.params;
+    
+    const { data: existing } = await supabase
+      .from('tester_idea_upvotes')
+      .select('id')
+      .eq('idea_id', ideaId)
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (existing) {
+      await supabase.from('tester_idea_upvotes').delete().eq('id', existing.id);
+      return res.json({ upvoted: false });
+    }
+
+    const { error } = await supabase.from('tester_idea_upvotes').insert({
+      idea_id: ideaId,
+      user_id: req.user.id
+    });
+
+    if (error) throw error;
+    res.json({ upvoted: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error upvoting' });
+  }
+};
+
+// --- NOTIFICATIONS -------------------------------------
+exports.getNotifications = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.markNotificationRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', id)
+      .eq('user_id', req.user.id);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- PROFILE -------------------------------------------
+exports.updateProfile = async (req, res) => {
+  try {
+    const { deviceModel, manufacturer, osVersion, prefsNewReleases, prefsBugUpdates, prefsIdeaUpdates, prefsWeeklyDigest } = req.body;
+    
+    const updates = {};
+    if (deviceModel !== undefined) updates.device_model = deviceModel;
+    if (manufacturer !== undefined) updates.manufacturer = manufacturer;
+    if (osVersion !== undefined) updates.os_version = osVersion;
+    if (prefsNewReleases !== undefined) updates.prefs_new_releases = prefsNewReleases;
+    if (prefsBugUpdates !== undefined) updates.prefs_bug_updates = prefsBugUpdates;
+    if (prefsIdeaUpdates !== undefined) updates.prefs_idea_updates = prefsIdeaUpdates;
+    if (prefsWeeklyDigest !== undefined) updates.prefs_weekly_digest = prefsWeeklyDigest;
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', req.user.id)
+      .select('id, username, email, device_model, manufacturer, os_version, prefs_new_releases, prefs_bug_updates, prefs_idea_updates, prefs_weekly_digest')
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error updating profile' });
+  }
+};
+
+// --- UNENROLL ------------------------------------------
+exports.unenrollApp = async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const { error } = await supabase
+      .from('ab_test_enrollments')
+      .delete()
+      .eq('app_id', appId)
+      .eq('user_id', req.user.id);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error unenrolling' });
   }
 };

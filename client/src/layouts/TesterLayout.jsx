@@ -13,8 +13,18 @@ import {
   Bell, 
   User,
   MoreHorizontal,
-  ChevronRight
+  ChevronRight,
+  ListTodo,
+  History,
+  BarChart2,
+  Trophy,
+  Search,
+  Zap
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import SearchModal from "@/components/tester/SearchModal";
+import CrashReportModal from "@/components/tester/CrashReportModal";
+import { getTesterTasks, getTesterPolls } from "@/services/api";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -48,9 +58,13 @@ import {
 const navItems = [
   { title: "Overview", icon: LayoutDashboard, path: "/tester/dashboard" },
   { title: "My Apps", icon: Package, path: "/tester/apps" },
+  { title: "Tasks", icon: ListTodo, path: "/tester/tasks", badgeKey: 'tasks' },
+  { title: "Timeline", icon: History, path: "/tester/timeline" },
   { title: "Bug Reports", icon: Bug, path: "/tester/bugs" },
   { title: "Ideas", icon: Lightbulb, path: "/tester/ideas" },
+  { title: "Polls", icon: BarChart2, path: "/tester/polls", badgeKey: 'polls' },
   { title: "Messages", icon: MessageSquare, path: "/tester/messages" },
+  { title: "Leaderboard", icon: Trophy, path: "/tester/leaderboard" },
   { title: "Activity", icon: Calendar, path: "/tester/activity" },
   { title: "Notifications", icon: Bell, path: "/tester/notifications" },
   { title: "Profile", icon: User, path: "/tester/profile" },
@@ -61,12 +75,44 @@ export default function TesterLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCrashModalOpen, setIsCrashModalOpen] = useState(false);
+  const [badges, setBadges] = useState({ tasks: 0, polls: 0 });
 
   useEffect(() => {
     if (!loading && (!isAuthenticated || !user)) {
       navigate("/login", { replace: true });
     }
   }, [loading, isAuthenticated, user, navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchBadges();
+    }
+
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAuthenticated]);
+
+  const fetchBadges = async () => {
+    try {
+      const [tasksRes, pollsRes] = await Promise.all([
+        getTesterTasks(),
+        getTesterPolls()
+      ]);
+      const pendingTasks = (tasksRes.data || []).filter(t => !t.isCompleted).length;
+      const unansweredPolls = (pollsRes.data || []).filter(p => !p.hasResponded).length;
+      setBadges({ tasks: pendingTasks, polls: unansweredPolls });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
@@ -108,6 +154,11 @@ export default function TesterLayout() {
                           <Link to={item.path}>
                             <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
+                            {item.badgeKey && badges[item.badgeKey] > 0 && (
+                              <Badge className="ml-auto bg-primary text-primary-foreground text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full">
+                                {badges[item.badgeKey]}
+                              </Badge>
+                            )}
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -129,6 +180,18 @@ export default function TesterLayout() {
                 <span className="font-bold">Tester Hub</span>
               </div>
               <div className="mx-2 h-4 w-[1px] bg-border hidden md:flex" aria-hidden="true" />
+              
+              {/* Search Trigger */}
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted transition-colors ml-2 mr-auto md:mr-0 group"
+              >
+                <Search className="h-3.5 w-3.5 group-hover:text-primary transition-colors" />
+                <span className="text-xs hidden sm:inline">Search...</span>
+                <kbd className="hidden md:inline-flex h-4 items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100">
+                  <span className="text-xs">⌘</span>K
+                </kbd>
+              </button>
               <Breadcrumb className="hidden sm:flex">
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -202,6 +265,20 @@ export default function TesterLayout() {
           </DropdownMenuContent>
         </DropdownMenu>
       </nav>
+
+      <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
+      <CrashReportModal open={isCrashModalOpen} onOpenChange={setIsCrashModalOpen} />
+
+      {/* Floating Action Button for Crash Reporting */}
+      <Button
+        onClick={() => setIsCrashModalOpen(true)}
+        className="fixed bottom-20 md:bottom-8 right-6 h-12 w-12 rounded-full shadow-2xl bg-red-600 hover:bg-red-700 text-white p-0 z-40 group"
+      >
+        <Bug className="h-6 w-6 group-hover:scale-110 transition-transform" />
+        <span className="absolute right-full mr-3 px-2 py-1 rounded bg-red-600 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          Report Crash
+        </span>
+      </Button>
     </div>
   );
 }

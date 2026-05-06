@@ -80,7 +80,45 @@ export const getTesterNotifications = () => api.get('/tester/notifications');
 export const markTesterNotificationRead = (id) => api.patch(`/tester/notifications/${id}/read`);
 
 export const updateTesterProfile = (data) => api.put('/tester/profile', data);
+export const updateTesterProfileSettings = (data) => api.put('/tester/profile/settings', data);
 export const unenrollTesterApp = (appId) => api.delete(`/tester/enrollments/${appId}`);
+
+// Tasks (New)
+export const getTesterTasks = () => api.get('/tester/tasks');
+export const completeTesterTask = (taskId, notes) => api.post(`/tester/tasks/${taskId}/complete`, { notes });
+export const uncompleteTesterTask = (taskId) => api.delete(`/tester/tasks/${taskId}/uncomplete`);
+
+// Timeline (New)
+export const getTesterTimeline = () => api.get('/tester/timeline');
+
+// Crashes (New)
+export const reportTesterCrash = (data) => api.post('/tester/crashes', data);
+
+// Ratings (New)
+export const getAppRatings = (slug) => api.get(`/tester/apps/${slug}/ratings`);
+export const addAppRating = (slug, data) => api.post(`/tester/apps/${slug}/ratings`, data);
+
+// Polls (New)
+export const getTesterPolls = () => api.get('/tester/polls');
+export const respondToPoll = (pollId, data) => api.post(`/tester/polls/${pollId}/respond`, data);
+export const getPollResults = (pollId) => api.get(`/tester/polls/${pollId}/results`);
+
+// Achievements (New)
+export const getTesterAchievements = () => api.get('/tester/achievements');
+
+// Leaderboard (New)
+export const getTesterLeaderboard = (appId) => api.get('/tester/leaderboard', { params: { appId } });
+
+// Search (New)
+export const globalSearch = (q) => api.get('/tester/search', { params: { q } });
+
+// Onboarding (New)
+export const getTesterOnboarding = () => api.get('/tester/onboarding');
+export const dismissTesterOnboarding = () => api.put('/tester/onboarding/dismiss');
+
+// Public Profile (New)
+export const checkUsernameAvailability = (username) => api.get(`/tester/check-username/${username}`);
+export const getPublicProfile = (username) => api.get(`/tester/profile/${username}`);
 
 export const getFileUrl = (url) => {
   if (!url) return "";

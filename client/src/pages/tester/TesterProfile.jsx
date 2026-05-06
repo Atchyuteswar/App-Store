@@ -1,26 +1,21 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { updateTesterProfile, getTesterStats, getTesterEnrollments } from "@/services/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { 
-  User, 
-  Smartphone, 
-  Mail, 
-  Lock, 
-  ShieldAlert, 
-  LogOut, 
-  Check, 
-  Loader2,
-  Bug,
-  Lightbulb,
-  MessageSquare,
-  Activity,
-  Bell
+  Bell,
+  Award,
+  Globe,
+  CheckCircle2,
+  Share2,
+  Copy,
+  ExternalLink
 } from "lucide-react";
+import { 
+  updateTesterProfile, 
+  getTesterStats, 
+  getTesterEnrollments, 
+  getTesterAchievements,
+  updateTesterProfileSettings,
+  checkUsernameAvailability
+} from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +25,22 @@ export default function TesterProfile() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [enrollments, setEnrollments] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [usernameStatus, setUsernameStatus] = useState("idle"); // idle, checking, available, taken
+  
+  useEffect(() => {
+    fetchStats();
+    fetchAchievements();
+  }, []);
+
+  const fetchAchievements = async () => {
+    try {
+      const { data } = await getTesterAchievements();
+      setAchievements(data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   
   useEffect(() => {
     fetchStats();
@@ -57,6 +68,8 @@ export default function TesterProfile() {
     prefsBugUpdates: user?.prefsBugUpdates ?? true,
     prefsIdeaUpdates: user?.prefsIdeaUpdates ?? true,
     prefsWeeklyDigest: user?.prefsWeeklyDigest ?? false,
+    username: user?.username || "",
+    profilePublic: user?.profilePublic ?? false,
   });
 
   // Password State
@@ -77,6 +90,36 @@ export default function TesterProfile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateSettings = async (newData) => {
+    try {
+      setProfileData(newData);
+      await updateTesterProfileSettings(newData);
+      toast({ title: "Settings Saved" });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to update settings.", variant: "destructive" });
+    }
+  };
+
+  const handleCheckUsername = async (name) => {
+    if (name.length < 3) {
+      setUsernameStatus("idle");
+      return;
+    }
+    setUsernameStatus("checking");
+    try {
+      const { data } = await checkUsernameAvailability(name);
+      setUsernameStatus(data.available ? "available" : "taken");
+    } catch (err) {
+      setUsernameStatus("idle");
+    }
+  };
+
+  const copyProfileLink = () => {
+    const url = `${window.location.origin}/t/${profileData.username}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Link Copied!", description: "Share your profile with others." });
   };
 
   const handlePasswordChange = async (e) => {
@@ -111,9 +154,17 @@ export default function TesterProfile() {
             <Badge variant="outline" className="border-primary/20 text-primary">ID: {user?.id?.slice(0, 8)}</Badge>
           </div>
         </div>
-        <Button variant="ghost" className="md:absolute top-8 right-8 text-red-500 hover:text-red-600 hover:bg-red-50 gap-2" onClick={logout}>
-          <LogOut className="h-4 w-4" /> Sign Out
-        </Button>
+        </div>
+        <div className="flex flex-col gap-2 md:absolute top-8 right-8">
+          {profileData.profilePublic && profileData.username && (
+            <Button variant="outline" className="gap-2" onClick={() => window.open(`/t/${profileData.username}`, '_blank')}>
+              <ExternalLink className="h-4 w-4" /> View Public Profile
+            </Button>
+          )}
+          <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2" onClick={logout}>
+            <LogOut className="h-4 w-4" /> Sign Out
+          </Button>
+        </div>
       </div>
 
       {/* Tester Stats Summary */}
@@ -225,7 +276,112 @@ export default function TesterProfile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Public Profile & Identity */}
+        <Card className="border-none shadow-xl bg-card/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              Public Identity
+            </CardTitle>
+            <CardDescription>Customize how you appear to the community.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="username">Public Username</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input 
+                    id="username" 
+                    placeholder="e.g. atchyut_tester" 
+                    value={profileData.username}
+                    onChange={e => {
+                      setProfileData({...profileData, username: e.target.value});
+                      handleCheckUsername(e.target.value);
+                    }}
+                    className={cn(
+                      "bg-muted/30",
+                      usernameStatus === "available" && "border-green-500/50",
+                      usernameStatus === "taken" && "border-red-500/50"
+                    )}
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {usernameStatus === "checking" && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                    {usernameStatus === "available" && <Check className="h-3 w-3 text-green-600" />}
+                    {usernameStatus === "taken" && <ShieldAlert className="h-3 w-3 text-red-600" />}
+                  </div>
+                </div>
+                <Button 
+                  variant="secondary" 
+                  disabled={usernameStatus !== "available"}
+                  onClick={() => handleUpdateSettings(profileData)}
+                >
+                  Save
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground italic">
+                Your profile URL: {window.location.origin}/t/{profileData.username || "username"}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/20">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-bold">Public Profile</Label>
+                <p className="text-xs text-muted-foreground">Allow others to see your stats & achievements</p>
+              </div>
+              <Switch 
+                checked={profileData.profilePublic}
+                onCheckedChange={(checked) => handleUpdateSettings({...profileData, profilePublic: checked})}
+              />
+            </div>
+
+            {profileData.profilePublic && (
+              <Button variant="outline" className="w-full border-dashed gap-2" onClick={copyProfileLink}>
+                <Copy className="h-4 w-4" /> Copy Shareable Link
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Achievements Section */}
+      <Card className="border-none shadow-xl bg-card/50 overflow-hidden">
+        <CardHeader className="bg-muted/10 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <Award className="h-5 w-5 text-primary" />
+            Achievements Gallery
+          </CardTitle>
+          <CardDescription>Your badges and milestones earned on the platform.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+            {achievements.map((achievement) => {
+              const isUnlocked = !!achievement.unlockedAt;
+              return (
+                <div 
+                  key={achievement.key} 
+                  className={cn(
+                    "flex flex-col items-center text-center p-4 rounded-2xl border transition-all group",
+                    isUnlocked ? "bg-primary/5 border-primary/20" : "bg-muted/10 border-transparent opacity-40 grayscale"
+                  )}
+                >
+                  <div className={cn(
+                    "h-12 w-12 rounded-full flex items-center justify-center mb-3 transition-transform",
+                    isUnlocked ? "bg-primary/10 text-primary group-hover:scale-110" : "bg-muted text-muted-foreground"
+                  )}>
+                    <Award className="h-6 w-6" />
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-tight leading-tight">{achievement.name}</p>
+                  <p className="text-[8px] text-muted-foreground mt-1 line-clamp-1">{achievement.description}</p>
+                  {isUnlocked && (
+                    <Badge className="mt-2 h-3 text-[7px] bg-green-600 px-1">UNLOCKED</Badge>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Security & Password */}
       <Card className="border-none shadow-xl bg-card/50">

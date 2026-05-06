@@ -16,12 +16,14 @@ import {
   ExternalLink,
   ChevronRight,
   Plus,
-  Bell
+  Bell,
+  Award
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import TesterOnboarding from "@/components/tester/TesterOnboarding";
 
 export default function TesterOverview() {
   const { user } = useAuth();
@@ -81,9 +83,10 @@ export default function TesterOverview() {
             <Link to="/tester/apps" className="flex items-center gap-2">
               <Plus className="h-4 w-4" /> Enroll New
             </Link>
-          </Button>
         </div>
       </div>
+
+      <TesterOnboarding />
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -239,6 +242,29 @@ export default function TesterOverview() {
                   <MessageSquare className="h-4 w-4" /> Message Team
                 </Link>
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* New: Recent Achievements */}
+          <Card className="border-none shadow-lg bg-card/50 overflow-hidden">
+            <CardHeader className="border-b bg-muted/10">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Award className="h-4 w-4 text-primary" />
+                  Achievements
+                </CardTitle>
+                <Link to="/tester/profile" className="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline">View All</Link>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="aspect-square rounded-xl bg-muted/20 flex items-center justify-center border border-dashed border-primary/20 group">
+                    <Award className="h-6 w-6 text-primary/30 group-hover:text-primary transition-colors" />
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-center text-muted-foreground mt-4 italic">Complete tasks to unlock badges</p>
             </CardContent>
           </Card>
 

@@ -1,5 +1,50 @@
 const supabase = require('../lib/supabase');
 
+// --- ACHIEVEMENT DEFINITIONS ---------------------------
+const ACHIEVEMENTS = {
+  first_bug: { name: 'Bug Hunter', description: 'Filed your first bug', icon: 'Bug' },
+  bug_10: { name: 'Debugger', description: 'Filed 10 bugs', icon: 'Terminal' },
+  first_idea: { name: 'Visionary', description: 'Submitted your first idea', icon: 'Lightbulb' },
+  idea_10: { name: 'Innovator', description: 'Submitted 10 ideas', icon: 'Zap' },
+  streak_7: { name: 'Week Warrior', description: '7-day activity streak', icon: 'Calendar' },
+  streak_30: { name: 'Monthly Legend', description: '30-day streak', icon: 'Trophy' },
+  first_task: { name: 'On It', description: 'Completed your first task', icon: 'CheckCircle' },
+  all_tasks: { name: 'Completionist', description: 'Completed all assigned tasks for an app', icon: 'Award' },
+  first_rating: { name: 'Critic', description: 'Rated your first app version', icon: 'Star' },
+  veteran: { name: 'Veteran Tester', description: 'Active for 90+ days', icon: 'Shield' }
+};
+
+const checkAndGrantAchievements = async (userId) => {
+  try {
+    const newlyUnlocked = [];
+    const [bugs, ideas, tasks, user, unlocked] = await Promise.all([
+      supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('tester_task_completions').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('users').select('created_at').eq('id', userId).single(),
+      supabase.from('tester_achievements').select('achievement_key').eq('user_id', userId)
+    ]);
+    const unlockedKeys = new Set((unlocked.data || []).map(a => a.achievement_key));
+    const check = async (key, condition) => {
+      if (!unlockedKeys.has(key) && condition) {
+        await supabase.from('tester_achievements').insert({ user_id: userId, achievement_key: key });
+        newlyUnlocked.push({ key, ...ACHIEVEMENTS[key] });
+      }
+    };
+    await check('first_bug', bugs.count >= 1);
+    await check('bug_10', bugs.count >= 10);
+    await check('first_idea', ideas.count >= 1);
+    await check('idea_10', ideas.count >= 10);
+    await check('first_task', tasks.count >= 1);
+    const daysSinceJoined = Math.ceil((new Date() - new Date(user.data.created_at)) / (1000 * 60 * 60 * 24));
+    await check('veteran', daysSinceJoined >= 90);
+    return newlyUnlocked;
+  } catch (err) {
+    console.error('Achievement error:', err);
+    return [];
+  }
+};
+
 // ─── GET ENROLLMENTS ────────────────────────────────────
 exports.getEnrollments = async (req, res) => {
   try {
@@ -154,7 +199,9 @@ exports.addBug = async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.status(201).json(data);
+    
+    const achievements = await checkAndGrantAchievements(req.user.id);
+    res.status(201).json({ ...data, achievements });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -223,7 +270,9 @@ exports.addIdea = async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.status(201).json(data);
+    
+    const achievements = await checkAndGrantAchievements(req.user.id);
+    res.status(201).json({ ...data, achievements });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -481,5 +530,431 @@ exports.getStats = async (req, res) => {
   } catch (err) {
     console.error('getStats error:', err);
     res.status(500).json({ message: 'Server error fetching stats' });
+  }
+};
+
+// --- TASKS ---------------------------------------------
+exports.getTasks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { data: enrollments } = await supabase.from('ab_test_enrollments').select('app_id').eq('user_id', userId);
+    const appIds = (enrollments || []).map(e => e.app_id);
+
+    const { data: tasks, error } = await supabase
+      .from('tester_tasks')
+      .select(`
+        *,
+        app:apps(name, icon, slug),
+        completions:tester_task_completions(*)
+      `)
+      .in('app_id', appIds)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const processedTasks = tasks.map(task => ({
+      ...task,
+      isCompleted: task.completions.some(c => c.user_id === userId),
+      userCompletion: task.completions.find(c => c.user_id === userId) || null
+    }));
+
+    res.json(processedTasks);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.completeTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { notes } = req.body;
+    const userId = req.user.id;
+
+    const { error } = await supabase
+      .from('tester_task_completions')
+      .upsert({ task_id: taskId, user_id: userId, notes, completed_at: new Date() });
+
+    if (error) throw error;
+
+    const achievements = await checkAndGrantAchievements(userId);
+    res.json({ success: true, achievements });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.uncompleteTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const userId = req.user.id;
+
+    const { error } = await supabase
+      .from('tester_task_completions')
+      .delete()
+      .eq('task_id', taskId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- TIMELINE ------------------------------------------
+exports.getTimeline = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { data: enrollments } = await supabase
+      .from('ab_test_enrollments')
+      .select('app:apps(id, name, icon, version, version_history, created_at)')
+      .eq('user_id', userId);
+
+    const timeline = [];
+    (enrollments || []).forEach(e => {
+      const app = e.app;
+      timeline.push({
+        appId: app.id,
+        appName: app.name,
+        appIcon: app.icon,
+        version: app.version,
+        releasedAt: app.created_at,
+        releaseNotes: 'Initial Release',
+        isCurrent: true
+      });
+
+      if (Array.isArray(app.version_history)) {
+        app.version_history.forEach(v => {
+          timeline.push({
+            appId: app.id,
+            appName: app.name,
+            appIcon: app.icon,
+            version: v.version,
+            releasedAt: v.date,
+            releaseNotes: v.notes,
+            isCurrent: false
+          });
+        });
+      }
+    });
+
+    timeline.sort((a, b) => new Date(b.releasedAt) - new Date(a.releasedAt));
+    res.json(timeline);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- CRASHES -------------------------------------------
+exports.addCrash = async (req, res) => {
+  try {
+    const { appId, appVersion, os, osVersion, deviceModel, manufacturer, description } = req.body;
+    const userId = req.user.id;
+
+    const { data, error } = await supabase
+      .from('tester_crashes')
+      .insert({
+        app_id: appId,
+        user_id: userId,
+        app_version: appVersion,
+        os,
+        os_version: osVersion,
+        device_model: deviceModel,
+        manufacturer,
+        description
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const achievements = await checkAndGrantAchievements(userId);
+    res.status(201).json({ ...data, achievements });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- RATINGS -------------------------------------------
+exports.addRating = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { version, stars, comment } = req.body;
+    const userId = req.user.id;
+
+    const { data: app } = await supabase.from('apps').select('id').eq('slug', slug).single();
+    if (!app) return res.status(404).json({ message: 'App not found' });
+
+    const { data, error } = await supabase
+      .from('tester_ratings')
+      .upsert({ app_id: app.id, user_id: userId, version, stars, comment }, { onConflict: 'app_id,user_id,version' })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const achievements = await checkAndGrantAchievements(userId);
+    res.json({ ...data, achievements });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getAppRatings = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { data: app } = await supabase.from('apps').select('id').eq('slug', slug).single();
+    if (!app) return res.status(404).json({ message: 'App not found' });
+
+    const { data: ratings } = await supabase.from('tester_ratings').select('*').eq('app_id', app.id);
+    const { data: myRating } = await supabase.from('tester_ratings').select('*').eq('app_id', app.id).eq('user_id', req.user.id).single();
+
+    res.json({ ratings, myRating });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- POLLS ---------------------------------------------
+exports.getPolls = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { data: enrollments } = await supabase.from('ab_test_enrollments').select('app_id').eq('user_id', userId);
+    const appIds = (enrollments || []).map(e => e.app_id);
+
+    // Get polls for enrolled apps OR platform-wide (null app_id)
+    const { data: polls } = await supabase
+      .from('tester_polls')
+      .select('*, app:apps(name), responses:tester_poll_responses(user_id)')
+      .or(`app_id.in.(${appIds.join(',')}),app_id.is.null`)
+      .order('created_at', { ascending: false });
+
+    const processedPolls = (polls || []).map(poll => ({
+      ...poll,
+      hasResponded: poll.responses.some(r => r.user_id === userId)
+    }));
+
+    res.json(processedPolls);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.respondToPoll = async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    const { selectedOptions, textResponse } = req.body;
+    const userId = req.user.id;
+
+    const { error } = await supabase
+      .from('tester_poll_responses')
+      .insert({ poll_id: pollId, user_id: userId, selected_options: selectedOptions, text_response: textResponse });
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getPollResults = async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    const { data: responses } = await supabase.from('tester_poll_responses').select('*').eq('poll_id', pollId);
+    res.json(responses);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- LEADERBOARD ---------------------------------------
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const { appId } = req.query;
+    
+    // In a real high-traffic app, this would be a materialized view or cached
+    const [bugs, ideas, msgs, tasks, users] = await Promise.all([
+      supabase.from('tester_bugs').select('user_id, app_id'),
+      supabase.from('tester_ideas').select('user_id, app_id'),
+      supabase.from('tester_messages').select('user_id, app_id'),
+      supabase.from('tester_task_completions').select('user_id, task:tester_tasks(app_id)'),
+      supabase.from('users').select('id, username, display_name, profile_image').eq('role', 'user')
+    ]);
+
+    const scores = {};
+    users.data.forEach(u => {
+      scores[u.id] = { 
+        userId: u.id, 
+        name: u.display_name || u.username, 
+        avatar: u.profile_image,
+        bugs: 0, ideas: 0, msgs: 0, tasks: 0, score: 0 
+      };
+    });
+
+    const filter = (item) => !appId || item.app_id === appId;
+    const taskFilter = (item) => !appId || item.task?.app_id === appId;
+
+    bugs.data?.filter(filter).forEach(b => { if(scores[b.user_id]) { scores[b.user_id].bugs++; scores[b.user_id].score += 3; } });
+    ideas.data?.filter(filter).forEach(i => { if(scores[i.user_id]) { scores[i.user_id].ideas++; scores[i.user_id].score += 2; } });
+    msgs.data?.filter(filter).forEach(m => { if(scores[m.user_id]) { scores[m.user_id].msgs++; scores[m.user_id].score += 1; } });
+    tasks.data?.filter(taskFilter).forEach(t => { if(scores[t.user_id]) { scores[t.user_id].tasks++; scores[t.user_id].score += 4; } });
+
+    const sorted = Object.values(scores).sort((a, b) => b.score - a.score);
+    res.json(sorted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- ACHIEVEMENTS --------------------------------------
+exports.getAchievements = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { data: unlocked } = await supabase.from('tester_achievements').select('*').eq('user_id', userId);
+    
+    const allAchievements = Object.keys(ACHIEVEMENTS).map(key => ({
+      key,
+      ...ACHIEVEMENTS[key],
+      unlockedAt: unlocked.find(u => u.achievement_key === key)?.unlocked_at || null
+    }));
+
+    res.json(allAchievements);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- PROFILE & SETTINGS --------------------------------
+exports.checkUsername = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { data } = await supabase.from('users').select('id').eq('username', username.toLowerCase()).single();
+    res.json({ available: !data });
+  } catch (err) {
+    res.json({ available: true });
+  }
+};
+
+exports.updateProfileSettings = async (req, res) => {
+  try {
+    const { username, profilePublic, emailNotifyDigest } = req.body;
+    const userId = req.user.id;
+
+    const { error } = await supabase
+      .from('users')
+      .update({ 
+        username: username?.toLowerCase(), 
+        profile_public: profilePublic,
+        email_notify_digest: emailNotifyDigest
+      })
+      .eq('id', userId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error updating settings' });
+  }
+};
+
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, username, display_name, profile_image, created_at, profile_public')
+      .eq('username', username.toLowerCase())
+      .single();
+
+    if (error || !user.profile_public) return res.status(404).json({ message: 'Profile not found' });
+
+    const [unlocked, bugs, ideas, tasks] = await Promise.all([
+      supabase.from('tester_achievements').select('*').eq('user_id', user.id),
+      supabase.from('tester_bugs').select('id', { count: 'exact' }).eq('user_id', user.id),
+      supabase.from('tester_ideas').select('id', { count: 'exact' }).eq('user_id', user.id),
+      supabase.from('tester_task_completions').select('id', { count: 'exact' }).eq('user_id', user.id)
+    ]);
+
+    res.json({
+      ...user,
+      achievements: unlocked.map(a => ({ key: a.achievement_key, ...ACHIEVEMENTS[a.achievement_key] })),
+      stats: {
+        bugs: bugs.count,
+        ideas: ideas.count,
+        tasks: tasks.count
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- GLOBAL SEARCH -------------------------------------
+exports.globalSearch = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const userId = req.user.id;
+    if (!q || q.length < 2) return res.json({ results: [] });
+
+    const [apps, bugs, ideas, msgs, tasks] = await Promise.all([
+      supabase.from('apps').select('id, name, version, slug').ilike('name', `%${q}%`).limit(5),
+      supabase.from('tester_bugs').select('id, title, status, app:apps(name)').eq('user_id', userId).ilike('title', `%${q}%`).limit(5),
+      supabase.from('tester_ideas').select('id, title, status, app:apps(name)').eq('user_id', userId).ilike('title', `%${q}%`).limit(5),
+      supabase.from('tester_messages').select('id, message, app:apps(name)').eq('user_id', userId).ilike('message', `%${q}%`).limit(5),
+      supabase.from('tester_tasks').select('id, title, app:apps(name)').ilike('title', `%${q}%`).limit(5)
+    ]);
+
+    res.json({
+      apps: apps.data || [],
+      bugs: bugs.data || [],
+      ideas: ideas.data || [],
+      messages: msgs.data || [],
+      tasks: tasks.data || []
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- ONBOARDING ----------------------------------------
+exports.getOnboarding = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    let { data: onboarding } = await supabase.from('tester_onboarding').select('*').eq('user_id', userId).single();
+    
+    if (!onboarding) {
+      const { data: fresh } = await supabase.from('tester_onboarding').insert({ user_id: userId }).select().single();
+      onboarding = fresh;
+    }
+    
+    res.json(onboarding);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.dismissOnboarding = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await supabase.from('tester_onboarding').update({ dismissed: true }).eq('user_id', userId);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };

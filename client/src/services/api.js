@@ -17,6 +17,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Extract data from standard wrapper if present
+api.interceptors.response.use(
+  (response) => {
+    if (response.data && response.data.success === true && response.data.data !== undefined) {
+      return { ...response, data: response.data.data };
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // ─── Public ───────────────────────────
 export const getApps = (params) => api.get("/apps", { params });
 export const getAppBySlug = (slug) => api.get(`/apps/${slug}`);
@@ -63,6 +76,7 @@ export const toggleAbTesting = (id) => api.patch(`/admin/apps/${id}/toggle-ab-te
 
 // --- TESTER HUB ---
 export const getTesterEnrollments = () => api.get('/tester/enrollments');
+export const getTesterDashboardSummary = () => api.get('/tester/dashboard-summary');
 export const getTesterStats = () => api.get('/tester/stats');
 export const getTesterActivity = () => api.get('/tester/activity');
 

@@ -1,90 +1,76 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../lib/supabase');
+const { success, error, unauthorized, badRequest } = require('../lib/utils');
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
+const generateToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  });
+};
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
+    if (!email || !password) return badRequest(res, 'Email and password are required');
 
-    const { data: admin, error } = await supabase
+    const { data: admin, error: fetchError } = await supabase
       .from('admins')
       .select('*')
       .eq('email', email.toLowerCase())
       .single();
 
-    if (error || !admin) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    if (fetchError || !admin) return unauthorized(res, 'Invalid credentials');
 
     const isMatch = await bcrypt.compare(password, admin.password_hash);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return unauthorized(res, 'Invalid credentials');
 
-    const token = jwt.sign({ id: admin.id, role: 'admin' }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    });
+    const token = generateToken({ id: admin.id, role: 'admin' });
+    res.cookie('token', token, cookieOptions);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none', 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({
+    return success(res, {
       token,
-      admin: { id: admin.id, username: admin.username, email: admin.email, role: 'admin' },
+      user: { id: admin.id, username: admin.username, email: admin.email, role: 'admin' },
     });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    console.error('Admin Login error:', err);
+    return error(res, 'Server error during login');
   }
 };
 
 exports.logout = async (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  });
-  res.json({ message: 'Logged out successfully' });
+  res.clearCookie('token', cookieOptions);
+  return success(res, null, 'Logged out successfully');
 };
 
 exports.me = async (req, res) => {
-  if (req.admin) {
-    res.json({ admin: req.admin });
-  } else if (req.user) {
-    res.json({ user: req.user });
-  } else {
-    res.status(401).json({ message: 'Not authenticated' });
-  }
+  if (req.user) return success(res, req.user);
+  return unauthorized(res, 'Not authenticated');
 };
 
 exports.userSignup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
+    if (!username || !email || !password) return badRequest(res, 'All fields are required');
     
-    // Check if user exists
     const { data: existingUser } = await supabase
       .from('users')
       .select('id')
       .eq('email', email.toLowerCase())
       .maybeSingle();
       
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already in use' });
-    }
+    if (existingUser) return badRequest(res, 'Email already in use');
 
     const passwordHash = await bcrypt.hash(password, 12);
     
-    const { data: user, error } = await supabase
+    const { data: user, error: insertError } = await supabase
       .from('users')
       .insert({
         username,
@@ -94,77 +80,47 @@ exports.userSignup = async (req, res) => {
       .select()
       .single();
 
-    if (error || !user) {
-      return res.status(500).json({ message: 'Failed to create user' });
-    }
+    if (insertError || !user) return error(res, 'Failed to create user');
 
-    const token = jwt.sign({ id: user.id, role: 'user' }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    });
+    const token = generateToken({ id: user.id, role: 'user' });
+    res.cookie('token', token, cookieOptions);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.status(201).json({
+    return success(res, {
       token,
-      user: { 
-        ...user,
-        role: 'user' 
-      },
-    });
-  } catch (error) {
-    console.error('User Signup error:', error);
-    res.status(500).json({ message: 'Server error' });
+      user: { ...user, role: 'user' },
+    }, 'Account created successfully', 201);
+  } catch (err) {
+    console.error('User Signup error:', err);
+    return error(res, 'Server error during signup');
   }
 };
 
 exports.userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
+    if (!email || !password) return badRequest(res, 'Email and password are required');
 
-    const { data: user, error } = await supabase
+    const { data: user, error: fetchError } = await supabase
       .from('users')
       .select('*')
       .eq('email', email.toLowerCase())
       .single();
 
-    if (error || !user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    if (fetchError || !user) return unauthorized(res, 'Invalid credentials');
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return unauthorized(res, 'Invalid credentials');
 
-    const token = jwt.sign({ id: user.id, role: 'user' }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    });
+    const token = generateToken({ id: user.id, role: 'user' });
+    res.cookie('token', token, cookieOptions);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({
+    return success(res, {
       token,
-      user: { 
-        ...user,
-        role: 'user' 
-      },
+      user: { ...user, role: 'user' },
     });
-  } catch (error) {
-    console.error('User Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    console.error('User Login error:', err);
+    return error(res, 'Server error during login');
   }
 };
 

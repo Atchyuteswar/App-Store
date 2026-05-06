@@ -2,6 +2,7 @@ const supabase = require('../lib/supabase');
 const slugify = require('slugify');
 const { uploadToStorage, deleteFromStorage } = require('../middleware/uploadMiddleware');
 const { sendConfirmationEmail } = require('../lib/mailer');
+const { success, error, notFound, badRequest } = require('../lib/utils');
 
 // Transform snake_case DB row to camelCase for frontend compatibility
 function toCamel(row) {
@@ -48,29 +49,30 @@ exports.getAllApps = async (req, res) => {
       query = query.or(`name.ilike.%${search}%,tagline.ilike.%${search}%`);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
-    if (error) throw error;
+    const { data, error: fetchError } = await query.order('created_at', { ascending: false });
+    if (fetchError) throw fetchError;
 
-    res.json(data.map(toCamel));
-  } catch (error) {
-    console.error('Get apps error:', error);
-    res.status(500).json({ message: 'Server error' });
+    return success(res, data.map(toCamel));
+  } catch (err) {
+    console.error('Get apps error:', err);
+    return error(res, 'Server error fetching apps');
   }
 };
 
 exports.getAppBySlug = async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('apps')
       .select('*')
       .eq('slug', req.params.slug)
       .eq('published', true)
       .single();
 
-    if (error || !data) return res.status(404).json({ message: 'App not found' });
-    res.json(toCamel(data));
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    if (fetchError || !data) return notFound(res, 'App not found');
+    return success(res, toCamel(data));
+  } catch (err) {
+    console.error('getAppBySlug error:', err);
+    return error(res, 'Server error');
   }
 };
 

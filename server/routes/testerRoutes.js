@@ -12,6 +12,7 @@ router.get('/check-username/:username', testerController.checkUsername);
 router.use(authMiddleware);
 
 router.get('/enrollments', testerController.getEnrollments);
+router.get('/dashboard-summary', testerController.getDashboardSummary);
 router.get('/stats', testerController.getStats);
 router.get('/activity', testerController.getActivity);
 

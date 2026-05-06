@@ -23,11 +23,9 @@ import {
 } from "lucide-react";
 import { 
   updateTesterProfile, 
-  getTesterStats, 
-  getTesterEnrollments, 
-  getTesterAchievements,
   updateTesterProfileSettings,
-  checkUsernameAvailability
+  checkUsernameAvailability,
+  getTesterDashboardSummary
 } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,33 +45,17 @@ export default function TesterProfile() {
   const [usernameStatus, setUsernameStatus] = useState("idle"); // idle, checking, available, taken
   
   useEffect(() => {
-    fetchStats();
-    fetchAchievements();
+    fetchData();
   }, []);
 
-  const fetchAchievements = async () => {
+  const fetchData = async () => {
     try {
-      const { data } = await getTesterAchievements();
-      setAchievements(data || []);
+      const { data: summary } = await getTesterDashboardSummary();
+      setStats(summary.stats);
+      setEnrollments(summary.enrollments || []);
+      setAchievements(summary.achievements || []);
     } catch (err) {
-      console.error(err);
-    }
-  };
-  
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      const [statsRes, enrollRes] = await Promise.all([
-        getTesterStats(),
-        getTesterEnrollments()
-      ]);
-      setStats(statsRes.data);
-      setEnrollments(enrollRes.data || []);
-    } catch (err) {
-      console.error(err);
+      console.error("Error fetching profile data:", err);
     }
   };
   

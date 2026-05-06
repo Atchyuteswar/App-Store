@@ -2,11 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { 
-  getTesterEnrollments, 
-  getTesterActivity, 
-  getTesterNotifications, 
-  getTesterStats,
-  getTesterAchievements
+  getTesterDashboardSummary
 } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,18 +43,12 @@ export default function TesterOverview() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [enrollRes, activityRes, notifyRes, statsRes, achieveRes] = await Promise.all([
-        getTesterEnrollments(),
-        getTesterActivity(),
-        getTesterNotifications(),
-        getTesterStats(),
-        getTesterAchievements()
-      ]);
-      setEnrollments(enrollRes.data || []);
-      setActivityFeed(activityRes.data?.recent || []);
-      setNotifications(notifyRes.data || []);
-      setStatsData(statsRes.data);
-      setAchievements(achieveRes.data || []);
+      const { data: summary } = await getTesterDashboardSummary();
+      setEnrollments(summary.enrollments || []);
+      setActivityFeed(summary.activity || []);
+      setNotifications(summary.notifications || []);
+      setStatsData(summary.stats);
+      setAchievements(summary.achievements || []);
     } catch (err) {
       console.error("Error fetching overview data:", err);
     } finally {

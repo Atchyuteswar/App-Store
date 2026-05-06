@@ -1,49 +1,6 @@
 const supabase = require('../lib/supabase');
-
-// --- ACHIEVEMENT DEFINITIONS ---------------------------
-const ACHIEVEMENTS = {
-  first_bug: { name: 'Bug Hunter', description: 'Filed your first bug', icon: 'Bug' },
-  bug_10: { name: 'Debugger', description: 'Filed 10 bugs', icon: 'Terminal' },
-  first_idea: { name: 'Visionary', description: 'Submitted your first idea', icon: 'Lightbulb' },
-  idea_10: { name: 'Innovator', description: 'Submitted 10 ideas', icon: 'Zap' },
-  streak_7: { name: 'Week Warrior', description: '7-day activity streak', icon: 'Calendar' },
-  streak_30: { name: 'Monthly Legend', description: '30-day streak', icon: 'Trophy' },
-  first_task: { name: 'On It', description: 'Completed your first task', icon: 'CheckCircle' },
-  all_tasks: { name: 'Completionist', description: 'Completed all assigned tasks for an app', icon: 'Award' },
-  first_rating: { name: 'Critic', description: 'Rated your first app version', icon: 'Star' },
-  veteran: { name: 'Veteran Tester', description: 'Active for 90+ days', icon: 'Shield' }
-};
-
-const checkAndGrantAchievements = async (userId) => {
-  try {
-    const newlyUnlocked = [];
-    const [bugs, ideas, tasks, user, unlocked] = await Promise.all([
-      supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('tester_task_completions').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('users').select('created_at').eq('id', userId).single(),
-      supabase.from('tester_achievements').select('achievement_key').eq('user_id', userId)
-    ]);
-    const unlockedKeys = new Set((unlocked.data || []).map(a => a.achievement_key));
-    const check = async (key, condition) => {
-      if (!unlockedKeys.has(key) && condition) {
-        await supabase.from('tester_achievements').insert({ user_id: userId, achievement_key: key });
-        newlyUnlocked.push({ key, ...ACHIEVEMENTS[key] });
-      }
-    };
-    await check('first_bug', bugs.count >= 1);
-    await check('bug_10', bugs.count >= 10);
-    await check('first_idea', ideas.count >= 1);
-    await check('idea_10', ideas.count >= 10);
-    await check('first_task', tasks.count >= 1);
-    const daysSinceJoined = Math.ceil((new Date() - new Date(user.data.created_at)) / (1000 * 60 * 60 * 24));
-    await check('veteran', daysSinceJoined >= 90);
-    return newlyUnlocked;
-  } catch (err) {
-    console.error('Achievement error:', err);
-    return [];
-  }
-};
+const { success, error, notFound, badRequest } = require('../lib/utils');
+const { ACHIEVEMENTS, checkAndGrantAchievements } = require('../lib/achievements');
 
 // ─── GET ENROLLMENTS ────────────────────────────────────
 exports.getEnrollments = async (req, res) => {
@@ -894,28 +851,19 @@ exports.updateProfileSettings = async (req, res) => {
 exports.getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params;
-    console.log('Fetching public profile for:', username);
-
-    const { data: user, error } = await supabase
+    
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, username, display_name, profile_image, created_at, profile_public')
       .ilike('username', username.toLowerCase())
       .single();
 
-    if (error || !user) {
-      console.log('User not found or error:', error, 'Requested username:', username);
-      return res.status(404).json({ 
-        message: 'Profile not found', 
-        debug: { searched: username.toLowerCase(), error: error?.message } 
-      });
+    if (userError || !user) {
+      return notFound(res, 'Profile not found', { searched: username.toLowerCase(), error: userError?.message });
     }
 
     if (user.profile_public === false) {
-      console.log('Profile is private for:', username);
-      return res.status(404).json({ 
-        message: 'Profile not found', 
-        debug: { searched: username.toLowerCase(), privacy: 'private' } 
-      });
+      return notFound(res, 'Profile not found', { searched: username.toLowerCase(), privacy: 'private' });
     }
 
     const [achRes, bugRes, ideaRes, taskRes, msgRes] = await Promise.all([
@@ -926,7 +874,7 @@ exports.getPublicProfile = async (req, res) => {
       supabase.from('tester_messages').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
     ]);
 
-    res.json({
+    return success(res, {
       ...user,
       achievements: (achRes.data || []).map(a => ({ key: a.achievement_key, ...ACHIEVEMENTS[a.achievement_key] })),
       stats: {
@@ -939,7 +887,7 @@ exports.getPublicProfile = async (req, res) => {
     });
   } catch (err) {
     console.error('getPublicProfile error:', err);
-    res.status(500).json({ message: 'Server error' });
+    return error(res, 'Server error');
   }
 };
 
@@ -971,6 +919,54 @@ exports.globalSearch = async (req, res) => {
   }
 };
 
+// --- DASHBOARD SUMMARY ---------------------------------
+exports.getDashboardSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const [enrollRes, activityRes, notifyRes, statsRes, achieveRes] = await Promise.all([
+      supabase.from('ab_test_enrollments').select('id, status, created_at, app:apps(id, name, slug, icon, tagline, version, category)').eq('user_id', userId),
+      supabase.from('tester_activity').select('*').eq('user_id', userId).order('timestamp', { ascending: false }).limit(10),
+      supabase.from('tester_notifications').select('*').eq('user_id', userId).eq('is_read', false).order('created_at', { ascending: false }),
+      exports.getStatsInternal(userId),
+      supabase.from('tester_achievements').select('achievement_key').eq('user_id', userId)
+    ]);
+
+    return success(res, {
+      enrollments: enrollRes.data || [],
+      activity: activityRes.data || [],
+      notifications: notifyRes.data || [],
+      stats: statsRes,
+      achievements: (achieveRes.data || []).map(a => ({ key: a.achievement_key, ...ACHIEVEMENTS[a.achievement_key] }))
+    });
+  } catch (err) {
+    console.error('getDashboardSummary error:', err);
+    return error(res, 'Server error fetching summary');
+  }
+};
+
+// Internal stats helper to avoid code duplication
+exports.getStatsInternal = async (userId) => {
+  const [enrollCount, bugCount, ideaCount, msgCount, tasksCount] = await Promise.all([
+    supabase.from('ab_test_enrollments').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    supabase.from('tester_messages').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    supabase.from('tester_task_completions').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+  ]);
+
+  const totalActions = (bugCount.count || 0) + (ideaCount.count || 0) + (tasksCount.count || 0) + (msgCount.count || 0);
+  
+  return {
+    totalEnrollments: enrollCount.count || 0,
+    totalBugs: bugCount.count || 0,
+    totalIdeas: ideaCount.count || 0,
+    totalMessages: msgCount.count || 0,
+    totalTasks: tasksCount.count || 0,
+    totalActions,
+    testerLevel: Math.floor(totalActions / 10) + 1
+  };
+};
 // --- ONBOARDING ----------------------------------------
 exports.getOnboarding = async (req, res) => {
   try {
@@ -982,20 +978,21 @@ exports.getOnboarding = async (req, res) => {
       onboarding = fresh;
     }
     
-    res.json(onboarding);
+    return success(res, onboarding);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('getOnboarding error:', err);
+    return error(res, 'Server error fetching onboarding state');
   }
 };
 
 exports.dismissOnboarding = async (req, res) => {
   try {
     const userId = req.user.id;
-    await supabase.from('tester_onboarding').update({ dismissed: true }).eq('user_id', userId);
-    res.json({ success: true });
+    const { error: updateError } = await supabase.from('tester_onboarding').update({ dismissed: true }).eq('user_id', userId);
+    if (updateError) throw updateError;
+    return success(res, null, 'Onboarding dismissed');
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('dismissOnboarding error:', err);
+    return error(res, 'Server error dismissing onboarding');
   }
 };

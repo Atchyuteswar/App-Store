@@ -262,7 +262,7 @@ export default function TesterOverview() {
                 <span className="text-sm text-muted-foreground">Active Testers</span>
                 <span className="text-sm font-bold">452</span>
               </div>
-              <Separator />
+              <div className="h-px bg-border my-2" />
               <div className="text-center pt-2">
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter mb-2">Current Version Hub Status</p>
                 <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-600/20 px-3">

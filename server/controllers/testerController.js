@@ -918,11 +918,12 @@ exports.getPublicProfile = async (req, res) => {
       });
     }
 
-    const [achRes, bugRes, ideaRes, taskRes] = await Promise.all([
+    const [achRes, bugRes, ideaRes, taskRes, msgRes] = await Promise.all([
       supabase.from('tester_achievements').select('achievement_key').eq('user_id', user.id),
       supabase.from('tester_bugs').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
       supabase.from('tester_ideas').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-      supabase.from('tester_task_completions').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
+      supabase.from('tester_task_completions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('tester_messages').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
     ]);
 
     res.json({
@@ -931,7 +932,9 @@ exports.getPublicProfile = async (req, res) => {
       stats: {
         bugs: bugRes.count || 0,
         ideas: ideaRes.count || 0,
-        tasks: taskRes.count || 0
+        tasks: taskRes.count || 0,
+        messages: msgRes.count || 0,
+        totalActions: (bugRes.count || 0) + (ideaRes.count || 0) + (taskRes.count || 0) + (msgRes.count || 0)
       }
     });
   } catch (err) {

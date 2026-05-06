@@ -97,7 +97,7 @@ export default function PublicProfile() {
             { label: "Bugs Filed", value: user.stats?.bugs || 0, icon: Bug, color: "text-red-500", bg: "bg-red-500/10" },
             { label: "Ideas Shared", value: user.stats?.ideas || 0, icon: Lightbulb, color: "text-amber-500", bg: "bg-amber-500/10" },
             { label: "Tasks Done", value: user.stats?.tasks || 0, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
-            { label: "Tester Level", value: Math.floor(((user.stats?.bugs || 0) + (user.stats?.ideas || 0) + (user.stats?.tasks || 0)) / 10) + 1, icon: Star, color: "text-primary", bg: "bg-primary/10" },
+            { label: "Messages", value: user.stats?.messages || 0, icon: MessageSquare, color: "text-blue-500", bg: "bg-blue-500/10" },
           ].map((stat, i) => (
             <Card key={i} className="border-none shadow-2xl bg-card/80 backdrop-blur-xl hover:scale-105 transition-all duration-300 ring-1 ring-white/5">
               <CardContent className="p-6 flex flex-col items-center text-center">
@@ -161,7 +161,7 @@ export default function PublicProfile() {
               <div className="relative z-10">
                 <h3 className="text-2xl font-black mb-4 tracking-tight">Community Impact</h3>
                 <p className="text-base text-muted-foreground leading-relaxed max-w-xl font-medium">
-                  This tester is a cornerstone of our beta community. By providing detailed feedback and reporting critical issues, they help ensure that every release meets the highest standards of quality and performance.
+                  This tester is a cornerstone of our beta community. With a total of <span className="text-primary font-black">{user.stats?.totalActions || 0} verified contributions</span>, they help ensure that every release meets the highest standards of quality and performance.
                 </p>
                 <div className="flex items-center gap-6 mt-10">
                   <div className="flex -space-x-4 overflow-hidden">

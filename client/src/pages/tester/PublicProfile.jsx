@@ -62,27 +62,27 @@ export default function PublicProfile() {
   return (
     <div className="min-h-screen bg-background pb-32 animate-in fade-in duration-1000">
       {/* Hero Header */}
-      <div className="h-[40vh] bg-gradient-to-br from-primary via-primary/90 to-primary/80 relative overflow-hidden">
+      <div className="h-[45vh] bg-gradient-to-br from-primary via-primary/90 to-primary/80 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         
-        <div className="max-w-5xl mx-auto px-6 h-full flex flex-col items-center justify-center relative z-10 pt-16">
-          <Avatar className="h-32 w-32 md:h-40 md:w-40 border-8 border-background/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] mb-6 ring-1 ring-white/10">
+        <div className="max-w-5xl mx-auto px-6 h-full flex flex-col items-center justify-end relative z-10 pb-28">
+          <Avatar className="h-32 w-32 md:h-40 md:w-40 border-8 border-background/20 shadow-[0_0_50px_rgba(0,0,0,0.3)] mb-6 ring-1 ring-white/10 shrink-0">
             <AvatarImage src={user.profile_image} className="object-cover" />
             <AvatarFallback className="text-5xl font-black bg-muted text-primary">
               {(user.display_name?.charAt(0) || user.username?.charAt(0) || "?").toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="text-center space-y-2">
-            <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight drop-shadow-md">
+            <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tight drop-shadow-lg">
               {user.display_name || user.username}
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] bg-background/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/5">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] bg-background/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
                 <Calendar className="h-3 w-3 text-primary" />
                 Joined {format(new Date(user.created_at), "MMMM yyyy")}
               </div>
-              <Badge className="bg-primary hover:bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 shadow-lg shadow-primary/20">
+              <Badge className="bg-primary hover:bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 shadow-xl shadow-primary/30">
                 ELITE TESTER
               </Badge>
             </div>
@@ -90,7 +90,7 @@ export default function PublicProfile() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 -mt-20 relative z-20 space-y-10">
+      <div className="max-w-5xl mx-auto px-6 -mt-16 relative z-20 space-y-10">
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[

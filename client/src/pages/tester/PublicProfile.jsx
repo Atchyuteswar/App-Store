@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 export default function PublicProfile() {
   const { username } = useParams();
   const [user, setUser] = useState(null);
+  const [debugData, setDebugData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -42,19 +43,21 @@ export default function PublicProfile() {
   const fetchProfile = async () => {
     try {
       setLoading(true);
+      setDebugData(null);
       const { data } = await getPublicProfile(username);
       setUser(data);
       setError(null);
     } catch (err) {
       console.error(err);
       setError(err.response?.status === 404 ? "Profile not found" : "Failed to load profile");
+      setDebugData(err.response?.data?.debug);
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) return <ProfileSkeleton />;
-  if (error) return <ProfileError message={error} />;
+  if (error) return <ProfileError message={error} debug={debugData} />;
 
   return (
     <div className="min-h-screen bg-background pb-20 animate-in fade-in duration-700">
@@ -219,14 +222,24 @@ function ProfileSkeleton() {
   );
 }
 
-function ProfileError({ message }) {
+function ProfileError({ message, debug }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
       <div className="p-6 rounded-full bg-red-500/10 mb-6">
         <UserIcon className="h-12 w-12 text-red-500 opacity-20" />
       </div>
       <h2 className="text-2xl font-bold">{message}</h2>
-      <p className="text-muted-foreground mt-2">This profile may be private or the link might be incorrect.</p>
+      <p className="text-muted-foreground mt-2 max-w-md">
+        This profile may be private, the link might be incorrect, or the username hasn't been saved yet.
+      </p>
+      
+      {debug && (
+        <div className="mt-6 p-4 rounded-2xl bg-muted/30 border text-[10px] font-mono text-left max-w-xs overflow-hidden">
+          <p className="text-muted-foreground uppercase font-bold mb-1">Debug Info:</p>
+          <pre>{JSON.stringify(debug, null, 2)}</pre>
+        </div>
+      )}
+
       <Button asChild className="mt-8 rounded-full px-8">
         <Link to="/">Back to Home</Link>
       </Button>

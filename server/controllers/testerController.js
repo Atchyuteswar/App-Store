@@ -903,13 +903,19 @@ exports.getPublicProfile = async (req, res) => {
       .single();
 
     if (error || !user) {
-      console.log('User not found or error:', error);
-      return res.status(404).json({ message: 'Profile not found' });
+      console.log('User not found or error:', error, 'Requested username:', username);
+      return res.status(404).json({ 
+        message: 'Profile not found', 
+        debug: { searched: username.toLowerCase(), error: error?.message } 
+      });
     }
 
     if (user.profile_public === false) {
       console.log('Profile is private for:', username);
-      return res.status(404).json({ message: 'Profile not found' });
+      return res.status(404).json({ 
+        message: 'Profile not found', 
+        debug: { searched: username.toLowerCase(), privacy: 'private' } 
+      });
     }
 
     const [achRes, bugRes, ideaRes, taskRes] = await Promise.all([

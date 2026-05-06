@@ -37,7 +37,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -129,7 +128,7 @@ export default function TesterLayout() {
                 <Beaker className="h-5 w-5 text-green-600" />
                 <span className="font-bold">Tester Hub</span>
               </div>
-              <Separator orientation="vertical" className="mx-2 h-4 hidden md:flex" />
+              <div className="mx-2 h-4 w-[1px] bg-border hidden md:flex" aria-hidden="true" />
               <Breadcrumb className="hidden sm:flex">
                 <BreadcrumbList>
                   <BreadcrumbItem>

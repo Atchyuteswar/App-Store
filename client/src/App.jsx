@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/Home";
@@ -49,4 +49,3 @@ export default function App() {
   );
 }
 
-import { Navigate } from "react-router-dom";

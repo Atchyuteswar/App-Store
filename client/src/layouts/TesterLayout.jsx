@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet, Link, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import { 
@@ -69,7 +69,8 @@ export default function TesterLayout() {
     }
   }, [loading, isAuthenticated, user, navigate]);
 
-  if (loading || !user) return null;
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
 
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
@@ -206,5 +207,4 @@ export default function TesterLayout() {
   );
 }
 
-// React needed for Breadcrumb Fragment
-import React from "react";
+

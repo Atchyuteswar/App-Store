@@ -19,7 +19,8 @@ import {
   Bug,
   Lightbulb,
   MessageSquare,
-  Activity
+  Activity,
+  Bell
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";

@@ -160,8 +160,7 @@ export default function Approvals() {
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-[#0f0f0f] border-white/5 group hover:border-green-500/30 transition-all duration-300">

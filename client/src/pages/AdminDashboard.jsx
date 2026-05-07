@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import * as api from "@/services/api";
 import { supabase } from "@/lib/supabaseClient";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -276,65 +277,56 @@ export default function AdminDashboard() {
   if (authLoading) return null;
 
   return (
-    <>
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">App Management</h1>
-        <Button onClick={openAdd}><Plus className="h-4 w-4 mr-1" />Add New App</Button>
+    <div className="space-y-10 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+            App Management
+          </h1>
+          <p className="text-white/40 mt-2 font-medium">Monitor your ecosystem and deploy new updates instantly.</p>
+        </div>
+        <Button onClick={openAdd} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">
+          <Plus className="h-5 w-5 mr-2" /> Add New App
+        </Button>
       </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {[
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        {[
             { label: "Total Apps", value: stats.total, icon: Package },
             { label: "Downloads", value: stats.downloads, icon: Download },
             { label: "Featured", value: stats.featured, icon: Star },
             { label: "Published", value: stats.published, icon: Eye },
             { label: "Unpublished", value: stats.unpublished, icon: EyeOff },
-            { label: "Total Apps", value: stats.total, icon: Package, color: "from-blue-500/20 to-blue-500/5", iconColor: "text-blue-400" },
-            { label: "Downloads", value: stats.downloads, icon: Download, color: "from-green-500/20 to-green-500/5", iconColor: "text-green-400" },
-            { label: "Featured", value: stats.featured, icon: Star, color: "from-yellow-500/20 to-yellow-500/5", iconColor: "text-yellow-400" },
-            { label: "Published", value: stats.published, icon: Eye, color: "from-purple-500/20 to-purple-500/5", iconColor: "text-purple-400" },
-            { label: "Unpublished", value: stats.unpublished, icon: EyeOff, color: "from-red-500/20 to-red-500/5", iconColor: "text-red-400" },
-          ].map((stat, i) => (
-            <Card key={i} className="bg-[#0f0f0f] border-white/5 overflow-hidden group hover:border-white/10 transition-all duration-300">
-              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500", stat.color)} />
-              <CardContent className="p-6 relative">
-                <div className="flex flex-col gap-4">
-                  <div className={cn("h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500", stat.iconColor)}>
-                    <stat.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white/30 uppercase tracking-widest">{stat.label}</p>
-                    <p className="text-2xl font-black mt-1 text-white">{stat.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          ].map((s) => (
+            <Card key={s.label} className="p-4 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-muted"><s.icon className="h-5 w-5 text-muted-foreground" /></div>
+              <div><p className="text-2xl font-bold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
+            <div className="w-1.5 h-6 bg-primary rounded-full" />
+            Apps List
+          </h2>
         </div>
 
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
-              <div className="w-1.5 h-6 bg-primary rounded-full" />
-              Apps List
-            </h2>
-          </div>
-
-          {loading ? (
-            <div className="grid gap-4">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />)}</div>
-          ) : (
-            <div className="rounded-2xl border border-white/5 bg-black/40 backdrop-blur-sm overflow-hidden">
-              <Table>
-                <TableHeader className="bg-white/[0.02] h-14">
-                  <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] pl-6">Application</TableHead>
-                    <TableHead className="hidden sm:table-cell text-white/40 font-bold uppercase tracking-widest text-[10px]">Category</TableHead>
-                    <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Status</TableHead>
-                    <TableHead className="text-right text-white/40 font-bold uppercase tracking-widest text-[10px] pr-6">Management</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+        {loading ? (
+          <div className="grid gap-4">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />)}</div>
+        ) : (
+          <div className="rounded-2xl border border-white/5 bg-black/40 backdrop-blur-sm overflow-hidden">
+            <Table>
+              <TableHeader className="bg-white/[0.02] h-14">
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] pl-6">Application</TableHead>
+                  <TableHead className="hidden sm:table-cell text-white/40 font-bold uppercase tracking-widest text-[10px]">Category</TableHead>
+                  <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Status</TableHead>
+                  <TableHead className="text-right text-white/40 font-bold uppercase tracking-widest text-[10px] pr-6">Management</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                   {apps.map((app) => (
                     <TableRow key={app._id} className="group hover:bg-white/[0.02] border-white/5 transition-colors">
                       <TableCell className="py-4 pl-6">
@@ -447,12 +439,9 @@ export default function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-    </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[800px] w-[95vw] h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
@@ -635,6 +624,6 @@ export default function AdminDashboard() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

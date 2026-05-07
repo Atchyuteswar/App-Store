@@ -56,28 +56,28 @@ export default function AdminLayout() {
   if (!admin) return <Navigate to="/admin/login" replace />;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur shrink-0">
-        <div className="container flex h-14 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="md:hidden" />
-            <h1 className="font-bold text-lg hidden sm:inline-block">Admin Console</h1>
-            <h1 className="font-bold text-lg sm:hidden">Admin</h1>
+    <SidebarProvider>
+      <div className="min-h-screen flex flex-col bg-background w-full">
+        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur shrink-0">
+          <div className="container flex h-14 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="md:hidden" />
+              <h1 className="font-bold text-lg hidden sm:inline-block">Admin Console</h1>
+              <h1 className="font-bold text-lg sm:hidden">Admin</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground hidden md:inline">{admin?.email}</span>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+                <Home className="h-4 w-4 mr-1" />Store
+              </Button>
+              <Button variant="outline" size="sm" onClick={async () => { await logout(); navigate("/admin/login"); }}>
+                <LogOut className="h-4 w-4 mr-1" />Logout
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden md:inline">{admin?.email}</span>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-              <Home className="h-4 w-4 mr-1" />Store
-            </Button>
-            <Button variant="outline" size="sm" onClick={async () => { await logout(); navigate("/admin/login"); }}>
-              <LogOut className="h-4 w-4 mr-1" />Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <SidebarProvider>
+        <div className="flex-1 flex overflow-hidden">
           <Sidebar className="hidden md:flex">
             <SidebarHeader className="h-14 flex items-center border-b px-4">
               <span className="font-bold text-lg tracking-tight">Admin Menu</span>
@@ -114,8 +114,8 @@ export default function AdminLayout() {
               </div>
             </main>
           </SidebarInset>
-        </SidebarProvider>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

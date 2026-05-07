@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { PackageOpen, ArrowRight, Zap, Activity, ShieldCheck, Terminal, Layers, Sparkles, Filter, Search, Globe, Cpu } from "lucide-react";
+import { PackageOpen, ArrowRight, Zap, Activity, ShieldCheck, Terminal, Layers, Sparkles, Filter, Search, Globe, Cpu, Badge } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import HeroBanner from "@/components/HeroBanner";
 import CategoryBar from "@/components/CategoryBar";
@@ -48,12 +48,12 @@ export default function Home() {
           <div className="p-2 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl flex items-center justify-between overflow-hidden group">
             <div className="flex gap-2 p-1 overflow-x-auto no-scrollbar">
               {["RESEARCH HUB", "EXPERIMENTS", "ALPHA DEPLOYMENTS", "DATASETS", "NEURAL LINKS"].map((tab, i) => (
-                <button 
-                  key={tab} 
+                <button
+                  key={tab}
                   className={cn(
-                    "h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 whitespace-nowrap flex items-center gap-3", 
-                    i === 0 
-                      ? "bg-primary text-white shadow-[0_0_20px_-5px_rgba(34,197,94,0.6)]" 
+                    "h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 whitespace-nowrap flex items-center gap-3",
+                    i === 0
+                      ? "bg-primary text-white shadow-[0_0_20px_-5px_rgba(34,197,94,0.6)]"
                       : "text-white/20 hover:text-white/60 hover:bg-white/5"
                   )}
                 >
@@ -112,11 +112,11 @@ export default function Home() {
                   Global Registry <ArrowRight className="ml-3 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-10">
                 {topApps.map((app, i) => (
-                  <div 
-                    key={app._id} 
+                  <div
+                    key={app._id}
                     className="flex items-center gap-8 group cursor-pointer p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-primary/30 transition-all duration-700 shadow-xl relative overflow-hidden"
                     onClick={() => window.location.href = `/app/${app.slug}`}
                   >
@@ -146,17 +146,17 @@ export default function Home() {
             {/* Curated Deployment Modules */}
             <div className="space-y-32">
               <AppSection title="PRIORITY REVISIONS" subtitle="Architectural focus for current research cycles" apps={recentApps} />
-              
+
               {/* Mid-Page Tactical CTA */}
               <div className="container">
                 <div className="relative overflow-hidden rounded-[4rem] bg-gradient-to-br from-primary/20 via-[#0a0a0a] to-[#050505] border border-white/5 p-16 md:p-24 flex flex-col lg:flex-row items-center gap-16 group shadow-2xl">
                   <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
                   <div className="absolute top-0 right-0 h-[600px] w-[600px] bg-primary/10 blur-[140px] rounded-full -mr-80 -mt-80" />
-                  
+
                   <div className="relative z-10 h-32 w-32 rounded-[3rem] bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:border-primary/50 transition-all duration-1000 shadow-2xl">
                     <Cpu className="h-14 w-14 text-primary animate-pulse" />
                   </div>
-                  
+
                   <div className="relative z-10 flex-1 text-center lg:text-left space-y-6">
                     <div className="space-y-4">
                       <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-black uppercase tracking-[0.3em] px-4 h-7">Core Infrastructure</Badge>

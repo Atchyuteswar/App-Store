@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { PackageOpen, ArrowRight, Zap, Activity, ShieldCheck, Terminal, Layers, Sparkles, Filter, Search, Globe, Cpu, Badge } from "lucide-react";
+import { PackageOpen, ArrowRight, Zap, Activity, ShieldCheck, Terminal, Layers, Sparkles, Filter, Search, Globe, Cpu } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import HeroBanner from "@/components/HeroBanner";
 import CategoryBar from "@/components/CategoryBar";

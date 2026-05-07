@@ -290,68 +290,168 @@ export default function AdminDashboard() {
             { label: "Featured", value: stats.featured, icon: Star },
             { label: "Published", value: stats.published, icon: Eye },
             { label: "Unpublished", value: stats.unpublished, icon: EyeOff },
-          ].map((s) => (
-            <Card key={s.label} className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-muted"><s.icon className="h-5 w-5 text-muted-foreground" /></div>
-              <div><p className="text-2xl font-bold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
+            { label: "Total Apps", value: stats.total, icon: Package, color: "from-blue-500/20 to-blue-500/5", iconColor: "text-blue-400" },
+            { label: "Downloads", value: stats.downloads, icon: Download, color: "from-green-500/20 to-green-500/5", iconColor: "text-green-400" },
+            { label: "Featured", value: stats.featured, icon: Star, color: "from-yellow-500/20 to-yellow-500/5", iconColor: "text-yellow-400" },
+            { label: "Published", value: stats.published, icon: Eye, color: "from-purple-500/20 to-purple-500/5", iconColor: "text-purple-400" },
+            { label: "Unpublished", value: stats.unpublished, icon: EyeOff, color: "from-red-500/20 to-red-500/5", iconColor: "text-red-400" },
+          ].map((stat, i) => (
+            <Card key={i} className="bg-[#0f0f0f] border-white/5 overflow-hidden group hover:border-white/10 transition-all duration-300">
+              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500", stat.color)} />
+              <CardContent className="p-6 relative">
+                <div className="flex flex-col gap-4">
+                  <div className={cn("h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500", stat.iconColor)}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white/30 uppercase tracking-widest">{stat.label}</p>
+                    <p className="text-2xl font-black mt-1 text-white">{stat.value}</p>
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Apps List</h2>
-        </div>
-
-        {loading ? (
-          <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
-        ) : (
-          <div className="border rounded-lg bg-card">
-            <Table>
-              <TableHeader><TableRow><TableHead>App</TableHead><TableHead className="hidden sm:table-cell">Category</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {apps.map((app) => (
-                  <TableRow key={app._id}>
-                    <TableCell><div className="flex items-center gap-3"><img src={api.getFileUrl(app.icon)} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted shrink-0" /><span className="font-medium max-w-[120px] sm:max-w-none truncate">{app.name}</span></div></TableCell>
-                    <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{app.category}</Badge></TableCell>
-                    <TableCell><div className="flex gap-1">{app.published ? <Badge>Live</Badge> : <Badge variant="outline">Draft</Badge>}{app.featured && <Badge variant="secondary">★</Badge>}</div></TableCell>
-                    <TableCell className="text-right">
-                      {/* Desktop Actions */}
-                      <div className="hidden sm:flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" title="Publish Update" onClick={() => openRelease(app)} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"><Rocket className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" title="Manage Versions" onClick={() => openRollback(app)} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"><History className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" title="Toggle Visibility" onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button>
-                        <Button variant="ghost" size="icon" title="Toggle Featured" onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /></Button>
-                        <Button variant="ghost" size="icon" title="Toggle A/B Testing" onClick={() => api.toggleAbTesting(app._id).then(fetchApps)}><Beaker className={`h-4 w-4 ${app.abTestingEnabled ? "text-purple-500 fill-purple-500" : ""}`} /></Button>
-                        <Button variant="ghost" size="icon" title="Edit App Details" onClick={() => openEdit(app)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" title="Delete App" className="text-destructive" onClick={() => api.deleteApp(app._id).then(fetchApps)}><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                      {/* Mobile Actions Dropdown */}
-                      <div className="sm:hidden flex justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-5 w-5" /></Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => openRelease(app)}><Rocket className="mr-2 h-4 w-4 text-blue-500" /> Publish Update</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openRollback(app)}><History className="mr-2 h-4 w-4 text-orange-500" /> Manage Versions</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? <><EyeOff className="mr-2 h-4 w-4" /> Unpublish</> : <><Eye className="mr-2 h-4 w-4" /> Publish</>}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => api.toggleFeatured(app._id).then(fetchApps)}><Star className={`mr-2 h-4 w-4 ${app.featured ? "fill-yellow-500 text-yellow-500" : ""}`} /> {app.featured ? "Unfeature" : "Feature"}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => api.toggleAbTesting(app._id).then(fetchApps)}><Beaker className={`mr-2 h-4 w-4 ${app.abTestingEnabled ? "text-purple-500 fill-purple-500" : ""}`} /> {app.abTestingEnabled ? "Disable A/B Testing" : "Enable A/B Testing"}</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => openEdit(app)}><Pencil className="mr-2 h-4 w-4" /> Edit Details</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete App</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
+              <div className="w-1.5 h-6 bg-primary rounded-full" />
+              Apps List
+            </h2>
           </div>
-        )}
+
+          {loading ? (
+            <div className="grid gap-4">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />)}</div>
+          ) : (
+            <div className="rounded-2xl border border-white/5 bg-black/40 backdrop-blur-sm overflow-hidden">
+              <Table>
+                <TableHeader className="bg-white/[0.02] h-14">
+                  <TableRow className="hover:bg-transparent border-white/5">
+                    <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] pl-6">Application</TableHead>
+                    <TableHead className="hidden sm:table-cell text-white/40 font-bold uppercase tracking-widest text-[10px]">Category</TableHead>
+                    <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Status</TableHead>
+                    <TableHead className="text-right text-white/40 font-bold uppercase tracking-widest text-[10px] pr-6">Management</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {apps.map((app) => (
+                    <TableRow key={app._id} className="group hover:bg-white/[0.02] border-white/5 transition-colors">
+                      <TableCell className="py-4 pl-6">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-white/10 shadow-lg group-hover:scale-105 transition-transform duration-300">
+                            <img src={api.getFileUrl(app.icon)} alt="" className="h-full w-full object-cover" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-white leading-tight">{app.name}</span>
+                            <span className="text-[10px] text-white/30 font-medium uppercase tracking-widest mt-1">v{app.version}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant="outline" className="bg-white/5 border-white/10 text-white/60 font-medium">
+                          {app.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {app.published ? (
+                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-bold uppercase">
+                              <div className="h-1 w-1 rounded-full bg-green-400 animate-pulse" />
+                              Live
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 text-white/40 border border-white/10 text-[10px] font-bold uppercase">
+                              Draft
+                            </div>
+                          )}
+                          {app.featured && (
+                            <div className="h-6 w-6 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <div className="hidden sm:flex items-center justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => openRelease(app)} 
+                            className="h-9 w-9 rounded-xl text-blue-400 hover:bg-blue-500/10 transition-all active:scale-90"
+                            title="Release Update"
+                          >
+                            <Rocket className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => openRollback(app)} 
+                            className="h-9 w-9 rounded-xl text-orange-400 hover:bg-orange-500/10 transition-all active:scale-90"
+                            title="Manage Versions"
+                          >
+                            <History className="h-4 w-4" />
+                          </Button>
+                          
+                          <div className="w-[1px] h-4 bg-white/10 mx-1" />
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-white/40 hover:text-white hover:bg-white/5">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-[#0f0f0f] border-white/10 text-white">
+                              <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-white/30">Configuration</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)} className="cursor-pointer">
+                                {app.published ? <><EyeOff className="mr-2 h-4 w-4 text-red-400" /> Unpublish</> : <><Eye className="mr-2 h-4 w-4 text-green-400" /> Publish</>}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => api.toggleFeatured(app._id).then(fetchApps)} className="cursor-pointer">
+                                <Star className={cn("mr-2 h-4 w-4", app.featured ? "fill-yellow-500 text-yellow-500" : "text-white/40")} /> 
+                                {app.featured ? "Remove Featured" : "Make Featured"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => api.toggleAbTesting(app._id).then(fetchApps)} className="cursor-pointer">
+                                <Beaker className={cn("mr-2 h-4 w-4", app.abTestingEnabled ? "text-purple-400 fill-purple-400/20" : "text-white/40")} /> 
+                                {app.abTestingEnabled ? "Disable A/B Tests" : "Enable A/B Tests"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuItem onClick={() => openEdit(app)} className="cursor-pointer">
+                                <Pencil className="mr-2 h-4 w-4 text-white/60" /> Edit Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer">
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete Application
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+
+                        {/* Mobile Actions */}
+                        <div className="sm:hidden flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-white/40 hover:text-white"><MoreHorizontal className="h-5 w-5" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-[#0f0f0f] border-white/10 text-white">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => openRelease(app)}><Rocket className="mr-2 h-4 w-4 text-blue-400" /> Publish Update</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openRollback(app)}><History className="mr-2 h-4 w-4 text-orange-400" /> Versions</DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? "Unpublish" : "Publish"}</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEdit(app)}><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-red-400">Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </div>
+
     </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

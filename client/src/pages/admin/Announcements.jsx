@@ -83,21 +83,23 @@ export default function Announcements() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-10 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Broadcast Announcements</h1>
-          <p className="text-muted-foreground mt-1">Send mass updates and notifications to your testers.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+            Broadcast Announcements
+          </h1>
+          <p className="text-white/40 mt-2 font-medium">Send mass updates and notifications to your testers.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" /> New Broadcast
+            <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-12 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">
+              <Plus className="h-5 w-5 mr-2" /> New Broadcast
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] bg-[#0f0f0f] border-white/10 text-white">
             <DialogHeader>
-              <DialogTitle>Create Announcement</DialogTitle>
+              <DialogTitle className="text-xl font-bold">Create Announcement</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">

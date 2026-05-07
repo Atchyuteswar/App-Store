@@ -36,10 +36,10 @@ import { Bug, Search, Filter, MoreVertical, MessageSquare, Clock, AlertTriangle,
 import { useToast } from "@/hooks/use-toast";
 
 const COLUMNS = [
-  { id: 'reported', title: 'Reported', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { id: 'under review', title: 'Under Review', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  { id: 'fixed', title: 'Fixed', color: 'bg-green-100 text-green-700 border-green-200' },
-  { id: 'closed', title: 'Closed', color: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { id: 'reported', title: 'Reported', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  { id: 'under review', title: 'Under Review', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  { id: 'fixed', title: 'Fixed', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  { id: 'closed', title: 'Closed', color: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
 ];
 
 export default function BugTriage() {
@@ -112,27 +112,29 @@ export default function BugTriage() {
   );
 
   return (
-    <div className="h-[calc(100vh-12rem)] flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="h-[calc(100vh-14rem)] flex flex-col gap-10 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bug Triage</h1>
-          <p className="text-muted-foreground mt-1">Manage and prioritize reported issues across all applications.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+            Bug Triage
+          </h1>
+          <p className="text-white/40 mt-2 font-medium">Manage and prioritize reported issues across all applications.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
             <Input 
               placeholder="Search bugs..." 
-              className="pl-9 w-[200px] md:w-[300px]" 
+              className="pl-10 w-[200px] md:w-[300px] bg-white/5 border-white/10 text-white rounded-xl h-11 focus-visible:ring-primary" 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Select value={selectedApp} onValueChange={setSelectedApp}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-white rounded-xl h-11">
               <SelectValue placeholder="All Apps" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#0f0f0f] border-white/10 text-white">
               <SelectItem value="all">All Apps</SelectItem>
               {apps.map(app => (
                 <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
@@ -150,24 +152,32 @@ export default function BugTriage() {
       >
         <div className="flex-1 flex gap-6 overflow-x-auto pb-4 custom-scrollbar">
           {COLUMNS.map(column => (
-            <div key={column.id} className="flex-1 min-w-[300px] flex flex-col gap-4">
-              <div className={cn("px-4 py-2 rounded-lg border flex items-center justify-between font-bold text-sm", column.color)}>
-                {column.title}
-                <Badge variant="secondary" className="bg-white/50">{filteredBugs.filter(b => b.status === column.id).length}</Badge>
+            <div key={column.id} className="flex-1 min-w-[320px] flex flex-col gap-6">
+              <div className={cn("px-5 py-3 rounded-2xl border flex items-center justify-between font-bold text-xs uppercase tracking-widest", column.color)}>
+                <div className="flex items-center gap-2">
+                  <div className={cn("h-1.5 w-1.5 rounded-full animate-pulse", column.id === 'reported' ? 'bg-blue-400' : column.id === 'under review' ? 'bg-amber-400' : column.id === 'fixed' ? 'bg-green-400' : 'bg-slate-400')} />
+                  {column.title}
+                </div>
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/10">{filteredBugs.filter(b => b.status === column.id).length}</Badge>
               </div>
               
               <SortableContext items={filteredBugs.filter(b => b.status === column.id)} strategy={verticalListSortingStrategy}>
-                <div className="flex-1 bg-muted/30 rounded-xl p-2 space-y-3 border-2 border-dashed border-transparent hover:border-muted-foreground/20 transition-colors">
+                <div className="flex-1 bg-white/[0.02] rounded-3xl p-3 space-y-4 border border-white/5 overflow-y-auto custom-scrollbar">
                   {filteredBugs.filter(b => b.status === column.id).map(bug => (
                     <BugCard key={bug.id} bug={bug} onClick={() => setSelectedBug(bug)} />
                   ))}
+                  {filteredBugs.filter(b => b.status === column.id).length === 0 && !loading && (
+                    <div className="h-20 flex items-center justify-center text-[10px] font-bold text-white/10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">
+                      Empty Column
+                    </div>
+                  )}
                 </div>
               </SortableContext>
             </div>
           ))}
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
           {activeId ? (
             <BugCard bug={bugs.find(b => b.id === activeId)} isOverlay />
           ) : null}

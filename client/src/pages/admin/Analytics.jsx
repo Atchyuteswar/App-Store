@@ -76,16 +76,17 @@ export default function Analytics() {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }) => (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <h3 className="text-2xl font-bold mt-1">{loading ? <Skeleton className="h-8 w-20" /> : value}</h3>
+  const StatCard = ({ title, value, icon: Icon, gradient, iconColor }) => (
+    <Card className="bg-[#0f0f0f] border-white/5 overflow-hidden group hover:border-white/10 transition-all duration-300">
+      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500", gradient)} />
+      <CardContent className="p-6 relative">
+        <div className="flex flex-col gap-4">
+          <div className={cn("h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500", iconColor)}>
+            <Icon className="h-5 w-5" />
           </div>
-          <div className={cn("p-2 rounded-full", color)}>
-            <Icon className="h-5 w-5 text-white" />
+          <div>
+            <p className="text-xs font-bold text-white/30 uppercase tracking-widest">{title}</p>
+            <p className="text-2xl font-black mt-1 text-white">{loading ? <Skeleton className="h-8 w-24 bg-white/5" /> : value}</p>
           </div>
         </div>
       </CardContent>
@@ -93,29 +94,20 @@ export default function Analytics() {
   );
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Monitor app performance and tester engagement.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+            Analytics Overview
+          </h1>
+          <p className="text-white/40 mt-2 font-medium">Deep dive into your application performance and tester behavior.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Select value={appId} onValueChange={setAppId}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Apps" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Apps</SelectItem>
-              {apps.map(app => (
-                <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-3">
           <Select value={range} onValueChange={setRange}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Last 30 Days" />
+            <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white rounded-xl h-11">
+              <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#0f0f0f] border-white/10 text-white">
               <SelectItem value="7">Last 7 Days</SelectItem>
               <SelectItem value="30">Last 30 Days</SelectItem>
               <SelectItem value="90">Last 90 Days</SelectItem>

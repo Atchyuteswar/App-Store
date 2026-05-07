@@ -68,36 +68,40 @@ export default function Approvals() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-10 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tester Approvals</h1>
-          <p className="text-muted-foreground mt-1">Review and manage access requests for restricted testing programs.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+            Tester Approvals
+          </h1>
+          <p className="text-white/40 mt-2 font-medium">Review and manage access requests for restricted testing programs.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 py-1 px-3">
-            <Clock className="h-3 w-3 mr-1" /> {pending.length} Pending
-          </Badge>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold uppercase tracking-widest">
+            <Clock className="h-3.5 w-3.5 animate-pulse" /> {pending.length} Pending Requests
+          </div>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Enrollment Requests</CardTitle>
-          <CardDescription>Waitlist for A/B testing programs requiring manual review.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
-                  <TableHead>Tester</TableHead>
-                  <TableHead>App</TableHead>
-                  <TableHead>Requested On</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+      <div className="rounded-3xl border border-white/5 bg-black/40 backdrop-blur-sm overflow-hidden">
+        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+          <div>
+            <h3 className="font-bold text-white">Enrollment Waitlist</h3>
+            <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-medium">Manual Review Required</p>
+          </div>
+          <Badge variant="outline" className="bg-white/5 border-white/10 text-white/60">A/B Testing Program</Badge>
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-white/[0.02]">
+              <TableRow className="hover:bg-transparent border-white/5">
+                <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] pl-6 h-12">Tester</TableHead>
+                <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] h-12">Application</TableHead>
+                <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] h-12">Requested On</TableHead>
+                <TableHead className="text-right text-white/40 font-bold uppercase tracking-widest text-[10px] pr-6 h-12">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
                 {loading ? (
                   Array(3).fill(0).map((_, i) => (
                     <TableRow key={i}>
@@ -160,41 +164,38 @@ export default function Approvals() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-green-50/50 border-green-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-green-800">
-              <ShieldCheck className="h-4 w-4" /> Why manual review?
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-green-700 leading-relaxed">
-              Manual review ensures that your restricted A/B tests are only accessed by trusted or targeted testers, protecting confidential builds and ensuring quality feedback.
+        <Card className="bg-[#0f0f0f] border-white/5 group hover:border-green-500/30 transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20 mb-4 group-hover:scale-110 transition-transform">
+              <ShieldCheck className="h-5 w-5 text-green-400" />
+            </div>
+            <h4 className="font-bold text-white text-sm mb-2">Why manual review?</h4>
+            <p className="text-xs text-white/40 leading-relaxed font-medium">
+              Manual review ensures that restricted A/B tests are only accessed by targeted testers, protecting confidential builds and ensuring high-quality feedback.
             </p>
           </CardContent>
         </Card>
         
-        <Card className="bg-blue-50/50 border-blue-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-blue-800">
-              <Mail className="h-4 w-4" /> Automation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-blue-700 leading-relaxed">
+        <Card className="bg-[#0f0f0f] border-white/5 group hover:border-blue-500/30 transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 mb-4 group-hover:scale-110 transition-transform">
+              <Mail className="h-5 w-5 text-blue-400" />
+            </div>
+            <h4 className="font-bold text-white text-sm mb-2">Automation</h4>
+            <p className="text-xs text-white/40 leading-relaxed font-medium">
               Upon approval or rejection, the system automatically sends a professionally formatted email and in-app notification to the tester.
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-50 border-slate-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-800">
-              <ExternalLink className="h-4 w-4" /> App Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              You can toggle "Require Manual Approval" for any individual app in the App Management dashboard under the "A/B Testing" section.
+        <Card className="bg-[#0f0f0f] border-white/5 group hover:border-slate-500/30 transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 mb-4 group-hover:scale-110 transition-transform">
+              <ExternalLink className="h-5 w-5 text-white/60" />
+            </div>
+            <h4 className="font-bold text-white text-sm mb-2">App Settings</h4>
+            <p className="text-xs text-white/40 leading-relaxed font-medium">
+              Toggle "Require Manual Approval" for any individual app in the App Management dashboard under the "A/B Testing" section.
             </p>
           </CardContent>
         </Card>

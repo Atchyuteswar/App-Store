@@ -16,11 +16,15 @@ router.get('/dashboard-summary', testerController.getDashboardSummary);
 router.get('/stats', testerController.getStats);
 router.get('/activity', testerController.getActivity);
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
 // Apps & Feedback
 router.get('/apps/:slug/messages', testerController.getMessages);
 router.post('/apps/:slug/messages', testerController.addMessage);
 router.get('/apps/:slug/bugs', testerController.getBugs);
-router.post('/apps/:slug/bugs', testerController.addBug);
+router.get('/bugs/similar', testerController.getSimilarBugs);
+router.post('/apps/:slug/bugs', upload.single('recording'), testerController.addBug);
 router.get('/apps/:slug/ideas', testerController.getIdeas);
 router.post('/apps/:slug/ideas', testerController.addIdea);
 router.post('/ideas/:ideaId/upvote', testerController.upvoteIdea);

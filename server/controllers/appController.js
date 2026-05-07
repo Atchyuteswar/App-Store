@@ -2,38 +2,9 @@ const supabase = require('../lib/supabase');
 const slugify = require('slugify');
 const { uploadToStorage, deleteFromStorage } = require('../middleware/uploadMiddleware');
 const { sendConfirmationEmail } = require('../lib/mailer');
-const { success, error, notFound, badRequest } = require('../lib/utils');
+const { success, error, notFound, badRequest, toCamel } = require('../lib/utils');
 
-// Transform snake_case DB row to camelCase for frontend compatibility
-function toCamel(row) {
-  if (!row) return row;
-  return {
-    _id: row.id,
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    tagline: row.tagline,
-    description: row.description,
-    whatsNew: row.whats_new,
-    category: row.category,
-    tags: row.tags || [],
-    icon: row.icon,
-    screenshots: row.screenshots || [],
-    apkFile: row.apk_file,
-    version: row.version,
-    size: row.size,
-    platform: row.platform,
-    minOSVersion: row.min_os_version,
-    rating: parseFloat(row.rating) || 0,
-    downloads: row.downloads || 0,
-    featured: row.featured,
-    published: row.published,
-    abTestingEnabled: row.ab_testing_enabled,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    versionHistory: row.version_history || [],
-  };
-}
+
 
 // ─── PUBLIC ─────────────────────────────────────────────
 

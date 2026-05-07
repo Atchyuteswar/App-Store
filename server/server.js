@@ -6,9 +6,9 @@ const bcrypt = require('bcryptjs');
 
 const supabase = require('./lib/supabase');
 const appRoutes = require('./routes/appRoutes');
-const { adminRouter } = require('./routes/appRoutes');
 const authRoutes = require('./routes/authRoutes');
 const testerRoutes = require('./routes/testerRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -27,7 +27,7 @@ app.use(cookieParser());
 // API Routes
 app.use('/api/apps', appRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRouter);
+app.use('/api/admin', adminRoutes);
 app.use('/api/tester', testerRoutes);
 
 // Health check

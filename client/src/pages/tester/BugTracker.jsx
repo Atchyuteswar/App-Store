@@ -32,9 +32,15 @@ import {
   XCircle,
   Search,
   MessageSquare,
-  Package
+  Package,
+  Video,
+  StopCircle,
+  Play,
+  Copy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getSimilarBugs } from "@/services/api";
+import { Progress } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -65,7 +71,6 @@ export default function BugTracker() {
   const [filterSeverity, setFilterSeverity] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // Form State
   const [formData, setFormData] = useState({
     appSlug: "",
     title: "",
@@ -74,6 +79,17 @@ export default function BugTracker() {
     steps: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Screen Recording State
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [recordedChunks, setRecordedChunks] = useState([]);
+  const [videoBlob, setVideoBlob] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
+
+  // Duplicate Check State
+  const [similarBugs, setSimilarBugs] = useState([]);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
 
   useEffect(() => {
     fetchInitialData();
@@ -106,6 +122,52 @@ export default function BugTracker() {
     }
   };
 
+  const handleTitleBlur = async () => {
+    if (formData.title.length < 5 || !formData.appSlug) return;
+    setIsCheckingDuplicates(true);
+    try {
+      const res = await getSimilarBugs({ title: formData.title, appSlug: formData.appSlug });
+      setSimilarBugs(res.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCheckingDuplicates(false);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        setVideoBlob(blob);
+        setVideoUrl(URL.createObjectURL(blob));
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      setMediaRecorder(recorder);
+      setRecordedChunks([]);
+      recorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      toast({ title: "Recording Error", description: "Could not start screen recording.", variant: "destructive" });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.appSlug || !formData.title || !formData.description) {
@@ -115,21 +177,43 @@ export default function BugTracker() {
 
     setIsSubmitting(true);
     try {
-      await addTesterBug(formData.appSlug, {
-        title: formData.title,
-        description: formData.description,
-        severity: formData.severity,
-        steps: formData.steps,
-      });
+      let recordingUrl = null;
+      if (videoBlob) {
+        // Upload logic would go here, assuming addTesterBug handles multipart or we send as field
+        // For now, we'll assume the API can handle a FormData object
+        const finalData = new FormData();
+        finalData.append('title', formData.title);
+        finalData.append('description', formData.description);
+        finalData.append('severity', formData.severity);
+        finalData.append('steps', formData.steps);
+        if (videoBlob) finalData.append('recording', videoBlob, 'recording.webm');
+        
+        await addTesterBug(formData.appSlug, finalData);
+      } else {
+        await addTesterBug(formData.appSlug, {
+          title: formData.title,
+          description: formData.description,
+          severity: formData.severity,
+          steps: formData.steps,
+        });
+      }
+      
       toast({ title: "Bug Reported", description: "Thank you! Our team will investigate this." });
       setIsModalOpen(false);
-      setFormData({ appSlug: "", title: "", description: "", severity: "medium", steps: "" });
+      resetForm();
       fetchAllBugs(enrollments);
     } catch (err) {
       toast({ title: "Error", description: "Failed to submit bug report.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({ appSlug: "", title: "", description: "", severity: "medium", steps: "" });
+    setVideoBlob(null);
+    setVideoUrl(null);
+    setSimilarBugs([]);
   };
 
   const filteredBugs = bugs.filter(bug => {
@@ -280,28 +364,37 @@ export default function BugTracker() {
                                 </div>
                               )}
                             </div>
-                            <div className="space-y-4">
-                              <div className="p-4 rounded-xl border bg-card/50">
-                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
-                                  <MessageSquare className="h-3 w-3" /> Admin Response
-                                </h4>
-                                <p className="text-sm text-muted-foreground italic">
-                                  No response from the developer team yet.
-                                </p>
+                                {bug.recordingUrl && (
+                                  <div>
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Recording</h4>
+                                    <div className="aspect-video bg-black rounded-lg overflow-hidden border">
+                                      <video src={bug.recordingUrl} controls className="h-full w-full" />
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                              <div className="flex justify-end gap-2">
-                                <Button variant="outline" size="sm" className="h-8 text-xs">
-                                  Send Message
-                                </Button>
-                                <Button variant="ghost" size="sm" className="h-8 text-xs text-red-500">
-                                  Withdraw Report
-                                </Button>
+                              <div className="space-y-4">
+                                <div className="p-4 rounded-xl border bg-card/50">
+                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
+                                    <MessageSquare className="h-3 w-3" /> Admin Response
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground italic">
+                                    {bug.internalNotes ? bug.internalNotes : "No response from the developer team yet."}
+                                  </p>
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                  <Button variant="outline" size="sm" className="h-8 text-xs">
+                                    Send Message
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-8 text-xs text-red-500">
+                                    Withdraw Report
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
+                          </td>
+                        </tr>
+                      )}
                   </React.Fragment>
                 ))
               )}
@@ -370,7 +463,24 @@ export default function BugTracker() {
                 className="bg-muted/30"
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onBlur={handleTitleBlur}
               />
+              {similarBugs.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 animate-in slide-in-from-top-2">
+                  <div className="flex items-center gap-2 text-amber-800 text-xs font-bold mb-2">
+                    <Copy className="h-3 w-3" /> Similar bugs already reported:
+                  </div>
+                  <ul className="space-y-1">
+                    {similarBugs.map(b => (
+                      <li key={b.id} className="text-[10px] text-amber-700 flex items-center gap-1">
+                        <div className="h-1 w-1 rounded-full bg-amber-400" />
+                        {b.title} ({b.status})
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-[10px] text-amber-600 mt-2 italic">Please check if your bug is unique before submitting.</p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -387,10 +497,45 @@ export default function BugTracker() {
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Steps to Reproduce</label>
               <Textarea 
                 placeholder="1. Open the app&#10;2. Click on..." 
-                className="bg-muted/30 min-h-[100px] font-mono text-xs"
+                className="bg-muted/30 min-h-[80px] font-mono text-xs"
                 value={formData.steps}
                 onChange={(e) => setFormData({...formData, steps: e.target.value})}
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Screen Recording (Evidence)</label>
+              <div className="flex flex-col gap-3">
+                {!videoUrl ? (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className={cn("w-full h-12 border-dashed flex items-center gap-2", isRecording && "border-red-500 text-red-500 animate-pulse")}
+                    onClick={isRecording ? stopRecording : startRecording}
+                  >
+                    {isRecording ? (
+                      <><StopCircle className="h-5 w-5" /> Stop Recording</>
+                    ) : (
+                      <><Video className="h-5 w-5" /> Start Screen Recording</>
+                    )}
+                  </Button>
+                ) : (
+                  <div className="relative aspect-video bg-black rounded-lg overflow-hidden border">
+                    <video src={videoUrl} controls className="h-full w-full" />
+                    <Button 
+                      size="icon" 
+                      variant="destructive" 
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      onClick={() => { setVideoBlob(null); setVideoUrl(null); }}
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground italic text-center">
+                  Visual evidence helps our developers fix bugs 10x faster.
+                </p>
+              </div>
             </div>
 
             <DialogFooter>

@@ -21,6 +21,13 @@ import Timeline from "@/pages/tester/Timeline";
 import Polls from "@/pages/tester/Polls";
 import Leaderboard from "@/pages/tester/Leaderboard";
 import PublicProfile from "@/pages/tester/PublicProfile";
+import AdminLayout from "@/layouts/AdminLayout";
+import Analytics from "@/pages/admin/Analytics";
+import BugTriage from "@/pages/admin/BugTriage";
+import Approvals from "@/pages/admin/Approvals";
+import Announcements from "@/pages/admin/Announcements";
+import Exports from "@/pages/admin/Exports";
+import CompareVersions from "@/pages/tester/CompareVersions";
 
 export default function App() {
   return (
@@ -48,10 +55,19 @@ export default function App() {
             <Route path="activity" element={<ActivityCalendar />} />
             <Route path="notifications" element={<NotificationCenter />} />
             <Route path="profile" element={<TesterProfile />} />
+            <Route path="apps/:slug/compare" element={<CompareVersions />} />
           </Route>
           
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="bugs" element={<BugTriage />} />
+            <Route path="approvals" element={<Approvals />} />
+            <Route path="announcements" element={<Announcements />} />
+            <Route path="exports" element={<Exports />} />
+          </Route>
         </Routes>
       </BrowserRouter>
       <Toaster />

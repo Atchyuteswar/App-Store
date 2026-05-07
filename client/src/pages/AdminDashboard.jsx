@@ -277,18 +277,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container flex h-14 items-center justify-between">
-          <h1 className="font-bold text-lg">Admin Dashboard</h1>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:inline">{admin?.email}</span>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")}><Home className="h-4 w-4 mr-1" />Store</Button>
-            <Button variant="outline" size="sm" onClick={async () => { await logout(); navigate("/admin/login"); }}><LogOut className="h-4 w-4 mr-1" />Logout</Button>
-          </div>
-        </div>
-      </header>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">App Management</h1>
+        <Button onClick={openAdd}><Plus className="h-4 w-4 mr-1" />Add New App</Button>
+      </div>
 
-      <main className="container py-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { label: "Total Apps", value: stats.total, icon: Package },
@@ -305,8 +298,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Apps</h2>
-          <Button onClick={openAdd}><Plus className="h-4 w-4 mr-1" />Add New App</Button>
+          <h2 className="text-xl font-semibold">Apps List</h2>
         </div>
 
         {loading ? (
@@ -359,7 +351,7 @@ export default function AdminDashboard() {
             </Table>
           </div>
         )}
-      </main>
+    </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[800px] w-[95vw] h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">

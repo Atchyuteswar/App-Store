@@ -74,6 +74,41 @@ export const toggleFeatured = (id) => api.patch(`/admin/apps/${id}/toggle-featur
 export const enrollAbTesting = (slug, data) => api.post(`/apps/${slug}/enroll`, data);
 export const toggleAbTesting = (id) => api.patch(`/admin/apps/${id}/toggle-ab-testing`);
 
+// --- ADMIN ANALYTICS ---
+export const getAnalyticsOverview = (params) => api.get('/admin/analytics/overview', { params });
+export const getDownloadStats = (params) => api.get('/admin/analytics/downloads', { params });
+export const getBugsPerVersion = (params) => api.get('/admin/analytics/bugs-per-version', { params });
+export const getTopTesters = (params) => api.get('/admin/analytics/top-testers', { params });
+export const getIdeaFunnel = (params) => api.get('/admin/analytics/idea-funnel', { params });
+export const getTesterRetention = (params) => api.get('/admin/analytics/tester-retention', { params });
+
+// --- ADMIN ANNOUNCEMENTS ---
+export const createAnnouncement = (data) => api.post('/admin/announcements', data);
+export const getAnnouncements = (params) => api.get('/admin/announcements', { params });
+
+// --- ADMIN APPROVALS ---
+export const getPendingEnrollments = () => api.get('/admin/enrollments/pending');
+export const approveEnrollment = (id) => api.put(`/admin/enrollments/${id}/approve`);
+export const rejectEnrollment = (id, data) => api.put(`/admin/enrollments/${id}/reject`, data);
+
+// --- ADMIN BUG TRIAGE ---
+export const getTriageBugs = (params) => api.get('/admin/bugs', { params });
+export const updateBugStatus = (id, status) => api.put(`/admin/bugs/${id}/status`, { status });
+export const updateBugPriority = (id, priority) => api.put(`/admin/bugs/${id}/priority`, { priority });
+export const updateBugNotes = (id, notes) => api.put(`/admin/bugs/${id}/notes`, { internalNotes: notes });
+export const replyToBug = (id, message) => api.post(`/admin/bugs/${id}/reply`, { message });
+export const markBugDuplicate = (id, duplicateOfId) => api.put(`/admin/bugs/${id}/duplicate`, { duplicateOfId });
+
+// --- ADMIN EXPORTS ---
+export const getExportCSVUrl = (params) => {
+  const query = new URLSearchParams(params).toString();
+  return `${API_URL}/api/admin/export/csv?${query}`;
+};
+export const getExportPDFUrl = (params) => {
+  const query = new URLSearchParams(params).toString();
+  return `${API_URL}/api/admin/export/pdf?${query}`;
+};
+
 // --- TESTER HUB ---
 export const getTesterEnrollments = () => api.get('/tester/enrollments');
 export const getTesterDashboardSummary = () => api.get('/tester/dashboard-summary');
@@ -133,6 +168,17 @@ export const dismissTesterOnboarding = () => api.put('/tester/onboarding/dismiss
 // Public Profile (New)
 export const checkUsernameAvailability = (username) => api.get(`/tester/check-username/${username}`);
 export const getPublicProfile = (username) => api.get(`/tester/profile/${username}`);
+
+// --- TESTER VERSION COMPARE ---
+export const getVersionComparison = (slug, params) => api.get(`/tester/apps/${slug}/compare`, { params });
+
+// --- TESTER DUPLICATE BUGS ---
+export const getSimilarBugs = (params) => api.get('/tester/bugs/similar', { params });
+
+// --- TESTER INSTALLS ---
+export const confirmInstall = (data) => api.post('/tester/installs', data);
+export const getInstallHistory = () => api.get('/tester/installs');
+export const getAppInstallsAdmin = (appId) => api.get(`/admin/apps/${appId}/installs`);
 
 export const getFileUrl = (url) => {
   if (!url) return "";

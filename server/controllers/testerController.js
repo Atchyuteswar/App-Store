@@ -121,16 +121,56 @@ exports.getBugs = async (req, res) => {
   }
 };
 
+exports.getSimilarBugs = async (req, res) => {
+  try {
+    const { title, appSlug } = req.query;
+    if (!title) return success(res, []);
+
+    let query = supabase.from('tester_bugs').select('id, title, status');
+    
+    if (appSlug) {
+      const { data: app } = await supabase.from('apps').select('id').eq('slug', appSlug).single();
+      if (app) query = query.eq('app_id', app.id);
+    }
+
+    // Similarity check using pg_trgm (if enabled) or simple LIKE
+    // For now, we'll fetch some and filter or use ilike
+    const { data: bugs } = await query.ilike('title', `%${title}%`).limit(5);
+    
+    res.json({ success: true, data: bugs || [] });
+  } catch (err) {
+    console.error(err);
+    error(res, 'Failed to check duplicates');
+  }
+};
+
 exports.addBug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { title, description, severity, steps, attachments } = req.body;
+    const { title, description, severity, steps } = req.body;
+    const file = req.file;
+
     if (!title || !description) return res.status(400).json({ message: 'Title and description required' });
 
     const { data: app } = await supabase.from('apps').select('id').eq('slug', slug).single();
     if (!app) return res.status(404).json({ message: 'App not found' });
 
-    const { data, error } = await supabase
+    let recordingUrl = null;
+    if (file) {
+      const fileName = `bugs/${app.id}/${Date.now()}_${file.originalname}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('recordings')
+        .upload(fileName, file.buffer, {
+          contentType: file.mimetype,
+          cacheControl: '3600'
+        });
+
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('recordings').getPublicUrl(fileName);
+      recordingUrl = publicUrl;
+    }
+
+    const { data, error: insertError } = await supabase
       .from('tester_bugs')
       .insert({
         app_id: app.id,
@@ -139,8 +179,8 @@ exports.addBug = async (req, res) => {
         description,
         severity: severity || 'medium',
         steps: steps || '',
-        attachments: attachments || [],
-        status: 'open'
+        recording_url: recordingUrl,
+        status: 'reported'
       })
       .select(`
         id,
@@ -148,20 +188,20 @@ exports.addBug = async (req, res) => {
         description,
         severity,
         steps,
-        attachments,
+        recording_url,
         status,
         created_at,
         user:users ( username )
       `)
       .single();
 
-    if (error) throw error;
+    if (insertError) throw insertError;
     
     const achievements = await checkAndGrantAchievements(req.user.id);
     res.status(201).json({ ...data, achievements });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('addBug error:', err);
+    res.status(500).json({ message: 'Server error reporting bug' });
   }
 };
 

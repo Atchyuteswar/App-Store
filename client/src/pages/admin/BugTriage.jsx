@@ -33,7 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { Bug, Search, Filter, MoreVertical, MessageSquare, Clock, AlertTriangle, CheckCircle, XCircle, Copy } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const COLUMNS = [
   { id: 'reported', title: 'Reported', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -99,6 +99,7 @@ function SortableBugCard({ bug, onClick }) {
 }
 
 export default function BugTriage() {
+  const { toast } = useToast();
   const [bugs, setBugs] = useState([]);
   const [apps, setApps] = useState([]);
   const [appId, setAppId] = useState("all");

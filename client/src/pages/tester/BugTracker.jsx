@@ -364,37 +364,36 @@ export default function BugTracker() {
                                 </div>
                               )}
                             </div>
-                                {bug.recordingUrl && (
-                                  <div>
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Recording</h4>
-                                    <div className="aspect-video bg-black rounded-lg overflow-hidden border">
-                                      <video src={bug.recordingUrl} controls className="h-full w-full" />
-                                    </div>
+                            <div className="space-y-4">
+                              {bug.recordingUrl && (
+                                <div>
+                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Recording</h4>
+                                  <div className="aspect-video bg-black rounded-lg overflow-hidden border">
+                                    <video src={bug.recordingUrl} controls className="h-full w-full" />
                                   </div>
-                                )}
+                                </div>
+                              )}
+                              <div className="p-4 rounded-xl border bg-card/50">
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
+                                  <MessageSquare className="h-3 w-3" /> Admin Response
+                                </h4>
+                                <p className="text-sm text-muted-foreground italic">
+                                  {bug.internalNotes ? bug.internalNotes : "No response from the developer team yet."}
+                                </p>
                               </div>
-                              <div className="space-y-4">
-                                <div className="p-4 rounded-xl border bg-card/50">
-                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
-                                    <MessageSquare className="h-3 w-3" /> Admin Response
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground italic">
-                                    {bug.internalNotes ? bug.internalNotes : "No response from the developer team yet."}
-                                  </p>
-                                </div>
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="outline" size="sm" className="h-8 text-xs">
-                                    Send Message
-                                  </Button>
-                                  <Button variant="ghost" size="sm" className="h-8 text-xs text-red-500">
-                                    Withdraw Report
-                                  </Button>
-                                </div>
+                              <div className="flex justify-end gap-2">
+                                <Button variant="outline" size="sm" className="h-8 text-xs">
+                                  Send Message
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-8 text-xs text-red-500">
+                                  Withdraw Report
+                                </Button>
                               </div>
                             </div>
-                          </td>
-                        </tr>
-                      )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </React.Fragment>
                 ))
               )}

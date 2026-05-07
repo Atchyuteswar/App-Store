@@ -276,6 +276,7 @@ export default function AdminDashboard() {
   if (authLoading) return null;
 
   return (
+    <>
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold tracking-tight">App Management</h1>
@@ -534,6 +535,6 @@ export default function AdminDashboard() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

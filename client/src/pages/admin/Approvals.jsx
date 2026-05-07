@@ -17,11 +17,12 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { UserCheck, UserX, Clock, Mail, ShieldCheck, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Approvals() {
+  const { toast } = useToast();
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);

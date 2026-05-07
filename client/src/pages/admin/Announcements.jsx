@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Send, Mail, Users, Info, Plus, Megaphone, Trash2, Calendar } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Announcements() {
+  const { toast } = useToast();
   const [announcements, setAnnouncements] = useState([]);
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);

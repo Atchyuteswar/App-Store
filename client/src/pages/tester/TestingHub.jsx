@@ -46,9 +46,16 @@ import {
   History, 
   User as UserIcon,
   PlusCircle,
-  AlertCircle
+  AlertCircle,
+  Zap,
+  Activity,
+  Terminal,
+  Cpu,
+  ShieldCheck,
+  Layout
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export default function TestingHub() {
   const { slug } = useParams();
@@ -58,7 +65,6 @@ export default function TestingHub() {
   const [app, setApp] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Tabs State
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -77,7 +83,6 @@ export default function TestingHub() {
     fetchAppData();
   }, [slug]);
 
-  // Scroll to bottom of chat when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -88,7 +93,6 @@ export default function TestingHub() {
       const appRes = await getAppBySlug(slug);
       setApp(appRes.data);
       
-      // Fetch initial tab data
       const [msgRes, bugRes, ideaRes] = await Promise.all([
         getTesterMessages(slug),
         getTesterBugs(slug),
@@ -106,7 +110,6 @@ export default function TestingHub() {
     }
   };
 
-  // Poll for new messages every 5 seconds
   useEffect(() => {
     if (!slug || loading) return;
 
@@ -145,7 +148,7 @@ export default function TestingHub() {
       setBugs([data, ...bugs]);
       setBugForm({ title: "", description: "" });
       setBugDialogOpen(false);
-      toast({ title: "Bug Reported", description: "Thank you for finding this issue!" });
+      toast({ title: "Anomaly Reported", description: "Thank you for finding this issue!" });
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to report bug" });
     } finally {
@@ -162,7 +165,7 @@ export default function TestingHub() {
       setIdeas([data, ...ideas]);
       setIdeaForm({ title: "", description: "" });
       setIdeaDialogOpen(false);
-      toast({ title: "Idea Submitted", description: "Your feature suggestion has been recorded!" });
+      toast({ title: "Innovation Submitted", description: "Your feature suggestion has been recorded!" });
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to submit idea" });
     } finally {
@@ -172,419 +175,429 @@ export default function TestingHub() {
 
   if (loading || !app) {
     return (
-      <div className="space-y-6 max-w-5xl mx-auto">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-[500px] w-full rounded-xl" />
+      <div className="space-y-12 max-w-7xl mx-auto py-20 px-6 animate-pulse">
+        <Skeleton className="h-40 w-full rounded-[3rem] bg-white/5" />
+        <div className="grid lg:grid-cols-12 gap-12">
+          <Skeleton className="lg:col-span-8 h-[600px] rounded-[3rem] bg-white/5" />
+          <Skeleton className="lg:col-span-4 h-[600px] rounded-[3rem] bg-white/5" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full max-w-7xl mx-auto px-4 md:px-0">
-      {/* Premium App Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-background to-background border p-6 shadow-sm">
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-          <div className="h-20 w-20 rounded-2xl bg-card border-2 border-primary/20 p-1 shadow-md overflow-hidden shrink-0">
+    <div className="flex flex-col gap-12 max-w-7xl mx-auto px-6 py-12 selection:bg-primary/30">
+      {/* Premium Experiment Header */}
+      <div className="p-10 rounded-[3rem] bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
+        <div className="absolute top-0 right-0 h-96 w-96 bg-primary/5 blur-[120px] rounded-full -mr-48 -mt-48 pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-10">
+          <div className="h-32 w-32 rounded-[2.5rem] bg-white/5 border border-white/10 p-2 shadow-2xl overflow-hidden shrink-0 group-hover:border-primary/50 transition-all duration-700">
             {app.icon ? (
-              <img src={getFileUrl(app.icon)} alt={app.name} className="h-full w-full object-cover rounded-xl" />
+              <img src={getFileUrl(app.icon)} alt={app.name} className="h-full w-full object-cover rounded-[2rem]" />
             ) : (
-              <div className="h-full w-full flex items-center justify-center font-bold text-2xl text-primary bg-primary/5">{app.name[0]}</div>
+              <div className="h-full w-full flex items-center justify-center font-black text-4xl text-primary bg-primary/5 rounded-[2rem]">{app.name[0]}</div>
             )}
           </div>
           
-          <div className="flex-1 text-center md:text-left space-y-1">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-              <h1 className="text-3xl font-bold tracking-tight">{app.name}</h1>
-              <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-mono">v{app.version}</Badge>
-              <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">Beta Stage</Badge>
+          <div className="flex-1 text-center lg:text-left space-y-4">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-premium uppercase leading-tight">{app.name}</h1>
+              <Badge className="bg-primary/10 text-primary border-primary/20 font-black uppercase tracking-widest text-[10px] px-4 h-7">v{app.version}</Badge>
+              <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 font-black uppercase tracking-widest text-[10px] px-4 h-7 flex items-center gap-2">
+                <Zap className="h-3 w-3" /> EXPERIMENT PHASE
+              </Badge>
             </div>
-            <p className="text-muted-foreground text-lg max-w-2xl">{app.tagline}</p>
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] max-w-2xl leading-relaxed">{app.tagline}</p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0">
             {app.apk_file && (
-              <Button asChild size="lg" className="shadow-lg shadow-primary/20">
+              <Button asChild className="h-16 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest shadow-[0_0_30px_-10px_rgba(34,197,94,0.5)] transition-all hover:scale-105 active:scale-95 text-xs">
                 <a href={getFileUrl(app.apk_file)} download>
-                  <Download className="h-4 w-4 mr-2" /> Download Build
+                  <Download className="h-5 w-5 mr-3" /> Initialize Build
                 </a>
               </Button>
             )}
-            <Button variant="outline" size="lg" asChild>
+            <Button variant="ghost" className="h-16 px-10 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all" asChild>
               <Link to={`/app/${app.slug}`}>
-                <ExternalLink className="h-4 w-4 mr-2" /> Store Page
+                <ExternalLink className="h-5 w-5 mr-3" /> Store Page
               </Link>
             </Button>
           </div>
         </div>
-        
-        {/* Background Decorative Element */}
-        <div className="absolute top-0 right-0 h-full w-1/3 bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8 flex-1 min-h-0 pb-8">
+      <div className="grid lg:grid-cols-12 gap-12 pb-12">
         {/* Main Interaction Area */}
-        <div className="lg:col-span-8 flex flex-col gap-6 min-h-0">
-          <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
-            <div className="flex items-center justify-between mb-2">
-              <TabsList className="bg-muted/50 p-1 w-full justify-start overflow-x-auto no-scrollbar h-auto">
-                <TabsTrigger value="chat" className="gap-2">
-                  <MessageSquare className="h-4 w-4" /> Community
-                </TabsTrigger>
-                <TabsTrigger value="issues" className="gap-2">
-                  <Bug className="h-4 w-4" /> Issues
-                </TabsTrigger>
-                <TabsTrigger value="suggestions" className="gap-2">
-                  <Lightbulb className="h-4 w-4" /> Suggestions
-                </TabsTrigger>
-                <TabsTrigger value="notes" className="gap-2">
-                  <History className="h-4 w-4" /> Release Notes
-                </TabsTrigger>
-              </TabsList>
-            </div>
+        <div className="lg:col-span-8 flex flex-col gap-10">
+          <Tabs defaultValue="chat" className="flex-1 flex flex-col space-y-8">
+            <TabsList className="bg-white/5 border border-white/10 p-2 h-18 rounded-[2rem] w-full justify-start gap-2 overflow-x-auto custom-scrollbar shadow-xl backdrop-blur-md">
+              <TabsTrigger value="chat" className="h-14 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white transition-all gap-3">
+                <MessageSquare className="h-4 w-4" /> Community
+              </TabsTrigger>
+              <TabsTrigger value="issues" className="h-14 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-red-500 data-[state=active]:text-white transition-all gap-3">
+                <Bug className="h-4 w-4" /> Anomalies
+              </TabsTrigger>
+              <TabsTrigger value="suggestions" className="h-14 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-amber-500 data-[state=active]:text-white transition-all gap-3">
+                <Lightbulb className="h-4 w-4" /> Innovations
+              </TabsTrigger>
+              <TabsTrigger value="notes" className="h-14 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all gap-3">
+                <History className="h-4 w-4" /> Protocols
+              </TabsTrigger>
+            </TabsList>
 
             {/* COMMUNITY TAB */}
-            <TabsContent value="chat" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
-              <div className="bg-muted/30 p-4 border-b flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="font-semibold">Live Community Chat</span>
+            <TabsContent value="chat" className="m-0 space-y-6 animate-in fade-in duration-700">
+              <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl flex flex-col h-[600px] relative overflow-hidden">
+                <div className="absolute top-0 right-0 h-64 w-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+                
+                <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/5 relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(34,197,94,1)]" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Neural Sync Channel</span>
+                  </div>
+                  <Badge className="bg-white/5 text-white/20 border-white/10 text-[9px] font-black h-6">{messages.length} ARCHIVED</Badge>
                 </div>
-                <Badge variant="outline" className="text-xs font-normal">{messages.length} messages</Badge>
-              </div>
 
-              <ScrollArea className="flex-1 p-4 bg-muted/5">
-                <div className="space-y-6">
-                  {messages.length === 0 ? (
-                    <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
-                      <MessageSquare className="h-10 w-10 opacity-20" />
-                      <p className="text-sm italic">No messages yet. Start the conversation!</p>
-                    </div>
-                  ) : (
-                    messages.map((msg) => {
-                      const isMe = msg.user.username === user.username;
-                      return (
-                        <div key={msg.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                          <Avatar className="h-8 w-8 shrink-0 mt-1 border">
-                            <AvatarFallback className={isMe ? 'bg-primary/20 text-primary' : 'bg-muted'}>
-                              {msg.user.username[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className={`flex flex-col max-w-[75%] ${isMe ? 'items-end' : 'items-start'}`}>
-                            <div className="flex items-center gap-2 mb-1 px-1">
-                              <span className="text-xs font-bold">{isMe ? 'You' : msg.user.username}</span>
-                              <span className="text-[10px] text-muted-foreground">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                <ScrollArea className="flex-1 pr-6 relative z-10">
+                  <div className="space-y-8">
+                    {messages.length === 0 ? (
+                      <div className="py-20 flex flex-col items-center justify-center text-white/10 gap-6">
+                        <MessageSquare className="h-16 w-16 opacity-5" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Silence in the matrix</p>
+                      </div>
+                    ) : (
+                      messages.map((msg) => {
+                        const isMe = msg.user.username === user.username;
+                        return (
+                          <div key={msg.id} className={`flex gap-6 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-lg">
+                              <span className="text-xs font-black text-white/40 uppercase">{msg.user.username[0]}</span>
                             </div>
-                            <div className={`px-4 py-2.5 rounded-2xl shadow-sm text-sm leading-relaxed ${
-                              isMe 
-                                ? 'bg-primary text-primary-foreground rounded-tr-none' 
-                                : 'bg-muted/80 backdrop-blur-sm rounded-tl-none'
-                            }`}>
-                              {msg.message}
+                            <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'} space-y-2`}>
+                              <div className="flex items-center gap-3 px-1">
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{isMe ? 'YOU' : msg.user.username}</span>
+                                <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                              </div>
+                              <div className={cn(
+                                "px-6 py-4 rounded-[1.5rem] shadow-xl text-sm leading-relaxed font-medium transition-all",
+                                isMe 
+                                  ? 'bg-primary text-white rounded-tr-none' 
+                                  : 'bg-white/5 border border-white/10 text-white/80 rounded-tl-none'
+                              )}>
+                                {msg.message}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+                        );
+                      })
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
 
-              <div className="p-4 bg-muted/20 border-t shrink-0">
-                <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <Input 
-                    placeholder="Message the testing community..." 
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    className="flex-1 bg-background border-primary/10 focus-visible:ring-primary"
-                    autoComplete="off"
-                  />
-                  <Button type="submit" disabled={!newMessage.trim()} className="shrink-0">
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </form>
+                <div className="mt-8 pt-8 border-t border-white/5 relative z-10">
+                  <form onSubmit={handleSendMessage} className="flex gap-4">
+                    <Input 
+                      placeholder="TRANSMIT TO COMMUNITY MATRIX..." 
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="h-16 bg-white/5 border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white placeholder:text-white/10 focus-visible:ring-0 px-8"
+                      autoComplete="off"
+                    />
+                    <Button type="submit" disabled={!newMessage.trim()} className="h-16 w-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shrink-0">
+                      <Send className="h-6 w-6" />
+                    </Button>
+                  </form>
+                </div>
               </div>
             </TabsContent>
 
             {/* ISSUES TAB */}
-            <TabsContent value="issues" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
-              <div className="p-4 border-b flex items-center justify-between shrink-0 bg-muted/10">
-                <div>
-                  <h3 className="font-semibold">Issue Tracking</h3>
-                  <p className="text-xs text-muted-foreground">Log and track bugs you find in this build</p>
+            <TabsContent value="issues" className="m-0 space-y-6 animate-in fade-in duration-700">
+              <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl flex flex-col h-[600px] relative overflow-hidden">
+                <div className="flex items-center justify-between mb-10 pb-8 border-b border-white/5 relative z-10">
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-1">Anomaly Tracker</h3>
+                    <p className="text-[8px] font-black text-white/10 uppercase tracking-widest">Document technical vulnerabilities</p>
+                  </div>
+                  <Dialog open={bugDialogOpen} onOpenChange={setBugDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="h-12 px-8 rounded-xl bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[9px] shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)]">
+                        <PlusCircle className="h-4 w-4 mr-3" /> Initialize Anomaly
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-[#0f0f0f] border-white/10 text-white p-10 max-w-2xl rounded-[3rem] overflow-hidden">
+                      <div className="absolute top-0 right-0 h-64 w-64 bg-red-500/5 blur-[100px] rounded-full" />
+                      <DialogHeader className="relative z-10">
+                        <DialogTitle className="text-3xl font-black tracking-tighter uppercase">Sync Anomaly</DialogTitle>
+                        <DialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[9px] pt-2">Log technical failure for administrative analysis.</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleSubmitBug} className="space-y-8 pt-8 relative z-10">
+                        <div className="space-y-4">
+                          <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Archive Title</Label>
+                          <Input value={bugForm.title} onChange={e => setBugForm({...bugForm, title: e.target.value})} placeholder="CONCISE IDENTIFIER" className="h-16 bg-white/5 border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest px-8" required />
+                        </div>
+                        <div className="space-y-4">
+                          <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Reproduction Script</Label>
+                          <Textarea 
+                            value={bugForm.description} 
+                            onChange={e => setBugForm({...bugForm, description: e.target.value})} 
+                            placeholder="DOCUMENT PROTOCOL STEPS..." 
+                            className="bg-white/5 border-white/10 rounded-[2rem] min-h-[160px] font-mono text-[10px] leading-relaxed p-8 resize-none"
+                            required 
+                          />
+                        </div>
+                        <DialogFooter className="pt-4">
+                          <Button type="submit" disabled={submittingBug || !bugForm.title || !bugForm.description} className="h-16 w-full rounded-2xl bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest shadow-xl">
+                            {submittingBug ? "Synchronizing..." : "Execute Synchronization"}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <Dialog open={bugDialogOpen} onOpenChange={setBugDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="gap-2">
-                      <PlusCircle className="h-4 w-4" /> Report Issue
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Report a Bug</DialogTitle>
-                      <DialogDescription>Provide details to help the developer fix the issue.</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmitBug} className="space-y-4 pt-4">
-                      <div className="space-y-2">
-                        <Label>Title</Label>
-                        <Input value={bugForm.title} onChange={e => setBugForm({...bugForm, title: e.target.value})} placeholder="e.g. Settings screen scrolls poorly" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Reproduction Steps</Label>
-                        <Textarea 
-                          value={bugForm.description} 
-                          onChange={e => setBugForm({...bugForm, description: e.target.value})} 
-                          placeholder="1. Open App&#10;2. Click on...&#10;3. See error..." 
-                          rows={6} 
-                          required 
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit" disabled={submittingBug || !bugForm.title || !bugForm.description}>
-                          {submittingBug ? "Submitting..." : "Submit Report"}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </div>
 
-              <ScrollArea className="flex-1">
-                <div className="p-4 space-y-3">
-                  {bugs.length === 0 ? (
-                    <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
-                      <Bug className="h-10 w-10 opacity-20" />
-                      <p className="text-sm italic">No issues reported yet. Clean build!</p>
-                    </div>
-                  ) : (
-                    bugs.map((bug) => (
-                      <Card key={bug.id} className="group hover:border-primary/30 transition-all overflow-hidden border-muted/50 shadow-none">
-                        <div className="flex items-start gap-4 p-4">
-                          <div className={`mt-1 h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
-                            bug.status === 'resolved' ? 'bg-green-500/10 text-green-600' : 
-                            bug.status === 'investigating' ? 'bg-amber-500/10 text-amber-600' : 
-                            'bg-red-500/10 text-red-600'
-                          }`}>
-                            <Bug className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-center justify-between gap-4">
-                              <h4 className="font-bold text-sm leading-none group-hover:text-primary transition-colors">{bug.title}</h4>
-                              <Badge variant="secondary" className={
-                                bug.status === 'resolved' ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20' : 
-                                bug.status === 'investigating' ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20' : 
-                                'bg-red-500/10 text-red-600 hover:bg-red-500/20'
-                              }>
-                                {bug.status || 'open'}
-                              </Badge>
+                <ScrollArea className="flex-1 pr-6 relative z-10">
+                  <div className="grid gap-6">
+                    {bugs.length === 0 ? (
+                      <div className="py-32 flex flex-col items-center justify-center text-white/10 gap-6">
+                        <Bug className="h-16 w-16 opacity-5" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Matrix stability 100%</p>
+                      </div>
+                    ) : (
+                      bugs.map((bug) => (
+                        <div key={bug.id} className="group p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-all duration-500 shadow-xl relative overflow-hidden">
+                          <div className="flex items-start gap-6">
+                            <div className={cn(
+                              "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-500",
+                              bug.status === 'resolved' ? 'bg-primary/10 border-primary/20 text-primary' : 
+                              bug.status === 'investigating' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 
+                              'bg-red-500/10 border-red-500/20 text-red-500'
+                            )}>
+                              <Bug className="h-6 w-6" />
                             </div>
-                            <p className="text-xs text-muted-foreground line-clamp-2">{bug.description}</p>
-                            <div className="flex items-center gap-3 pt-2 text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">
-                              <span className="flex items-center gap-1"><UserIcon className="h-3 w-3" /> {bug.user.username}</span>
-                              <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatDate(bug.created_at)}</span>
+                            <div className="flex-1 space-y-4">
+                              <div className="flex flex-wrap items-center justify-between gap-4">
+                                <h4 className="font-black text-base text-white tracking-tight uppercase group-hover:text-primary transition-colors">{bug.title}</h4>
+                                <Badge className={cn(
+                                  "text-[8px] font-black uppercase tracking-[0.2em] px-3 h-6",
+                                  bug.status === 'resolved' ? 'bg-primary/10 text-primary border-primary/20' : 
+                                  bug.status === 'investigating' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                                  'bg-red-500/10 text-red-500 border-red-500/20'
+                                )}>
+                                  {bug.status.toUpperCase() || 'OPEN'}
+                                </Badge>
+                              </div>
+                              <p className="text-[11px] text-white/40 font-medium leading-relaxed italic line-clamp-2">"{bug.description}"</p>
+                              <div className="flex items-center gap-6 pt-4 border-t border-white/5 text-[9px] font-black text-white/20 uppercase tracking-widest">
+                                <span className="flex items-center gap-2"><UserIcon className="h-3.5 w-3.5" /> {bug.user.username}</span>
+                                <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> {formatDate(bug.created_at)}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
             </TabsContent>
 
             {/* SUGGESTIONS TAB */}
-            <TabsContent value="suggestions" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
-              <div className="p-4 border-b flex items-center justify-between shrink-0 bg-muted/10">
-                <div>
-                  <h3 className="font-semibold">Innovation Board</h3>
-                  <p className="text-xs text-muted-foreground">Suggest new features or improvements</p>
+            <TabsContent value="suggestions" className="m-0 space-y-6 animate-in fade-in duration-700">
+              <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl flex flex-col h-[600px] relative overflow-hidden">
+                <div className="flex items-center justify-between mb-10 pb-8 border-b border-white/5 relative z-10">
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-1">Innovation Matrix</h3>
+                    <p className="text-[8px] font-black text-white/10 uppercase tracking-widest">Architectural feature suggestions</p>
+                  </div>
+                  <Dialog open={ideaDialogOpen} onOpenChange={setIdeaDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="h-12 px-8 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[9px] shadow-[0_0_20px_-5px_rgba(245,158,11,0.5)]">
+                        <PlusCircle className="h-4 w-4 mr-3" /> Propose Innovation
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-[#0f0f0f] border-white/10 text-white p-10 max-w-2xl rounded-[3rem] overflow-hidden">
+                      <div className="absolute top-0 right-0 h-64 w-64 bg-amber-500/5 blur-[100px] rounded-full" />
+                      <DialogHeader className="relative z-10">
+                        <DialogTitle className="text-3xl font-black tracking-tighter uppercase">Initialize Proposal</DialogTitle>
+                        <DialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[9px] pt-2">Suggest architectural enhancements for the experiment.</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleSubmitIdea} className="space-y-8 pt-8 relative z-10">
+                        <div className="space-y-4">
+                          <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Innovation Title</Label>
+                          <Input value={ideaForm.title} onChange={e => setIdeaForm({...ideaForm, title: e.target.value})} placeholder="CONCISE CONCEPT" className="h-16 bg-white/5 border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest px-8" required />
+                        </div>
+                        <div className="space-y-4">
+                          <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Technical Specification</Label>
+                          <Textarea 
+                            value={ideaForm.description} 
+                            onChange={e => setIdeaForm({...ideaForm, description: e.target.value})} 
+                            placeholder="DESCRIBE THE ENHANCEMENT PROTOCOL..." 
+                            className="bg-white/5 border-white/10 rounded-[2rem] min-h-[160px] font-medium p-8 resize-none"
+                            required 
+                          />
+                        </div>
+                        <DialogFooter className="pt-4">
+                          <Button type="submit" disabled={submittingIdea || !ideaForm.title || !ideaForm.description} className="h-16 w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest shadow-xl">
+                            {submittingIdea ? "Transmitting..." : "Initialize Proposal"}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <Dialog open={ideaDialogOpen} onOpenChange={setIdeaDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="gap-2">
-                      <Lightbulb className="h-4 w-4" /> New Suggestion
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Feature Suggestion</DialogTitle>
-                      <DialogDescription>What would make this app even better?</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmitIdea} className="space-y-4 pt-4">
-                      <div className="space-y-2">
-                        <Label>Title</Label>
-                        <Input value={ideaForm.title} onChange={e => setIdeaForm({...ideaForm, title: e.target.value})} placeholder="e.g. Add dark mode to dashboard" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Detail</Label>
-                        <Textarea 
-                          value={ideaForm.description} 
-                          onChange={e => setIdeaForm({...ideaForm, description: e.target.value})} 
-                          placeholder="Describe your idea in detail..." 
-                          rows={6} 
-                          required 
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit" disabled={submittingIdea || !ideaForm.title || !ideaForm.description}>
-                          {submittingIdea ? "Submitting..." : "Post Suggestion"}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </div>
 
-              <ScrollArea className="flex-1">
-                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ideas.length === 0 ? (
-                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
-                      <Lightbulb className="h-10 w-10 opacity-20" />
-                      <p className="text-sm italic">No suggestions yet. Be the first to innovate!</p>
-                    </div>
-                  ) : (
-                    ideas.map((idea) => (
-                      <Card key={idea.id} className="group hover:border-primary/30 transition-all border-muted/50 shadow-none flex flex-col">
-                        <CardHeader className="p-4 pb-2">
-                          <div className="flex justify-between items-start gap-2">
-                            <h4 className="font-bold text-sm leading-tight group-hover:text-primary transition-colors">{idea.title}</h4>
-                            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                              <Lightbulb className="h-4 w-4" />
+                <ScrollArea className="flex-1 pr-6 relative z-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {ideas.length === 0 ? (
+                      <div className="col-span-full py-32 flex flex-col items-center justify-center text-white/10 gap-6">
+                        <Lightbulb className="h-16 w-16 opacity-5" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">No innovations logged</p>
+                      </div>
+                    ) : (
+                      ideas.map((idea) => (
+                        <div key={idea.id} className="group p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-all duration-500 shadow-xl flex flex-col relative overflow-hidden">
+                          <div className="absolute top-0 right-0 h-24 w-24 bg-amber-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="flex justify-between items-start gap-4 mb-6">
+                            <h4 className="font-black text-sm text-white tracking-tight uppercase group-hover:text-primary transition-colors leading-tight">{idea.title}</h4>
+                            <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                              <Lightbulb className="h-5 w-5" />
                             </div>
                           </div>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0 flex-1">
-                          <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">{idea.description}</p>
-                        </CardContent>
-                        <CardFooter className="p-4 pt-0 border-t bg-muted/5 mt-auto flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-semibold">
-                            <UserIcon className="h-3 w-3" /> {idea.user.username}
+                          <p className="text-[11px] text-white/40 font-medium leading-relaxed italic line-clamp-4 flex-1 mb-6">"{idea.description}"</p>
+                          <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-[9px] font-black text-white/20 uppercase tracking-widest">
+                              <UserIcon className="h-3.5 w-3.5" /> {idea.user.username}
+                            </div>
+                            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{formatDate(idea.created_at)}</span>
                           </div>
-                          <span className="text-[10px] text-muted-foreground">{formatDate(idea.created_at)}</span>
-                        </CardFooter>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-
-            {/* RELEASE NOTES TAB */}
-            <TabsContent value="notes" className="m-0 border rounded-xl bg-card overflow-hidden shadow-sm data-[state=active]:flex-1 data-[state=active]:flex flex-col min-h-[400px]">
-              <ScrollArea className="flex-1">
-                <div className="p-8 max-w-2xl mx-auto space-y-8">
-                  <div className="space-y-2 border-b pb-6">
-                    <h2 className="text-2xl font-bold">What's New in v{app.version}</h2>
-                    <p className="text-muted-foreground">Latest changes and focus areas for testing.</p>
-                  </div>
-                  
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    {app.whats_new ? (
-                      <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">{app.whats_new}</p>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-10 gap-4 text-center">
-                        <AlertCircle className="h-12 w-12 text-muted-foreground/30" />
-                        <p className="text-muted-foreground italic">The developer hasn't provided specific release notes for this build yet.</p>
-                      </div>
+                        </div>
+                      ))
                     )}
                   </div>
+                </ScrollArea>
+              </div>
+            </TabsContent>
 
-                  <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10">
-                    <h3 className="text-sm font-bold flex items-center gap-2 mb-3">
-                      <Info className="h-4 w-4 text-primary" /> Tester Guidelines
-                    </h3>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        Focus on the new navigation system and dark mode toggle.
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        Report any UI inconsistencies on screens larger than 6 inches.
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        Verify that notifications are received when the app is in background.
-                      </li>
-                    </ul>
+            {/* PROTOCOLS TAB */}
+            <TabsContent value="notes" className="m-0 space-y-6 animate-in fade-in duration-700">
+              <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl flex flex-col h-[600px] relative overflow-hidden">
+                <ScrollArea className="flex-1 pr-6 relative z-10">
+                  <div className="max-w-2xl mx-auto space-y-12 py-10">
+                    <div className="space-y-4 border-b border-white/5 pb-10 text-center lg:text-left">
+                      <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[9px] font-black uppercase tracking-widest px-4 h-6 mb-2">Technical Brief</Badge>
+                      <h2 className="text-4xl font-black text-white tracking-tighter uppercase leading-tight">Revisions v{app.version}</h2>
+                      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Latest architectural changes & synchronization focus</p>
+                    </div>
+                    
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      {app.whats_new ? (
+                        <p className="text-sm font-medium text-white/60 leading-relaxed italic p-10 rounded-[2.5rem] bg-white/5 border border-white/10 whitespace-pre-wrap">"{app.whats_new}"</p>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-20 gap-6 opacity-10">
+                          <AlertCircle className="h-16 w-16" />
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">No protocols documented for this revision</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-10 rounded-[2.5rem] bg-primary/5 border border-primary/20 backdrop-blur-md space-y-8 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 h-32 w-32 bg-primary/10 blur-3xl rounded-full" />
+                      <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-4 relative z-10">
+                        <ShieldCheck className="h-5 w-5 text-primary" /> Researcher Protocol
+                      </h3>
+                      <ul className="space-y-6 relative z-10">
+                        {[
+                          "Focus on the new neural navigation matrix and dark state toggle.",
+                          "Report UI anomalies on displays exceeding 6.5 inches.",
+                          "Validate background synchronization bandwidth receipt."
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-4 group/li">
+                            <div className="h-2 w-2 rounded-full bg-primary mt-1.5 shrink-0 group-hover/li:scale-150 transition-all shadow-[0_0_8px_rgba(34,197,94,1)]" />
+                            <span className="text-[11px] font-black text-white/40 uppercase tracking-widest leading-relaxed group-hover:text-white transition-colors">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </ScrollArea>
+                </ScrollArea>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
 
-        {/* Sidebar Widgets */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Your Stats Card */}
-          <Card className="bg-primary text-primary-foreground overflow-hidden relative border-none shadow-lg shadow-primary/20">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent)] pointer-events-none" />
-            <CardHeader>
-              <CardTitle className="text-lg">Your Participation</CardTitle>
-              <CardDescription className="text-primary-foreground/70">Your impact on this project</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                  <div className="text-2xl font-bold">{bugs.filter(b => b.user.username === user.username).length}</div>
-                  <div className="text-[10px] uppercase font-bold opacity-70 tracking-widest">Bugs Found</div>
+        {/* Researcher Telemetry */}
+        <div className="lg:col-span-4 space-y-10">
+          <div className="p-10 rounded-[3rem] bg-primary border border-white/20 overflow-hidden relative shadow-[0_30px_60px_-12px_rgba(34,197,94,0.4)] group">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none group-hover:opacity-100 opacity-50 transition-opacity duration-1000" />
+            <div className="relative z-10 space-y-10">
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-white uppercase tracking-tighter">Participation</h3>
+                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Research node impact metrics</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-all">
+                  <div className="text-4xl font-black text-white tracking-tighter mb-1">{bugs.filter(b => b.user.username === user.username).length}</div>
+                  <div className="text-[8px] font-black uppercase text-white/50 tracking-widest leading-tight">Anomalies Detected</div>
                 </div>
-                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                  <div className="text-2xl font-bold">{ideas.filter(i => i.user.username === user.username).length}</div>
-                  <div className="text-[10px] uppercase font-bold opacity-70 tracking-widest">Ideas Shared</div>
+                <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-all">
+                  <div className="text-4xl font-black text-white tracking-tighter mb-1">{ideas.filter(i => i.user.username === user.username).length}</div>
+                  <div className="text-[8px] font-black uppercase text-white/50 tracking-widest leading-tight">Innovations Shared</div>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider opacity-70">
-                  <span>Community Level</span>
+              <div className="space-y-4 pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                  <span>Community Cohesion</span>
                   <span>75%</span>
                 </div>
-                <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-white w-3/4 shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                <div className="h-3 w-full bg-black/20 rounded-full overflow-hidden p-0.5 shadow-inner">
+                  <div className="h-full bg-white w-3/4 rounded-full shadow-[0_0_15px_rgba(255,255,255,1)] transition-all duration-1000 animate-pulse" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Test Info Widget */}
-          <Card>
-            <CardHeader className="pb-3 border-b">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">About this Test</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                <div className="flex items-center justify-between p-4">
-                  <span className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-4 w-4" /> Started</span>
-                  <span className="text-sm font-semibold">{app.created_at ? formatDate(app.created_at) : "N/A"}</span>
+          <div className="p-10 rounded-[3rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl space-y-8 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 h-40 w-40 bg-white/[0.02] blur-3xl rounded-full" />
+            <div className="flex items-center justify-between border-b border-white/5 pb-6">
+              <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Experiment Telemetry</h3>
+              <Activity className="h-4 w-4 text-primary/40 group-hover:animate-spin transition-all" />
+            </div>
+            
+            <div className="space-y-6">
+              {[
+                { label: "Experiment Start", value: app.created_at ? formatDate(app.created_at) : "UNINITIALIZED", icon: Clock },
+                { label: "Detected Anomalies", value: bugs.length, icon: Bug, color: "text-red-500" },
+                { label: "Synchronized Revisions", value: bugs.filter(b => b.status === 'resolved').length, icon: CheckCircle2, color: "text-primary" }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between group/item">
+                  <div className="flex items-center gap-4 text-[10px] font-black text-white/20 uppercase tracking-widest group-hover/item:text-white/40 transition-colors">
+                    <item.icon className={cn("h-4 w-4", item.color || "text-white/10")} />
+                    {item.label}
+                  </div>
+                  <span className={cn("text-xs font-black text-white tracking-tighter uppercase", item.color)}>{item.value}</span>
                 </div>
-                <div className="flex items-center justify-between p-4">
-                  <span className="text-sm text-muted-foreground flex items-center gap-2"><Bug className="h-4 w-4" /> Total Issues</span>
-                  <span className="text-sm font-semibold text-red-500">{bugs.length}</span>
-                </div>
-                <div className="flex items-center justify-between p-4">
-                  <span className="text-sm text-muted-foreground flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Fixed</span>
-                  <span className="text-sm font-semibold text-green-500">{bugs.filter(b => b.status === 'resolved').length}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </div>
 
-          {/* Quick Support */}
-          <Card className="border-dashed bg-muted/10">
-            <CardContent className="p-6 text-center space-y-4">
-              <div className="h-12 w-12 rounded-full bg-background border flex items-center justify-center mx-auto">
-                <AlertCircle className="h-6 w-6 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-bold">Need Help?</h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">Having trouble with this build? Message the developer team directly in the Community chat.</p>
-              </div>
-              <Button variant="outline" size="sm" className="w-full">
-                Contact Developer
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="p-10 rounded-[3rem] border border-dashed border-white/10 bg-white/[0.02] text-center space-y-8 group hover:bg-white/[0.04] transition-all">
+            <div className="h-16 w-16 rounded-[1.5rem] bg-white/5 border border-white/10 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:border-primary/50 transition-all duration-700 shadow-xl">
+              <Cpu className="h-8 w-8 text-white/20 group-hover:text-primary transition-colors" />
+            </div>
+            <div className="space-y-3">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Protocol Support</h4>
+              <p className="text-[10px] text-white/20 font-bold uppercase tracking-wider leading-relaxed">Technical difficulties? Contact the architectural lead directly in the community matrix.</p>
+            </div>
+            <Button variant="ghost" className="w-full h-14 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all">
+              Initialize Comms
+            </Button>
+          </div>
         </div>
       </div>
     </div>

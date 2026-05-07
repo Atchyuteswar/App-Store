@@ -47,56 +47,65 @@ export default function CompareVersions() {
   };
 
   const VersionColumn = ({ data, title, isCurrent }) => (
-    <div className="flex-1 space-y-4">
+    <div className="flex-1 space-y-6 relative z-10">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-bold text-lg flex items-center gap-2">
-          {isCurrent ? <Package className="h-4 w-4 text-green-600" /> : <History className="h-4 w-4 text-muted-foreground" />}
-          {title}
-        </h3>
-        <Badge variant={isCurrent ? "default" : "secondary"}>
-          v{data?.version}
+        <div className="space-y-1">
+          <h3 className="font-black text-xs uppercase tracking-[0.2em] text-white flex items-center gap-3">
+            {isCurrent ? <Package className="h-4 w-4 text-primary" /> : <History className="h-4 w-4 text-white/20" />}
+            {title}
+          </h3>
+        </div>
+        <Badge className={cn("text-[10px] font-black uppercase tracking-widest px-3 h-6", isCurrent ? "bg-primary/10 text-primary border-primary/20" : "bg-white/5 text-white/30 border-white/10")}>
+          Build v{data?.version}
         </Badge>
       </div>
 
-      <Card className={isCurrent ? "border-green-200 bg-green-50/10 shadow-sm" : ""}>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">What's New</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm leading-relaxed whitespace-pre-wrap min-h-[150px]">
-            {data?.whatsNew || "No release notes provided."}
+      <div className={cn("p-8 rounded-[2rem] border backdrop-blur-xl transition-all duration-500 min-h-[300px] flex flex-col gap-8", isCurrent ? "bg-primary/[0.03] border-primary/20 shadow-[0_0_50px_-20px_rgba(1,135,95,0.3)]" : "bg-white/5 border-white/5")}>
+        <div className="space-y-4 flex-1">
+          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Operational Changes</h4>
+          <div className="text-xs font-medium leading-relaxed text-white/50 whitespace-pre-wrap italic">
+            {data?.whatsNew ? `"${data.whatsNew}"` : "No technical logs for this build."}
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground">File Size</span>
-            <p className="text-sm font-bold mt-1">{data?.size || "N/A"}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground">Release Date</span>
-            <p className="text-sm font-bold mt-1">{new Date(data?.date).toLocaleDateString()}</p>
-          </CardContent>
-        </Card>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 rounded-2xl bg-black/40 border border-white/5">
+            <span className="text-[8px] font-black uppercase tracking-widest text-white/20 block mb-1">Payload Size</span>
+            <p className="text-xs font-black text-white">{data?.size || "N/A"}</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-black/40 border border-white/5">
+            <span className="text-[8px] font-black uppercase tracking-widest text-white/20 block mb-1">Release Sync</span>
+            <p className="text-xs font-black text-white">{data?.date ? new Date(data.date).toLocaleDateString() : "N/A"}</p>
+          </div>
+        </div>
       </div>
     </div>
   );
 
   if (loading) return (
-    <div className="space-y-6">
-      <Skeleton className="h-12 w-64" />
-      <div className="grid grid-cols-2 gap-8">
-        <Skeleton className="h-[400px] w-full" />
-        <Skeleton className="h-[400px] w-full" />
+    <div className="space-y-12 animate-pulse">
+      <div className="flex justify-between items-end">
+        <div className="space-y-4">
+          <div className="h-6 w-32 bg-white/5 rounded-full" />
+          <div className="h-12 w-64 bg-white/5 rounded-2xl" />
+        </div>
+      </div>
+      <div className="h-32 w-full bg-white/5 rounded-[2rem]" />
+      <div className="grid grid-cols-2 gap-12">
+        <div className="h-[400px] bg-white/5 rounded-[2rem]" />
+        <div className="h-[400px] bg-white/5 rounded-[2rem]" />
       </div>
     </div>
   );
 
-  if (!app) return <div>App not found</div>;
+  if (!app) return (
+    <div className="h-96 flex flex-col items-center justify-center space-y-4">
+      <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+        <Package className="h-8 w-8 text-white/10" />
+      </div>
+      <p className="font-black uppercase tracking-[0.2em] text-white/20">Subject Not Found</p>
+    </div>
+  );
 
   const historyOptions = [
     { version: app.version, whatsNew: app.whatsNew, size: app.size, date: app.updatedAt || app.createdAt },
@@ -104,62 +113,58 @@ export default function CompareVersions() {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Compare Versions</h1>
-            <p className="text-sm text-muted-foreground">Compare release notes and changes for {app.name}.</p>
-          </div>
-        </div>
-        <div className="hidden sm:flex items-center gap-2">
-          <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-            {app.platform}
-          </Badge>
+    <div className="space-y-12 pb-20 selection:bg-primary/30">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-2">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors mb-4">
+            <ChevronLeft className="h-3.5 w-3.5" /> Back to Profile
+          </button>
+          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-black uppercase tracking-widest px-3 h-6 mb-2">Technical Analysis</Badge>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-premium uppercase leading-tight">Version Delta</h1>
+          <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Comparative analysis of research builds for {app.name}</p>
         </div>
       </div>
 
-      <div className="bg-muted/30 border rounded-2xl p-4 md:p-8">
-        <div className="flex flex-col md:flex-row items-center gap-6 mb-8 bg-card border rounded-xl p-4 shadow-sm">
-          <div className="flex-1 w-full space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Select Base Version</Label>
+      <div className="p-10 rounded-[3rem] bg-white/5 border border-white/10 backdrop-blur-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 h-96 w-96 bg-primary/5 blur-[120px] rounded-full -mr-48 -mt-48" />
+        
+        <div className="flex flex-col lg:flex-row items-center gap-8 mb-16 bg-black/40 border border-white/5 rounded-[2rem] p-8 relative z-10 shadow-2xl">
+          <div className="flex-1 w-full space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Base Revision</label>
             <Select 
               value={v1?.version} 
               onValueChange={(val) => setV1(historyOptions.find(o => o.version === val))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold">
                 <SelectValue placeholder="Select Version" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#0f0f0f] border-white/10 text-white">
                 {historyOptions.map(opt => (
-                  <SelectItem key={opt.version} value={opt.version}>
-                    Version {opt.version} {opt.version === app.version ? "(Current)" : ""}
+                  <SelectItem key={opt.version} value={opt.version} className="font-bold">
+                    REVISION {opt.version} {opt.version === app.version ? "(STABLE)" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-            <ArrowLeftRight className="h-5 w-5 text-muted-foreground" />
+          <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0 shadow-lg">
+            <ArrowLeftRight className="h-6 w-6 text-primary" />
           </div>
 
-          <div className="flex-1 w-full space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Select Target Version</Label>
+          <div className="flex-1 w-full space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Target Revision</label>
             <Select 
               value={v2?.version} 
               onValueChange={(val) => setV2(historyOptions.find(o => o.version === val))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold">
                 <SelectValue placeholder="Select Version" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#0f0f0f] border-white/10 text-white">
                 {historyOptions.map(opt => (
-                  <SelectItem key={opt.version} value={opt.version}>
-                    Version {opt.version} {opt.version === app.version ? "(Current)" : ""}
+                  <SelectItem key={opt.version} value={opt.version} className="font-bold">
+                    REVISION {opt.version} {opt.version === app.version ? "(STABLE)" : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -167,64 +172,43 @@ export default function CompareVersions() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 relative">
-          {/* Vertical Divider for desktop */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-border -translate-x-1/2 z-0" />
+        <div className="flex flex-col md:flex-row gap-16 relative">
+          {/* Delta Bridge */}
+          <div className="hidden md:block absolute left-1/2 top-10 bottom-10 w-[1px] bg-white/5 -translate-x-1/2 z-0" />
           
           <VersionColumn 
             data={v1} 
-            title={v1?.version === app.version ? "Current Release" : "Base Version"} 
+            title={v1?.version === app.version ? "Stable Branch" : "Reference Build"} 
             isCurrent={v1?.version === app.version} 
           />
           
           <VersionColumn 
             data={v2} 
-            title={v2?.version === app.version ? "Current Release" : "Target Version"} 
+            title={v2?.version === app.version ? "Stable Branch" : "Comparison Build"} 
             isCurrent={v2?.version === app.version} 
           />
         </div>
       </div>
 
-      {/* Comparison Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-blue-50/50 border-blue-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-blue-800">
-              <Info className="h-4 w-4" /> Version Drift
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-blue-700 leading-relaxed">
-              Comparing these versions allows you to see how the app has evolved over time. Pay attention to the "What's New" section for feature additions or bug fixes.
+      {/* Analytical Insights */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { icon: <Info className="h-5 w-5" />, title: "Architecture Drift", content: "Version delta reveals the evolution of technical implementations. Review 'Operational Changes' for refactor logs.", color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
+          { icon: <Star className="h-5 w-5" />, title: "Regression Context", content: "Comparative analysis helps isolate regression points. Stable builds provide the baseline for quality assurance.", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+          { icon: <CheckCircle2 className="h-5 w-5" />, title: "Payload Integrity", content: "Significant delta in payload size may indicate asset optimization or inclusion of new binary libraries.", color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" }
+        ].map((insight, i) => (
+          <div key={i} className={cn("p-8 rounded-[2.5rem] border backdrop-blur-md relative overflow-hidden group hover:scale-105 transition-all duration-500", insight.bg, insight.border)}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border", insight.border)}>
+                {insight.icon}
+              </div>
+              <h4 className={cn("font-black text-xs uppercase tracking-[0.2em]", insight.color)}>{insight.title}</h4>
+            </div>
+            <p className="text-xs font-medium text-white/40 leading-relaxed">
+              {insight.content}
             </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-amber-50/50 border-amber-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-800">
-              <Star className="h-4 w-4" /> Rating Context
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-amber-700 leading-relaxed">
-              Newer versions often address stability issues found in previous releases. If you're experiencing crashes, check if the newer version includes a fix.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-green-50/50 border-green-100">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2 text-green-800">
-              <CheckCircle2 className="h-4 w-4" /> Stability Info
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-green-700 leading-relaxed">
-              The platform tracks bug reports per version. You can see the health of specific releases in the analytics section if you have admin access.
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -277,343 +277,428 @@ export default function AdminDashboard() {
   if (authLoading) return null;
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
-            App Management
-          </h1>
-          <p className="text-white/40 mt-2 font-medium">Monitor your ecosystem and deploy new updates instantly.</p>
+    <div className="space-y-12 pb-20 selection:bg-primary/30">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-black uppercase tracking-widest px-3 h-6 mb-2">Central Intelligence</Badge>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-premium uppercase leading-tight">Command Center</h1>
+          <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Platform-wide application orchestration & research management</p>
         </div>
-        <Button onClick={openAdd} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">
-          <Plus className="h-5 w-5 mr-2" /> Add New App
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button 
+            onClick={openAdd}
+            className="h-14 px-8 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest shadow-[0_0_30px_-10px_rgba(1,135,95,0.5)] transition-all hover:scale-105 active:scale-95"
+          >
+            <Plus className="h-5 w-5 mr-2" /> Initialize App
+          </Button>
+          <Button 
+            variant="ghost" 
+            onClick={logout}
+            className="h-14 px-6 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 font-black uppercase tracking-widest text-[10px]"
+          >
+            <LogOut className="h-4 w-4 mr-2" /> Terminate Session
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
         {[
-            { label: "Total Apps", value: stats.total, icon: Package },
-            { label: "Downloads", value: stats.downloads, icon: Download },
-            { label: "Featured", value: stats.featured, icon: Star },
-            { label: "Published", value: stats.published, icon: Eye },
-            { label: "Unpublished", value: stats.unpublished, icon: EyeOff },
-          ].map((s) => (
-            <Card key={s.label} className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-muted"><s.icon className="h-5 w-5 text-muted-foreground" /></div>
-              <div><p className="text-2xl font-bold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
-          </Card>
+          { label: "Active Deployments", value: stats.total, icon: Package, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Total Installs", value: stats.downloads, icon: Download, color: "text-blue-400", bg: "bg-blue-400/10" },
+          { label: "Priority Builds", value: stats.featured, icon: Star, color: "text-yellow-400", bg: "bg-yellow-400/10" },
+          { label: "Online Assets", value: stats.published, icon: Eye, color: "text-green-400", bg: "bg-green-400/10" },
+          { label: "Offline Assets", value: stats.unpublished, icon: EyeOff, color: "text-red-400", bg: "bg-red-400/10" }
+        ].map((s) => (
+          <div key={s.label} className="p-6 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md group hover:bg-white/[0.08] transition-all duration-500">
+            <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", s.bg)}>
+              <s.icon className={cn("h-6 w-6", s.color)} />
+            </div>
+            <div>
+              <p className="text-3xl font-black text-white tracking-tighter">{s.value}</p>
+              <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">{s.label}</p>
+            </div>
+          </div>
         ))}
       </div>
 
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
-            <div className="w-1.5 h-6 bg-primary rounded-full" />
-            Apps List
+        <div className="flex items-center justify-between px-2">
+          <h2 className="text-xl font-black tracking-tighter text-premium uppercase flex items-center gap-3">
+            <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(1,135,95,0.5)]" />
+            Registry
           </h2>
         </div>
 
         {loading ? (
-          <div className="grid gap-4">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />)}</div>
+          <div className="grid gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-24 w-full rounded-[2rem] bg-white/5 animate-pulse border border-white/5" />
+            ))}
+          </div>
         ) : (
-          <div className="rounded-2xl border border-white/5 bg-black/40 backdrop-blur-sm overflow-hidden">
+          <div className="rounded-[2.5rem] border border-white/5 bg-black/40 backdrop-blur-xl overflow-hidden shadow-2xl">
             <Table>
-              <TableHeader className="bg-white/[0.02] h-14">
-                <TableRow className="hover:bg-transparent border-white/5">
-                  <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px] pl-6">Application</TableHead>
-                  <TableHead className="hidden sm:table-cell text-white/40 font-bold uppercase tracking-widest text-[10px]">Category</TableHead>
-                  <TableHead className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Status</TableHead>
-                  <TableHead className="text-right text-white/40 font-bold uppercase tracking-widest text-[10px] pr-6">Management</TableHead>
+              <TableHeader className="bg-white/[0.02] border-b border-white/5">
+                <TableRow className="hover:bg-transparent border-none">
+                  <TableHead className="text-white/20 font-black uppercase tracking-[0.2em] text-[10px] pl-8 h-16">Application</TableHead>
+                  <TableHead className="hidden sm:table-cell text-white/20 font-black uppercase tracking-[0.2em] text-[10px] h-16">Department</TableHead>
+                  <TableHead className="text-white/20 font-black uppercase tracking-[0.2em] text-[10px] h-16">Status</TableHead>
+                  <TableHead className="text-right text-white/20 font-black uppercase tracking-[0.2em] text-[10px] pr-8 h-16">Directives</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                  {apps.map((app) => (
-                    <TableRow key={app._id} className="group hover:bg-white/[0.02] border-white/5 transition-colors">
-                      <TableCell className="py-4 pl-6">
-                        <div className="flex items-center gap-4">
-                          <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-white/10 shadow-lg group-hover:scale-105 transition-transform duration-300">
-                            <img src={api.getFileUrl(app.icon)} alt="" className="h-full w-full object-cover" />
+                {apps.map((app) => (
+                  <TableRow key={app._id} className="group hover:bg-white/[0.02] border-white/5 transition-all">
+                    <TableCell className="py-6 pl-8">
+                      <div className="flex items-center gap-4">
+                        <div className="relative h-14 w-14 rounded-2xl overflow-hidden border border-white/10 shadow-xl transition-all duration-500 group-hover:scale-105 group-hover:border-primary/50">
+                          <img src={api.getFileUrl(app.icon)} alt="" className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-black text-sm text-white tracking-tight">{app.name}</span>
+                          <span className="text-[10px] text-white/20 font-black uppercase tracking-widest">Build v{app.version}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge className="bg-white/5 border-white/10 text-white/40 font-black uppercase tracking-widest text-[9px] px-3 h-6">
+                        {app.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {app.published ? (
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-[9px] font-black uppercase tracking-widest shadow-[0_0_20px_-5px_rgba(1,135,95,0.3)]">
+                            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(1,135,95,1)]" />
+                            Live
                           </div>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-white leading-tight">{app.name}</span>
-                            <span className="text-[10px] text-white/30 font-medium uppercase tracking-widest mt-1">v{app.version}</span>
+                        ) : (
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 text-white/20 border border-white/10 text-[9px] font-black uppercase tracking-widest">
+                            <div className="h-1.5 w-1.5 rounded-full bg-white/10" />
+                            Draft
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <Badge variant="outline" className="bg-white/5 border-white/10 text-white/60 font-medium">
-                          {app.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {app.published ? (
-                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-bold uppercase">
-                              <div className="h-1 w-1 rounded-full bg-green-400 animate-pulse" />
-                              Live
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 text-white/40 border border-white/10 text-[10px] font-bold uppercase">
-                              Draft
-                            </div>
-                          )}
-                          {app.featured && (
-                            <div className="h-6 w-6 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
-                              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <div className="hidden sm:flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => openRelease(app)} 
-                            className="h-9 w-9 rounded-xl text-blue-400 hover:bg-blue-500/10 transition-all active:scale-90"
-                            title="Release Update"
-                          >
-                            <Rocket className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => openRollback(app)} 
-                            className="h-9 w-9 rounded-xl text-orange-400 hover:bg-orange-500/10 transition-all active:scale-90"
-                            title="Manage Versions"
-                          >
-                            <History className="h-4 w-4" />
-                          </Button>
-                          
-                          <div className="w-[1px] h-4 bg-white/10 mx-1" />
+                        )}
+                        {app.featured && (
+                          <div className="h-7 w-7 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20 shadow-[0_0_15px_-5px_rgba(234,179,8,0.3)]">
+                            <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-8">
+                      <div className="flex items-center justify-end gap-3">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => openRelease(app)} 
+                          className="h-11 w-11 rounded-2xl text-blue-400 hover:bg-blue-400/10 hover:text-blue-300 transition-all active:scale-90 border border-transparent hover:border-blue-400/20"
+                          title="Deploy Update"
+                        >
+                          <Rocket className="h-5 w-5" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => openRollback(app)} 
+                          className="h-11 w-11 rounded-2xl text-orange-400 hover:bg-orange-400/10 hover:text-orange-300 transition-all active:scale-90 border border-transparent hover:border-orange-400/20"
+                          title="Archive Logs"
+                        >
+                          <History className="h-5 w-5" />
+                        </Button>
+                        
+                        <div className="w-[1px] h-6 bg-white/10 mx-1" />
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-white/40 hover:text-white hover:bg-white/5">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-[#0f0f0f] border-white/10 text-white">
-                              <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-white/30">Configuration</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)} className="cursor-pointer">
-                                {app.published ? <><EyeOff className="mr-2 h-4 w-4 text-red-400" /> Unpublish</> : <><Eye className="mr-2 h-4 w-4 text-green-400" /> Publish</>}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => api.toggleFeatured(app._id).then(fetchApps)} className="cursor-pointer">
-                                <Star className={cn("mr-2 h-4 w-4", app.featured ? "fill-yellow-500 text-yellow-500" : "text-white/40")} /> 
-                                {app.featured ? "Remove Featured" : "Make Featured"}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => api.toggleAbTesting(app._id).then(fetchApps)} className="cursor-pointer">
-                                <Beaker className={cn("mr-2 h-4 w-4", app.abTestingEnabled ? "text-purple-400 fill-purple-400/20" : "text-white/40")} /> 
-                                {app.abTestingEnabled ? "Disable A/B Tests" : "Enable A/B Tests"}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-white/10" />
-                              <DropdownMenuItem onClick={() => openEdit(app)} className="cursor-pointer">
-                                <Pencil className="mr-2 h-4 w-4 text-white/60" /> Edit Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer">
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete Application
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-
-                        {/* Mobile Actions */}
-                        <div className="sm:hidden flex justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-white/40 hover:text-white"><MoreHorizontal className="h-5 w-5" /></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-[#0f0f0f] border-white/10 text-white">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => openRelease(app)}><Rocket className="mr-2 h-4 w-4 text-blue-400" /> Publish Update</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openRollback(app)}><History className="mr-2 h-4 w-4 text-orange-400" /> Versions</DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-white/10" />
-                              <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)}>{app.published ? "Unpublish" : "Publish"}</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openEdit(app)}><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="text-red-400">Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl text-white/20 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all">
+                              <MoreHorizontal className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-64 bg-[#0f0f0f] border-white/10 text-white p-2 rounded-2xl shadow-2xl backdrop-blur-xl">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 px-3 py-2">Operational Parameters</DropdownMenuLabel>
+                            <DropdownMenuSeparator className="bg-white/5 mx-2" />
+                            <DropdownMenuItem onClick={() => api.togglePublish(app._id).then(fetchApps)} className="rounded-xl cursor-pointer py-3 hover:bg-white/5 transition-colors focus:bg-white/5">
+                              {app.published ? <><EyeOff className="mr-3 h-4 w-4 text-red-400" /> Offline Mode</> : <><Eye className="mr-3 h-4 w-4 text-primary" /> Synchronize Online</>}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => api.toggleFeatured(app._id).then(fetchApps)} className="rounded-xl cursor-pointer py-3 hover:bg-white/5 transition-colors focus:bg-white/5">
+                              <Star className={cn("mr-3 h-4 w-4", app.featured ? "fill-yellow-500 text-yellow-500" : "text-white/20")} /> 
+                              {app.featured ? "De-prioritize Build" : "Priority Deployment"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => api.toggleAbTesting(app._id).then(fetchApps)} className="rounded-xl cursor-pointer py-3 hover:bg-white/5 transition-colors focus:bg-white/5">
+                              <Beaker className={cn("mr-3 h-4 w-4", app.abTestingEnabled ? "text-purple-400 fill-purple-400/20" : "text-white/20")} /> 
+                              {app.abTestingEnabled ? "Terminate Research" : "Initialize Research"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-white/5 mx-2" />
+                            <DropdownMenuItem onClick={() => openEdit(app)} className="rounded-xl cursor-pointer py-3 hover:bg-white/5 transition-colors focus:bg-white/5">
+                              <Pencil className="mr-3 h-4 w-4 text-white/40" /> Adjust Parameters
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => api.deleteApp(app._id).then(fetchApps)} className="rounded-xl text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer py-3">
+                              <Trash2 className="mr-3 h-4 w-4" /> Purge Records
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
 
+      {/* Initialize/Edit Modal */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[800px] w-[95vw] h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
-          <DialogHeader className="p-6 border-b bg-card shrink-0">
-            <DialogTitle className="text-xl font-bold">{editingApp ? "Edit App" : "Add New App"}</DialogTitle>
-            <DialogDescription>{editingApp ? "Update your app's information and files." : "Enter the details for your new application."}</DialogDescription>
+        <DialogContent className="bg-[#0f0f0f] border-white/10 text-white p-0 max-w-4xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col h-[90vh]">
+          <div className="absolute top-0 right-0 h-96 w-96 bg-primary/5 blur-[120px] rounded-full -mr-48 -mt-48" />
+          <DialogHeader className="p-10 border-b border-white/5 relative z-10 shrink-0">
+            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 mb-6">
+              <Rocket className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-3xl font-black tracking-tighter uppercase leading-tight">{editingApp ? "Parameter Adjustment" : "Project Initialization"}</DialogTitle>
+            <DialogDescription className="text-white/40 font-medium pt-2">
+              {editingApp ? "Update the core parameters of your existing deployment." : "Define the technical specifications for your new research subject."}
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-            <form onSubmit={handleSubmit} id="admin-form" className="space-y-8">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2"><Label className="text-sm font-semibold">App Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. My Awesome App" required /></div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Tagline *</Label><Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} placeholder="Short catchy description" required /></div>
-              </div>
-
-              <div className="space-y-2"><Label className="text-sm font-semibold">Description *</Label><Textarea rows={5} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /></div>
-              <div className="space-y-2"><Label className="text-sm font-semibold">What's New</Label><Textarea rows={3} value={form.whatsNew} onChange={(e) => setForm({ ...form, whatsNew: e.target.value })} placeholder="Release notes..." /></div>
-              
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Category *</Label>
-                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>{categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
+          <div className="flex-1 overflow-y-auto p-10 custom-scrollbar relative z-10">
+            <form onSubmit={handleSubmit} id="admin-form" className="space-y-12">
+              <div className="grid md:grid-cols-2 gap-10">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Subject Designation</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold placeholder:text-white/10" placeholder="e.g. Project Orion" required />
                 </div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Tags</Label><Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="fitness, tools, etc." /></div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Mission Tagline</Label>
+                  <Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold placeholder:text-white/10" placeholder="Brief operational summary" required />
+                </div>
               </div>
 
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">Platform *</Label>
-                <RadioGroup value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })} className="flex gap-6">
-                  {["android", "ios", "both"].map(p => <div key={p} className="flex items-center gap-2"><RadioGroupItem value={p} id={`p-${p}`} /><Label htmlFor={`p-${p}`} className="capitalize cursor-pointer">{p}</Label></div>)}
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Technical Dossier</Label>
+                <Textarea rows={6} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-white/5 border-white/10 rounded-2xl font-medium resize-none placeholder:text-white/10" placeholder="Full technical description..." required />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-10">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Classification</Label>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                    <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[#0f0f0f] border-white/10 text-white">{categories.map((c) => <SelectItem key={c} value={c} className="font-bold">{c.toUpperCase()}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Meta Tags</Label>
+                  <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold placeholder:text-white/10" placeholder="research, security, etc." />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Environment Compatibility</Label>
+                <RadioGroup value={form.platform} onValueChange={(v) => setForm({ ...form, platform: v })} className="flex gap-10 bg-white/5 p-6 rounded-2xl border border-white/5">
+                  {["android", "ios", "both"].map(p => (
+                    <div key={p} className="flex items-center gap-3">
+                      <RadioGroupItem value={p} id={`p-${p}`} className="border-white/20 data-[state=checked]:bg-primary" />
+                      <Label htmlFor={`p-${p}`} className="capitalize cursor-pointer font-black text-xs text-white/60 tracking-wider uppercase">{p}</Label>
+                    </div>
+                  ))}
                 </RadioGroup>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2"><Label className="text-sm font-semibold">Version</Label><Input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} /></div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Min OS</Label><Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} /></div>
+              <div className="grid md:grid-cols-2 gap-10">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Baseline Revision</Label>
+                  <Input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold placeholder:text-white/10" placeholder="1.0.0" />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Min Kernel Specification</Label>
+                  <Input value={form.minOSVersion} onChange={(e) => setForm({ ...form, minOSVersion: e.target.value })} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold placeholder:text-white/10" placeholder="Android 13+" />
+                </div>
               </div>
 
-              <Separator />
+              <div className="w-full h-[1px] bg-white/5" />
               
-              {/* Screenshot Manager */}
+              {/* Media Archive Management */}
               {existingScreenshots.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between"><Label className="text-sm font-semibold">Manage Screenshots</Label><Badge variant="outline">{existingScreenshots.length} images</Badge></div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between ml-1">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Media Archive Assets</Label>
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[8px] font-black uppercase">{existingScreenshots.length} UNITS</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                     {existingScreenshots.map((url, i) => (
-                      <div key={url} className="relative aspect-[9/16] group rounded-lg overflow-hidden border bg-muted">
+                      <div key={url} className="relative aspect-[9/16] group rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-primary/30">
                         <img src={api.getFileUrl(url)} alt="" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                          <div className="flex gap-1">
-                            <Button type="button" size="icon" variant="secondary" className="h-7 w-7" onClick={() => moveScreenshot(i, -1)} disabled={i === 0}><ArrowLeft className="h-3 w-3" /></Button>
-                            <Button type="button" size="icon" variant="secondary" className="h-7 w-7" onClick={() => moveScreenshot(i, 1)} disabled={i === existingScreenshots.length - 1}><ArrowRight className="h-3 w-3" /></Button>
+                        <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
+                          <div className="flex gap-2">
+                            <Button type="button" size="icon" variant="ghost" className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white" onClick={() => moveScreenshot(i, -1)} disabled={i === 0}><ArrowLeft className="h-4 w-4" /></Button>
+                            <Button type="button" size="icon" variant="ghost" className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-primary hover:text-white" onClick={() => moveScreenshot(i, 1)} disabled={i === existingScreenshots.length - 1}><ArrowRight className="h-4 w-4" /></Button>
                           </div>
-                          <Button type="button" size="icon" variant="destructive" className="h-7 w-7" onClick={() => removeScreenshot(i)}><X className="h-3 w-3" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-10 w-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white" onClick={() => removeScreenshot(i)}><Trash2 className="h-4 w-4" /></Button>
                         </div>
-                        <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/50 text-[10px] text-white">{i + 1}</div>
+                        <div className="absolute top-3 left-3 px-3 py-1 rounded-lg bg-black/60 border border-white/10 text-[9px] font-black text-white tracking-widest backdrop-blur-md">U-{i + 1}</div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2"><Label className="text-sm font-semibold">Icon</Label><Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} /></div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Additional Screenshots</Label><Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} /></div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">Video Preview (MP4)</Label><Input type="file" accept="video/mp4,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} /></div>
-                <div className="space-y-2"><Label className="text-sm font-semibold">App File (.apk/.ipa)</Label><Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} /></div>
-              </div>
-
-              {submitting && <div className="space-y-3 pt-2"><Progress value={uploadProgress} className="h-2" /><p className="text-xs text-center font-medium animate-pulse">{uploadProgress}% - Uploading Assets...</p></div>}
-            </form>
-          </div>
-
-          <DialogFooter className="p-6 border-t bg-card shrink-0 flex gap-2">
-            <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="admin-form" disabled={submitting} className="min-w-[120px]"><Upload className="h-4 w-4 mr-2" />{submitting ? "Saving..." : "Save App"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Release Update Dialog */}
-      <Dialog open={releaseDialogOpen} onOpenChange={setReleaseDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-blue-500" /> Release Update</DialogTitle>
-            <DialogDescription>
-              Publish a new version for <strong className="text-foreground">{editingApp?.name}</strong>. Previous versions will be archived in the version history.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleReleaseSubmit} id="release-form" className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>New Version Number *</Label>
-              <Input value={releaseForm.version} onChange={(e) => setReleaseForm({ ...releaseForm, version: e.target.value })} placeholder="e.g. 1.0.1" required />
-            </div>
-            <div className="space-y-2">
-              <Label>Release Notes (What's New) *</Label>
-              <Textarea rows={4} value={releaseForm.whatsNew} onChange={(e) => setReleaseForm({ ...releaseForm, whatsNew: e.target.value })} placeholder="Describe what's changed in this update..." required />
-            </div>
-            <div className="space-y-2">
-              <Label>New App File (.apk/.ipa) *</Label>
-              <Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} required />
-            </div>
-            {submitting && (
-              <div className="space-y-2 pt-2">
-                <Progress value={uploadProgress} className="h-2" />
-                <p className="text-xs text-center font-medium animate-pulse">{uploadProgress}% - Uploading Update...</p>
-              </div>
-            )}
-          </form>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setReleaseDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="release-form" disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Rocket className="h-4 w-4 mr-2" />
-              {submitting ? "Publishing..." : "Publish Release"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Manage Versions (Rollback) Dialog */}
-      <Dialog open={rollbackDialogOpen} onOpenChange={setRollbackDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[85vh] flex flex-col p-0">
-          <DialogHeader className="p-6 border-b shrink-0">
-            <DialogTitle className="flex items-center gap-2"><History className="h-5 w-5 text-orange-500" /> Manage Versions</DialogTitle>
-            <DialogDescription>
-              View past releases for <strong className="text-foreground">{editingApp?.name}</strong>. You can rollback to an older version if the current one has issues.
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="flex-1 p-6">
-            <div className="space-y-6">
-              {/* Current Version */}
-              <div>
-                <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Current Live Version</h4>
-                <div className="p-4 border border-green-500/30 bg-green-500/5 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-bold text-lg">v{editingApp?.version}</span>
-                    <Badge variant="default" className="bg-green-600">Active</Badge>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Identify Interface (Icon)</Label>
+                  <div className="relative">
+                    <Input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0])} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold file:bg-primary file:text-white file:border-none file:rounded-lg file:px-4 file:h-8 file:mr-4 file:text-[10px] file:font-black file:uppercase file:tracking-widest cursor-pointer" />
                   </div>
-                  <p className="text-sm text-muted-foreground mb-1"><strong>Released:</strong> {editingApp?.updatedAt ? new Date(editingApp.updatedAt).toLocaleDateString() : 'Unknown'}</p>
-                  <p className="text-sm text-muted-foreground line-clamp-2"><strong>Notes:</strong> {editingApp?.whatsNew || "No release notes"}</p>
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Visual Evidence (Screenshots)</Label>
+                  <Input type="file" accept="image/*" multiple onChange={(e) => setScreenshotFiles(Array.from(e.target.files || []))} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold file:bg-primary file:text-white file:border-none file:rounded-lg file:px-4 file:h-8 file:mr-4 file:text-[10px] file:font-black file:uppercase file:tracking-widest cursor-pointer" />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Operational Loop (MP4)</Label>
+                  <Input type="file" accept="video/mp4,video/*" onChange={(e) => setVideoFile(e.target.files?.[0])} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold file:bg-primary file:text-white file:border-none file:rounded-lg file:px-4 file:h-8 file:mr-4 file:text-[10px] file:font-black file:uppercase file:tracking-widest cursor-pointer" />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Executable Binary (.APK/.IPA)</Label>
+                  <Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold file:bg-primary file:text-white file:border-none file:rounded-lg file:px-4 file:h-8 file:mr-4 file:text-[10px] file:font-black file:uppercase file:tracking-widest cursor-pointer" />
                 </div>
               </div>
 
-              <Separator />
+              {submitting && (
+                <div className="space-y-4 pt-4 bg-white/5 p-8 rounded-[2rem] border border-white/5 animate-in fade-in zoom-in duration-500">
+                  <div className="flex justify-between items-center mb-2 px-1">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Transmission Pipeline</span>
+                    <span className="text-[10px] font-black text-white/60">{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-3 bg-white/5 overflow-hidden rounded-full [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-primary/50 shadow-[0_0_15px_-5px_rgba(1,135,95,0.5)]" />
+                  <p className="text-[10px] text-center font-black uppercase tracking-[0.2em] text-white/20 animate-pulse mt-4">Transmitting assets to secure storage node...</p>
+                </div>
+              )}
+            </form>
+          </div>
 
-              {/* History */}
-              <div>
-                <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Version History</h4>
+          <DialogFooter className="p-10 border-t border-white/5 bg-black/40 relative z-10 shrink-0 flex gap-4">
+            <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)} className="h-14 px-8 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 font-black uppercase tracking-widest text-[10px] flex-1">Abort Mission</Button>
+            <Button type="submit" form="admin-form" disabled={submitting} className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest shadow-[0_0_30px_-10px_rgba(1,135,95,0.5)] transition-all hover:scale-[1.02] flex-[2]"><Upload className="h-5 w-5 mr-3" />{submitting ? "Transmitting..." : "Finalize Deployment"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Deploy Update Dialog */}
+      <Dialog open={releaseDialogOpen} onOpenChange={setReleaseDialogOpen}>
+        <DialogContent className="bg-[#0f0f0f] border-white/10 text-white p-10 max-w-lg rounded-[3rem] overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 h-64 w-64 bg-blue-500/5 blur-[100px] rounded-full -mr-32 -mt-32" />
+          <DialogHeader className="relative z-10">
+            <div className="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 mb-6">
+              <Rocket className="h-8 w-8 text-blue-400" />
+            </div>
+            <DialogTitle className="text-3xl font-black tracking-tighter uppercase leading-tight">Deploy Revision</DialogTitle>
+            <DialogDescription className="text-white/40 font-medium pt-2 text-sm leading-relaxed">
+              Initialize a new build cycle for <strong className="text-white font-black">{editingApp?.name}</strong>. Previous versions will be archived in the technical repository.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleReleaseSubmit} id="release-form" className="space-y-8 pt-10 relative z-10">
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">New Build Identifier</Label>
+              <Input value={releaseForm.version} onChange={(e) => setReleaseForm({ ...releaseForm, version: e.target.value })} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold placeholder:text-white/10" placeholder="e.g. 1.0.1" required />
+            </div>
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Technical Release Logs</Label>
+              <Textarea rows={4} value={releaseForm.whatsNew} onChange={(e) => setReleaseForm({ ...releaseForm, whatsNew: e.target.value })} className="bg-white/5 border-white/10 rounded-2xl font-medium resize-none placeholder:text-white/10" placeholder="Describe the architectural improvements..." required />
+            </div>
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Target Binary Payload (.APK/.IPA)</Label>
+              <Input type="file" accept=".apk,.ipa" onChange={(e) => setAppFile(e.target.files?.[0])} className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold file:bg-blue-500 file:text-white file:border-none file:rounded-lg file:px-4 file:h-8 file:mr-4 file:text-[10px] file:font-black file:uppercase file:tracking-widest cursor-pointer" required />
+            </div>
+            {submitting && (
+              <div className="space-y-4 pt-2 bg-white/5 p-6 rounded-2xl border border-white/5">
+                <Progress value={uploadProgress} className="h-2 bg-white/5 overflow-hidden rounded-full [&>div]:bg-blue-500" />
+                <p className="text-[9px] text-center font-black uppercase tracking-widest text-blue-400/60 animate-pulse">{uploadProgress}% - Synchronizing Build Payload...</p>
+              </div>
+            )}
+            <DialogFooter className="flex-col sm:flex-col gap-4 pt-4">
+              <Button type="submit" form="release-form" disabled={submitting} className="w-full h-16 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest shadow-[0_0_30px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-[1.02]">
+                <Rocket className="h-5 w-5 mr-3" />
+                {submitting ? "Deploying..." : "Finalize Deployment"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setReleaseDialogOpen(false)} className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors">Abort Cycle</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Management (Rollback) Modal */}
+      <Dialog open={rollbackDialogOpen} onOpenChange={setRollbackDialogOpen}>
+        <DialogContent className="bg-[#0f0f0f] border-white/10 text-white p-0 max-w-2xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+          <div className="absolute top-0 right-0 h-64 w-64 bg-orange-500/5 blur-[100px] rounded-full -mr-32 -mt-32" />
+          <DialogHeader className="p-10 border-b border-white/5 relative z-10 shrink-0">
+            <div className="h-16 w-16 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 mb-6">
+              <History className="h-8 w-8 text-orange-400" />
+            </div>
+            <DialogTitle className="text-3xl font-black tracking-tighter uppercase leading-tight">Archive Management</DialogTitle>
+            <DialogDescription className="text-white/40 font-medium pt-2 text-sm leading-relaxed">
+              Navigate the technical evolution of <strong className="text-white font-black">{editingApp?.name}</strong>. Revert state to previous stable revisions if necessary.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1 p-10 relative z-10 custom-scrollbar">
+            <div className="space-y-12">
+              {/* Active Build */}
+              <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-3">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(1,135,95,1)]" />
+                  Active Operational Revision
+                </h4>
+                <div className="p-8 border border-primary/20 bg-primary/5 rounded-[2rem] shadow-[0_0_40px_-15px_rgba(1,135,95,0.3)] backdrop-blur-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="font-black text-3xl text-white tracking-tighter">BUILD v{editingApp?.version}</span>
+                    <Badge className="bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] px-3 h-6">STABLE ACTIVE</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6 mb-6">
+                    <div className="space-y-1">
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Deployment Sync</p>
+                      <p className="text-xs font-bold text-white/60">{editingApp?.updatedAt ? new Date(editingApp.updatedAt).toLocaleDateString() : 'Unknown'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Payload Size</p>
+                      <p className="text-xs font-bold text-white/60">{editingApp?.size || "N/A"}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 pt-4 border-t border-primary/10">
+                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Technical Logs</p>
+                    <p className="text-xs font-medium text-white/40 leading-relaxed italic line-clamp-3">"{editingApp?.whatsNew || "No release logs recorded for this revision."}"</p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-white/5" />
+
+              {/* Revision History */}
+              <div className="space-y-6 pb-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Legacy Records Archive</h4>
                 {(!editingApp?.versionHistory || editingApp.versionHistory.length === 0) ? (
-                  <p className="text-sm text-muted-foreground text-center py-4 italic">No previous versions found.</p>
+                  <div className="p-12 rounded-[2rem] border border-white/5 bg-white/[0.02] text-center">
+                    <RotateCcw className="h-8 w-8 text-white/10 mx-auto mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">No legacy revisions available in local archive.</p>
+                  </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {editingApp.versionHistory.map((hist, idx) => (
-                      <div key={idx} className="p-4 border rounded-lg bg-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold">v{hist.version}</span>
-                            <span className="text-xs text-muted-foreground">({new Date(hist.date).toLocaleDateString()})</span>
+                      <div key={idx} className="p-6 border border-white/5 bg-white/[0.02] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-white/5 transition-all group">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 mb-1">
+                            <span className="font-black text-sm text-white/80 group-hover:text-white transition-colors">REV v{hist.version}</span>
+                            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">SYNC: {new Date(hist.date).toLocaleDateString()}</span>
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-1">{hist.whatsNew || "No release notes"}</p>
+                          <p className="text-[11px] font-medium text-white/30 italic line-clamp-1 group-hover:text-white/40 transition-colors">"{hist.whatsNew || "No technical logs"}"</p>
                         </div>
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm" 
-                          className="shrink-0 text-orange-500 border-orange-200 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/50"
+                          className="h-11 px-5 rounded-xl text-orange-400 bg-orange-400/5 hover:bg-orange-500 hover:text-white transition-all font-black uppercase tracking-widest text-[9px] border border-orange-400/20 active:scale-95"
                           onClick={() => handleRollback(idx)}
                         >
-                          <RotateCcw className="h-4 w-4 mr-2" />
-                          Rollback
+                          <RotateCcw className="h-3.5 w-3.5 mr-2" />
+                          Initialize Rollback
                         </Button>
                       </div>
                     ))}

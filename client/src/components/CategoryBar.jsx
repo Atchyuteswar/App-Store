@@ -1,23 +1,39 @@
 import { cn } from "@/lib/utils";
+import { Layers, Terminal, Cpu, Globe, Activity, Zap, Box, Database } from "lucide-react";
 
-const categories = ["All", "Productivity", "Utility", "Games", "Education", "Health", "Finance", "Other"];
+const categories = [
+  { name: "All", icon: Layers },
+  { name: "Productivity", icon: Activity },
+  { name: "Utility", icon: Cpu },
+  { name: "Games", icon: Zap },
+  { name: "Education", icon: Terminal },
+  { name: "Health", icon: Globe },
+  { name: "Finance", icon: Database },
+  { name: "Other", icon: Box }
+];
 
 export default function CategoryBar({ selected, onSelect }) {
   return (
-    <div className="container mb-6 overflow-x-auto no-scrollbar">
-      <div className="flex gap-2 pb-2">
+    <div className="overflow-x-auto no-scrollbar py-4">
+      <div className="flex gap-4 min-w-max px-2">
         {categories.map((cat) => (
           <button
-            key={cat}
-            onClick={() => onSelect(cat)}
+            key={cat.name}
+            onClick={() => onSelect(cat.name)}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-              selected === cat
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+              "flex items-center gap-4 px-10 h-16 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-700 border group",
+              selected === cat.name
+                ? "bg-primary text-white border-primary shadow-[0_0_30px_-10px_rgba(34,197,94,0.6)] scale-[1.05] z-10"
+                : "bg-black/40 text-white/20 border-white/5 hover:bg-white/5 hover:text-white/60 hover:border-white/10"
             )}
           >
-            {cat}
+            <cat.icon className={cn(
+              "h-4 w-4 transition-all duration-700",
+              selected === cat.name 
+                ? "text-white" 
+                : "text-white/10 group-hover:text-primary/40 group-hover:rotate-12"
+            )} />
+            {cat.name}
           </button>
         ))}
       </div>

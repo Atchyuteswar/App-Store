@@ -15,11 +15,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Users, Bug, Lightbulb, Star, TrendingUp, ChevronRight } from "lucide-react";
+import { Download, Users, Bug, Lightbulb, Star, TrendingUp, ChevronRight, Activity, Zap } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-const COLORS = ["#166534", "#22c55e", "#4ade80", "#86efac"];
+const COLORS = ["#22c55e", "#10b981", "#34d399", "#6ee7b7"];
 
 export default function Analytics() {
   const [appId, setAppId] = useState("all");
@@ -76,106 +76,139 @@ export default function Analytics() {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, gradient, iconColor }) => (
-    <Card className="bg-[#0f0f0f] border-white/5 overflow-hidden group hover:border-white/10 transition-all duration-300">
-      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500", gradient)} />
-      <CardContent className="p-6 relative">
-        <div className="flex flex-col gap-4">
-          <div className={cn("h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500", iconColor)}>
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-white/30 uppercase tracking-widest">{title}</p>
-            <p className="text-2xl font-black mt-1 text-white">{loading ? <Skeleton className="h-8 w-24 bg-white/5" /> : value}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+  const StatCard = ({ title, value, icon: Icon, color, bg }) => (
+    <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-md group hover:bg-white/[0.08] transition-all duration-500 shadow-xl">
+      <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-500 border border-white/10", bg)}>
+        <Icon className={cn("h-7 w-7", color)} />
+      </div>
+      <div>
+        <p className="text-4xl font-black text-white tracking-tighter">
+          {loading ? <Skeleton className="h-10 w-24 bg-white/5" /> : value}
+        </p>
+        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-2 leading-tight">{title}</p>
+      </div>
+    </div>
   );
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
-            Analytics Overview
-          </h1>
-          <p className="text-white/40 mt-2 font-medium">Deep dive into your application performance and tester behavior.</p>
+    <div className="space-y-12 pb-20 selection:bg-primary/30">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-black uppercase tracking-widest px-3 h-6 mb-2">Real-time Intelligence</Badge>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-premium uppercase leading-tight">Research Analytics</h1>
+          <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Deep architectural insights & performance telemetry</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Select value={range} onValueChange={setRange}>
-            <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white rounded-xl h-11">
+            <SelectTrigger className="h-14 w-[180px] bg-white/5 border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/60 focus:ring-0">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#0f0f0f] border-white/10 text-white">
-              <SelectItem value="7">Last 7 Days</SelectItem>
-              <SelectItem value="30">Last 30 Days</SelectItem>
-              <SelectItem value="90">Last 90 Days</SelectItem>
-              <SelectItem value="all">All Time</SelectItem>
+            <SelectContent className="bg-[#0f0f0f] border-white/10 text-white rounded-2xl p-2">
+              <SelectItem value="7" className="rounded-xl py-3 font-bold">LAST 7 DAYS</SelectItem>
+              <SelectItem value="30" className="rounded-xl py-3 font-bold">LAST 30 DAYS</SelectItem>
+              <SelectItem value="90" className="rounded-xl py-3 font-bold">LAST 90 DAYS</SelectItem>
+              <SelectItem value="all" className="rounded-xl py-3 font-bold">ALL TIME ARCHIVE</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard title="Total Downloads" value={stats?.totalDownloads || 0} icon={Download} color="bg-blue-600" />
-        <StatCard title="Active Testers" value={stats?.activeTesters || 0} icon={Users} color="bg-green-600" />
-        <StatCard title="Bugs Filed" value={stats?.bugCount || 0} icon={Bug} color="bg-red-600" />
-        <StatCard title="Ideas Submitted" value={stats?.ideaCount || 0} icon={Lightbulb} color="bg-amber-600" />
-        <StatCard title="Avg Rating" value={stats?.avgRating || "0.0"} icon={Star} color="bg-yellow-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <StatCard title="Global Deployments" value={stats?.totalDownloads || 0} icon={Download} color="text-primary" bg="bg-primary/10" />
+        <StatCard title="Active Researches" value={stats?.activeTesters || 0} icon={Users} color="text-blue-400" bg="bg-blue-400/10" />
+        <StatCard title="Stability Logs" value={stats?.bugCount || 0} icon={Bug} color="text-red-400" bg="bg-red-400/10" />
+        <StatCard title="Innovation Nodes" value={stats?.ideaCount || 0} icon={Lightbulb} color="text-amber-400" bg="bg-amber-400/10" />
+        <StatCard title="Efficiency Rating" value={stats?.avgRating || "0.0"} icon={Star} color="text-yellow-400" bg="bg-yellow-400/10" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Downloads Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Downloads Over Time</CardTitle>
-            <CardDescription>Cumulative download count for selected period.</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[350px]">
+        <div className="lg:col-span-2 p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black tracking-tighter text-premium uppercase flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(1,135,95,0.5)]" />
+              Transmission Velocity
+            </h2>
+            <Activity className="h-5 w-5 text-white/10" />
+          </div>
+          <div className="h-[400px] w-full">
             {loading ? (
-              <Skeleton className="h-full w-full" />
+              <Skeleton className="h-full w-full rounded-2xl bg-white/5" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={downloadsData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" tick={{fontSize: 12}} />
-                  <YAxis tick={{fontSize: 12}} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 10, fill: 'rgba(255,255,255,0.2)', fontWeight: 900}} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 10, fill: 'rgba(255,255,255,0.2)', fontWeight: 900}} 
+                  />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ 
+                      backgroundColor: '#0f0f0f', 
+                      borderRadius: '24px', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      padding: '16px',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }}
+                    itemStyle={{ color: '#22c55e', fontWeight: 900, fontSize: '12px' }}
+                    labelStyle={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginBottom: '8px', fontWeight: 900 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="count" 
-                    stroke="#166534" 
-                    strokeWidth={3} 
-                    dot={{ r: 4, fill: '#166534' }}
-                    activeDot={{ r: 6 }}
+                    stroke="#22c55e" 
+                    strokeWidth={4} 
+                    dot={{ r: 0 }}
+                    activeDot={{ r: 6, fill: '#22c55e', strokeWidth: 0 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Bug Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Bugs per Version</CardTitle>
-            <CardDescription>Issue distribution across app releases.</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[350px]">
+        <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black tracking-tighter text-premium uppercase flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-red-500 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
+              Kernel Anomalies
+            </h2>
+            <Zap className="h-5 w-5 text-white/10" />
+          </div>
+          <div className="h-[400px] w-full">
             {loading ? (
-              <Skeleton className="h-full w-full" />
+              <Skeleton className="h-full w-full rounded-2xl bg-white/5" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={bugsData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                <BarChart data={bugsData} layout="vertical" margin={{ left: -20 }}>
                   <XAxis type="number" hide />
-                  <YAxis dataKey="version" type="category" tick={{fontSize: 12}} />
-                  <Tooltip cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="count" fill="#166534" radius={[0, 4, 4, 0]}>
+                  <YAxis 
+                    dataKey="version" 
+                    type="category" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 10, fill: 'rgba(255,255,255,0.4)', fontWeight: 900}} 
+                  />
+                  <Tooltip 
+                    cursor={{fill: 'rgba(255,255,255,0.02)'}}
+                    contentStyle={{ 
+                      backgroundColor: '#0f0f0f', 
+                      borderRadius: '24px', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      padding: '16px',
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={24}>
                     {bugsData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -183,102 +216,104 @@ export default function Analytics() {
                 </BarChart>
               </ResponsiveContainer>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Testers */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Top Contributing Testers</CardTitle>
-              <CardDescription>Ranked by engagement score.</CardDescription>
-            </div>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              Top 50
-            </Badge>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-auto max-h-[400px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">Rank</TableHead>
-                    <TableHead>Tester</TableHead>
-                    <TableHead className="text-right">Bugs</TableHead>
-                    <TableHead className="text-right">Ideas</TableHead>
-                    <TableHead className="text-right">Score</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading ? (
-                    Array(5).fill(0).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell colSpan={5}><Skeleton className="h-8 w-full" /></TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    topTesters.map((tester) => (
-                      <TableRow key={tester.id}>
-                        <TableCell className="font-bold text-muted-foreground">{tester.rank}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{tester.name}</span>
-                            <span className="text-xs text-muted-foreground">{tester.email}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">{tester.bugs}</TableCell>
-                        <TableCell className="text-right">{tester.ideas}</TableCell>
-                        <TableCell className="text-right font-bold text-green-700">{tester.score}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black tracking-tighter text-premium uppercase flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+              Elite Researchers
+            </h2>
+            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[8px] font-black uppercase tracking-widest px-3 h-6">TOP 50 NODES</Badge>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-white/5">
+            <Table>
+              <TableHeader className="bg-white/[0.02]">
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="text-white/20 font-black uppercase tracking-widest text-[9px] pl-6 h-12 w-16 text-center">Rank</TableHead>
+                  <TableHead className="text-white/20 font-black uppercase tracking-widest text-[9px] h-12">Researcher</TableHead>
+                  <TableHead className="text-right text-white/20 font-black uppercase tracking-widest text-[9px] h-12">Stability</TableHead>
+                  <TableHead className="text-right text-white/20 font-black uppercase tracking-widest text-[9px] h-12">Innovation</TableHead>
+                  <TableHead className="text-right text-white/20 font-black uppercase tracking-widest text-[9px] pr-6 h-12">Rating</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  Array(5).fill(0).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell colSpan={5} className="py-4 pl-6"><Skeleton className="h-8 w-full bg-white/5 rounded-xl" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  topTesters.map((tester) => (
+                    <TableRow key={tester.id} className="group hover:bg-white/[0.02] border-white/5 transition-colors">
+                      <TableCell className="text-center">
+                        <span className="font-black text-xs text-white/20 group-hover:text-primary transition-colors">#{tester.rank}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-black text-xs text-white">{tester.name}</span>
+                          <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">{tester.email}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-bold text-xs text-red-400/60">{tester.bugs}</TableCell>
+                      <TableCell className="text-right font-bold text-xs text-amber-400/60">{tester.ideas}</TableCell>
+                      <TableCell className="text-right pr-6">
+                        <span className="font-black text-xs text-primary shadow-[0_0_10px_rgba(34,197,94,0.3)]">{tester.score}</span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-8">
           {/* Idea Funnel */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Idea Conversion Funnel</CardTitle>
-              <CardDescription>Feedback progression from submission to implementation.</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[200px]">
+          <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl space-y-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black tracking-tighter text-premium uppercase flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+                Conversion Pipeline
+              </h2>
+            </div>
+            <div className="space-y-4">
               {loading ? (
-                <Skeleton className="h-full w-full" />
+                <Skeleton className="h-[200px] w-full rounded-2xl bg-white/5" />
               ) : (
-                <div className="flex flex-col justify-center h-full space-y-4">
-                  {funnelData.map((item, i) => (
-                    <div key={item.stage} className="relative h-10 w-full bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="absolute inset-y-0 left-0 bg-green-600 flex items-center px-4 text-white text-xs font-bold transition-all duration-1000"
-                        style={{ width: `${(item.value / (funnelData[0].value || 1)) * 100}%` }}
-                      >
-                        {item.stage}
-                      </div>
-                      <div className="absolute right-4 inset-y-0 flex items-center text-xs font-bold">
-                        {item.value}
-                      </div>
+                funnelData.map((item, i) => (
+                  <div key={item.stage} className="relative h-12 w-full bg-white/5 rounded-2xl overflow-hidden group">
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/40 to-primary/10 border-r border-primary/30 flex items-center px-6 transition-all duration-1000"
+                      style={{ width: `${(item.value / (funnelData[0].value || 1)) * 100}%` }}
+                    >
+                      <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] whitespace-nowrap">{item.stage}</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="absolute right-6 inset-y-0 flex items-center text-xs font-black text-white/40">
+                      {item.value}
+                    </div>
+                  </div>
+                ))
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Tester Retention */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Tester Retention</CardTitle>
-              <CardDescription>Active vs Churned enrolled testers.</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[180px] flex items-center justify-center">
+          <div className="p-10 rounded-[3rem] border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl space-y-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black tracking-tighter text-premium uppercase flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+                Network Cohesion
+              </h2>
+            </div>
+            <div className="h-[180px] flex items-center justify-center">
               {loading ? (
-                <Skeleton className="h-full w-full" />
+                <Skeleton className="h-full w-full rounded-2xl bg-white/5" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -286,24 +321,35 @@ export default function Analytics() {
                       data={retentionData}
                       innerRadius={60}
                       outerRadius={80}
-                      paddingAngle={5}
+                      paddingAngle={8}
                       dataKey="value"
+                      stroke="none"
                     >
                       {retentionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index === 0 ? "#166534" : "#e2e8f0"} />
+                        <Cell key={`cell-${index}`} fill={index === 0 ? "#22c55e" : "rgba(255,255,255,0.05)"} />
                       ))}
                     </Pie>
-                    <Tooltip />
-                    <Legend verticalAlign="middle" align="right" layout="vertical" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#0f0f0f', 
+                        borderRadius: '24px', 
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        padding: '16px'
+                      }}
+                    />
+                    <Legend 
+                      verticalAlign="middle" 
+                      align="right" 
+                      layout="vertical" 
+                      formatter={(value) => <span className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">{value}</span>}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-

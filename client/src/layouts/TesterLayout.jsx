@@ -130,33 +130,40 @@ export default function TesterLayout() {
   const moreTabs = navItems.slice(4);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col premium-bg text-white pb-16 md:pb-0 font-sans selection:bg-primary/30 selection:text-white">
       <Navbar />
       
-      <div className="flex-1 flex overflow-hidden border-t">
+      <div className="flex-1 flex overflow-hidden">
         <SidebarProvider>
           {/* Desktop Sidebar */}
-          <Sidebar className="hidden md:flex">
-            <SidebarHeader className="h-14 flex items-center border-b px-4 py-0 flex-row">
-              <Beaker className="h-5 w-5 text-green-600 mr-2" />
-              <span className="font-bold text-lg tracking-tight truncate">Tester Hub</span>
+          <Sidebar className="hidden md:flex bg-black/40 backdrop-blur-xl border-r border-white/5">
+            <SidebarHeader className="h-14 flex items-center border-b border-white/5 px-6 py-0 flex-row">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 mr-3">
+                <Beaker className="h-4 w-4 text-primary" />
+              </div>
+              <span className="font-black text-sm uppercase tracking-[0.2em] text-white/90">Tester Hub</span>
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent className="custom-scrollbar px-2 pt-4">
               <SidebarGroup>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1">
                     {navItems.map((item) => (
                       <SidebarMenuItem key={item.path}>
                         <SidebarMenuButton 
                           asChild 
                           isActive={location.pathname === item.path}
-                          className={location.pathname === item.path ? "!bg-primary/10 !text-primary hover:!bg-primary/20" : ""}
+                          className={cn(
+                            "h-11 rounded-xl transition-all duration-300 px-4 group",
+                            location.pathname === item.path 
+                              ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_20px_-5px_rgba(1,135,95,0.3)]" 
+                              : "text-white/40 hover:text-white hover:bg-white/5"
+                          )}
                         >
                           <Link to={item.path}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            <item.icon className={cn("h-4.5 w-4.5 transition-transform duration-300 group-hover:scale-110", location.pathname === item.path ? "text-primary" : "")} />
+                            <span className="font-bold text-xs uppercase tracking-widest ml-3">{item.title}</span>
                             {item.badgeKey && badges[item.badgeKey] > 0 && (
-                              <Badge className="ml-auto bg-primary text-primary-foreground text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full">
+                              <Badge className="ml-auto bg-primary text-white text-[10px] h-5 min-w-5 px-1 flex items-center justify-center rounded-full font-black">
                                 {badges[item.badgeKey]}
                               </Badge>
                             )}
@@ -168,46 +175,62 @@ export default function TesterLayout() {
                 </SidebarGroupContent>
               </SidebarGroup>
             </SidebarContent>
+
+            <div className="p-4 mt-auto border-t border-white/5">
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] uppercase tracking-tighter text-white/20 font-bold">
+                Build v3.2.4-Production
+              </div>
+            </div>
             <SidebarRail />
           </Sidebar>
 
           {/* Main Content Area */}
           <SidebarInset className="flex flex-col min-w-0 bg-transparent">
-            {/* Breadcrumb Header */}
-            <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-4 sticky top-0 z-10">
-              <SidebarTrigger className="-ml-1 hidden md:flex" />
+            {/* Header / Breadcrumb */}
+            <header className="flex h-14 shrink-0 items-center gap-4 bg-black/20 backdrop-blur-md border-b border-white/5 px-6 sticky top-0 z-10">
+              <SidebarTrigger className="-ml-1 hidden md:flex text-white/40 hover:text-white" />
               <div className="md:hidden flex items-center gap-2">
-                <Beaker className="h-5 w-5 text-green-600" />
-                <span className="font-bold">Tester Hub</span>
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                  <Beaker className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span className="font-black text-xs uppercase tracking-widest text-white/90">Tester Hub</span>
               </div>
-              <div className="mx-2 h-4 w-[1px] bg-border hidden md:flex" aria-hidden="true" />
               
-              <Breadcrumb className="hidden sm:flex">
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link to="/tester/dashboard">Tester Panel</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  {pathSegments.slice(1).map((segment, idx) => (
-                    <React.Fragment key={segment}>
-                      <BreadcrumbSeparator />
-                      <BreadcrumbItem>
-                        {idx === pathSegments.length - 2 ? (
-                          <BreadcrumbPage>{getBreadcrumbLabel(segment)}</BreadcrumbPage>
-                        ) : (
-                          <BreadcrumbLink asChild>
-                            <Link to={`/tester/${segment}`}>{getBreadcrumbLabel(segment)}</Link>
-                          </BreadcrumbLink>
-                        )}
-                      </BreadcrumbItem>
-                    </React.Fragment>
-                  ))}
-                </BreadcrumbList>
-              </Breadcrumb>
+              <div className="hidden sm:flex items-center gap-2">
+                <div className="h-4 w-[1px] bg-white/10 mx-2" aria-hidden="true" />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild className="text-white/40 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
+                        <Link to="/tester/dashboard">Tester Panel</Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    {pathSegments.slice(1).map((segment, idx) => (
+                      <React.Fragment key={segment}>
+                        <BreadcrumbSeparator className="text-white/10" />
+                        <BreadcrumbItem>
+                          {idx === pathSegments.length - 2 ? (
+                            <BreadcrumbPage className="text-white font-bold text-xs uppercase tracking-widest">{getBreadcrumbLabel(segment)}</BreadcrumbPage>
+                          ) : (
+                            <BreadcrumbLink asChild className="text-white/40 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">
+                              <Link to={`/tester/${segment}`}>{getBreadcrumbLabel(segment)}</Link>
+                            </BreadcrumbLink>
+                          )}
+                        </BreadcrumbItem>
+                      </React.Fragment>
+                    ))}
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+
+              <div className="ml-auto flex items-center gap-4">
+                <div className="hidden sm:flex h-8 px-3 items-center rounded-full bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-white/40">
+                  <Zap className="h-3 w-3 mr-1.5 text-yellow-500 fill-yellow-500/20" /> Fast Track Enrolled
+                </div>
+              </div>
             </header>
 
-            <main className="flex-1 overflow-auto bg-muted/5 p-4 md:p-8 custom-scrollbar">
+            <main className="flex-1 overflow-auto p-6 md:p-10 custom-scrollbar">
               <div className="max-w-7xl mx-auto">
                 <Outlet />
               </div>

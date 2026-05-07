@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function Exports() {
   const [apps, setApps] = useState([]);
@@ -245,6 +246,4 @@ export default function Exports() {
   );
 }
 
-function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
 }

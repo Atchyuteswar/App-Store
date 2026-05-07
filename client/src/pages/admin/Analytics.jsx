@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Download, Users, Bug, Lightbulb, Star, TrendingUp, ChevronRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const COLORS = ["#166534", "#22c55e", "#4ade80", "#86efac"];
 
@@ -313,6 +314,4 @@ export default function Analytics() {
   );
 }
 
-function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
 }
